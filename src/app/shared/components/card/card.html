@@ -1,0 +1,16 @@
+<div [class]="wrapperClass">
+
+  <!-- Slot cabecera — cubre todo el ancho sin padding de la tarjeta.
+       Uso: <div card-header class="...">...</div> -->
+  <ng-content select="[card-header]" />
+
+  <!-- Cuerpo principal con padding configurable -->
+  <div [class]="bodyClass">
+    <ng-content />
+  </div>
+
+  <!-- Slot pie — igual que cabecera, ancho completo.
+       Uso: <div card-footer class="...">...</div> -->
+  <ng-content select="[card-footer]" />
+
+</div>

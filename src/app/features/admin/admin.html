@@ -1,0 +1,227 @@
+<div class="px-4 py-6 max-w-screen-xl mx-auto pb-24 md:pb-6 space-y-6">
+  <!-- Cabecera -->
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-800">Panel de administración</h2>
+      <p class="text-sm text-gray-500 mt-1">Gestión de cuentas de odontólogos de SonriApp.</p>
+    </div>
+    <button
+      type="button"
+      (click)="abrirNueva()"
+      class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-sky-700 transition-colors shadow-sm shrink-0"
+    >
+      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      <span class="hidden sm:inline">Nueva cuenta</span>
+    </button>
+  </div>
+
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
+  }
+
+  <!-- Dashboard de contadores -->
+  <div class="grid grid-cols-3 gap-3">
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium">Activas</p>
+      <p class="text-2xl font-bold text-green-600 mt-1">{{ stats().activas }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium">Suspendidas</p>
+      <p class="text-2xl font-bold text-red-600 mt-1">{{ stats().suspendidas }}</p>
+    </div>
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+      <p class="text-xs text-gray-500 font-medium">Vencen &lt; 30 días</p>
+      <p class="text-2xl font-bold text-amber-600 mt-1">{{ stats().porVencer30 }}</p>
+    </div>
+  </div>
+
+  <!-- Buscador -->
+  <div class="relative">
+    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+      <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+    <input
+      type="text"
+      [formControl]="searchControl"
+      placeholder="Buscar por nombre o correo..."
+      class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-2xl text-sm placeholder-gray-400 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 shadow-sm"
+    />
+  </div>
+
+  <!-- Listado -->
+  @if (loading()) {
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse h-32"></div>
+  } @else if (cuentas().length > 0) {
+    @if (layout.isDesktop()) {
+      <!-- Tabla (desktop) -->
+      <div class="bg-white rounded-2xl shadow-card border border-gray-100 overflow-visible">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-gray-500 border-b border-gray-100">
+              <th class="px-4 py-3 font-semibold">Odontólogo</th>
+              <th class="px-4 py-3 font-semibold">Consultorio</th>
+              <th class="px-4 py-3 font-semibold">Correo</th>
+              <th class="px-4 py-3 font-semibold">Plan</th>
+              <th class="px-4 py-3 font-semibold">Estado</th>
+              <th class="px-4 py-3 font-semibold">Vence</th>
+              <th class="px-4 py-3 font-semibold text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of cuentas(); track c.id) {
+              <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50/60">
+                <td class="px-4 py-3 font-medium text-gray-800">{{ c.nombre_completo }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ c.nombre_consultorio || '—' }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ c.email || '—' }}</td>
+                <td class="px-4 py-3 text-gray-600 capitalize">{{ c.plan_contratado || '—' }}</td>
+                <td class="px-4 py-3"><app-status-badge [estado]="c.estado_cuenta" /></td>
+                <td class="px-4 py-3 text-gray-600">{{ c.fecha_vencimiento_plan ? (c.fecha_vencimiento_plan | date: 'dd/MM/yyyy') : '—' }}</td>
+                <td class="px-4 py-3 text-right">
+                  <ng-container [ngTemplateOutlet]="accionesTpl" [ngTemplateOutletContext]="{ c: c }" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else {
+      <!-- Lista (mobile) -->
+      <div class="space-y-3">
+        @for (c of cuentas(); track c.id) {
+          <app-card [bordered]="true" shadow="sm" padding="sm">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h3 class="font-semibold text-gray-900 truncate">{{ c.nombre_completo }}</h3>
+                  <app-status-badge [estado]="c.estado_cuenta" />
+                </div>
+                <p class="text-xs text-gray-500 mt-0.5 truncate">{{ c.nombre_consultorio || 'Sin consultorio' }}</p>
+                <p class="text-xs text-gray-400 mt-0.5 truncate">{{ c.email || 'Sin correo' }}</p>
+                <div class="flex items-center gap-2 mt-1.5 text-xs">
+                  <span class="capitalize bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{{ c.plan_contratado || 'Sin plan' }}</span>
+                  @if (c.fecha_vencimiento_plan) {
+                    <span class="text-gray-400">Vence {{ c.fecha_vencimiento_plan | date: 'dd/MM/yyyy' }}</span>
+                  }
+                </div>
+              </div>
+              <ng-container [ngTemplateOutlet]="accionesTpl" [ngTemplateOutletContext]="{ c: c }" />
+            </div>
+          </app-card>
+        }
+      </div>
+    }
+  } @else {
+    <app-card>
+      <app-empty-state
+        icon="👤"
+        title="Sin cuentas"
+        subtitle="Crea la primera cuenta de odontólogo con el botón 'Nueva cuenta'."
+        size="md"
+      />
+    </app-card>
+  }
+</div>
+
+<!-- Plantilla reutilizable: menú de acciones por cuenta -->
+<ng-template #accionesTpl let-c="c">
+  <div class="relative inline-block text-left" (click)="$event.stopPropagation()">
+    <button
+      type="button"
+      (click)="toggleMenu(c.id, $event)"
+      class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+      aria-label="Acciones"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+      </svg>
+    </button>
+    @if (openMenuId() === c.id) {
+      <div class="absolute right-0 mt-1 w-52 bg-white rounded-xl shadow-lg ring-1 ring-black/5 py-1 z-30" role="menu">
+        @if (c.estado_cuenta !== 'suspendido') {
+          <button type="button" (click)="suspender(c)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Suspender</button>
+        } @else {
+          <button type="button" (click)="reactivar(c)" class="w-full text-left px-4 py-2 text-sm text-green-700 hover:bg-green-50">Reactivar</button>
+        }
+        <button type="button" (click)="abrirEditarPlan(c)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Editar plan y vencimiento</button>
+        <button type="button" (click)="pedirEliminar(c)" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Eliminar cuenta</button>
+      </div>
+    }
+  </div>
+</ng-template>
+
+<!-- Modal: nueva cuenta -->
+<app-modal #nuevaModal title="Nueva cuenta de odontólogo">
+  <form [formGroup]="nuevaForm" (ngSubmit)="guardarNueva()" class="space-y-3.5">
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre completo *</label>
+      <input type="text" formControlName="nombre_completo" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Correo electrónico *</label>
+      <input type="email" formControlName="email" placeholder="odontologo@correo.com" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+      <p class="text-xxs text-gray-400 mt-1">Se le enviará una invitación para definir su contraseña.</p>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre del consultorio *</label>
+      <input type="text" formControlName="nombre_consultorio" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+    </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Plan *</label>
+        <select formControlName="plan_contratado" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-100">
+          @for (p of planes; track p) {
+            <option [value]="p" class="capitalize">{{ p }}</option>
+          }
+        </select>
+      </div>
+      <div>
+        <label class="block text-xs font-semibold text-gray-600 mb-1">Vence *</label>
+        <input type="date" formControlName="fecha_vencimiento_plan" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+      </div>
+    </div>
+    <div class="flex justify-end gap-3 pt-1">
+      <button type="button" (click)="closeNueva()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 px-3 py-2">Cancelar</button>
+      <button type="submit" [disabled]="saving()" class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-sky-700 transition-colors shadow-sm disabled:opacity-40">
+        {{ saving() ? 'Creando...' : 'Crear cuenta' }}
+      </button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Modal: editar plan -->
+<app-modal #planModal title="Editar plan y vencimiento">
+  <form [formGroup]="planForm" (ngSubmit)="guardarPlan()" class="space-y-3.5">
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Plan *</label>
+      <select formControlName="plan_contratado" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-100">
+        @for (p of planes; track p) {
+          <option [value]="p" class="capitalize">{{ p }}</option>
+        }
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Fecha de vencimiento *</label>
+      <input type="date" formControlName="fecha_vencimiento_plan" class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+    </div>
+    <div class="flex justify-end gap-3 pt-1">
+      <button type="button" (click)="closePlan()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 px-3 py-2">Cancelar</button>
+      <button type="submit" [disabled]="saving()" class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-sky-700 transition-colors shadow-sm disabled:opacity-40">
+        Guardar
+      </button>
+    </div>
+  </form>
+</app-modal>
+
+<!-- Confirmación de eliminación -->
+<app-confirm-modal
+  title="Eliminar cuenta"
+  [message]="'¿Seguro que deseas eliminar la cuenta de ' + (aEliminar()?.nombre_completo ?? 'este odontólogo') + '? El perfil se borrará de SonriApp.'"
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  (confirm)="confirmarEliminar()"
+  (cancel)="aEliminar.set(null)"
+/>

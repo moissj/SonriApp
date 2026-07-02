@@ -1,0 +1,112 @@
+:host {
+  display: block;
+}
+
+.odontograma-wrap {
+  touch-action: pan-x pan-y pinch-zoom;
+  overflow-x: auto;
+}
+
+.odontograma-svg {
+  display: block;
+  min-width: 900px; /* asegura zonas táctiles (~30px) con scroll horizontal en móvil */
+  margin: 0 auto;
+}
+
+/* --- Superficies de cada diente --- */
+.surface {
+  stroke: #94a3b8;
+  stroke-width: 1;
+  cursor: pointer;
+  transition: fill 0.12s ease, stroke 0.12s ease, opacity 0.12s ease;
+}
+
+.tooth-group:hover .surface {
+  stroke: #0284c7;
+}
+
+.surface:hover {
+  opacity: 0.85;
+  stroke: #0284c7;
+  stroke-width: 1.6;
+}
+
+.surface.selected {
+  stroke: #0284c7;
+  stroke-width: 2.4;
+}
+
+/* Marca de diente ausente */
+.ausente-x {
+  stroke: #64748b;
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.tooth-num {
+  font-size: 13px;
+  font-weight: 700;
+  fill: #334155;
+  pointer-events: none;
+}
+
+.quad-divider {
+  stroke: #e2e8f0;
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+}
+
+/* --- Colores por estado (paleta coherente con la app) --- */
+.estado-sano {
+  fill: #ffffff;
+}
+.estado-caries {
+  fill: #ef4444; /* rojo */
+}
+.estado-obturado {
+  fill: #0ea5e9; /* celeste (marca) */
+}
+.estado-ausente {
+  fill: #cbd5e1; /* gris */
+}
+.estado-corona {
+  fill: #f59e0b; /* ámbar/dorado */
+}
+.estado-endodoncia {
+  fill: #a855f7; /* púrpura */
+}
+.estado-implante {
+  fill: #10b981; /* esmeralda */
+}
+
+/* --- Muestras de color (leyenda y formulario) --- */
+.swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 0.3rem;
+  border: 1px solid #cbd5e1;
+  flex-shrink: 0;
+}
+.swatch.estado-sano {
+  background: #ffffff;
+}
+.swatch.estado-caries {
+  background: #ef4444;
+}
+.swatch.estado-obturado {
+  background: #0ea5e9;
+}
+.swatch.estado-ausente {
+  background: #cbd5e1;
+}
+.swatch.estado-corona {
+  background: #f59e0b;
+}
+.swatch.estado-endodoncia {
+  background: #a855f7;
+}
+.swatch.estado-implante {
+  background: #10b981;
+}

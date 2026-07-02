@@ -1,0 +1,24 @@
+<div [class]="containerClass">
+
+  <!-- Ícono emoji por @Input -->
+  @if (icon) {
+    <span [class]="iconClass" role="img" aria-hidden="true">{{ icon }}</span>
+  }
+
+  <!-- Slot para ícono SVG personalizado: <svg empty-icon ...> -->
+  <ng-content select="[empty-icon]" />
+
+  <h3 [class]="titleClass">{{ title }}</h3>
+
+  @if (subtitle) {
+    <p class="text-small text-gray-400 max-w-xs mt-1.5 leading-relaxed">
+      {{ subtitle }}
+    </p>
+  }
+
+  <!-- Slot para acciones: botón "Crear primera cita", link, etc. -->
+  <div class="mt-5">
+    <ng-content />
+  </div>
+
+</div>

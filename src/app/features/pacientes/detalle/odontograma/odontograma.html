@@ -1,0 +1,146 @@
+<div class="space-y-4">
+  <div class="flex items-start justify-between gap-3">
+    <div>
+      <h3 class="text-base font-semibold text-gray-800">Odontograma</h3>
+      <p class="text-xs text-gray-500 mt-0.5">
+        Toca una zona del diente: centro (oclusal/incisal), caras (anillo medio) o tercio cervical (aro exterior).
+      </p>
+    </div>
+    <!-- Controles de zoom -->
+    <div class="flex items-center gap-1 shrink-0">
+      <button type="button" (click)="zoomOut()" class="h-8 w-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="Alejar">−</button>
+      <button type="button" (click)="zoomIn()" class="h-8 w-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="Acercar">+</button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse h-64"></div>
+  } @else {
+    <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5">
+      <svg
+        [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+        [style.width]="svgWidth()"
+        class="odontograma-svg h-auto select-none"
+        preserveAspectRatio="xMidYMid meet"
+        role="group"
+        aria-label="Odontograma por superficies, numeración FDI"
+      >
+        <line [attr.x1]="dividerX" y1="6" [attr.x2]="dividerX" [attr.y2]="viewHeight - 6" class="quad-divider" />
+        <line x1="6" [attr.y1]="dividerY" [attr.x2]="viewWidth - 6" [attr.y2]="dividerY" class="quad-divider" />
+
+        @for (t of dientes; track t.fdi) {
+          <g [attr.transform]="'translate(' + t.cx + ',' + t.cy + ')'" class="tooth-group">
+            <text [attr.y]="numDy" class="tooth-num" text-anchor="middle">{{ t.fdi }}</text>
+
+            @if (piezaAusente(t.fdi); as aus) {
+              <!-- Diente ausente: pieza completa de un color, sin subzonas -->
+              <circle
+                cx="0" cy="0" [attr.r]="rOuter"
+                class="surface estado-ausente"
+                (click)="onSurfaceClick(t.fdi, aus.superficie)"
+              />
+              <path d="M -12 -12 L 12 12 M 12 -12 L -12 12" class="ausente-x" />
+            } @else {
+              <!-- Anillo cervical (tercio exterior): 4 caras -->
+              @for (seg of cervicales(t.fdi); track seg.superficie) {
+                <path
+                  [attr.d]="seg.d"
+                  [attr.class]="'surface estado-' + estadoDe(t.fdi, seg.superficie) + (isSelected(t.fdi, seg.superficie) ? ' selected' : '')"
+                  (click)="onSurfaceClick(t.fdi, seg.superficie)"
+                />
+              }
+              <!-- Anillo intermedio: 4 caras -->
+              @for (seg of intermedios(t.fdi); track seg.superficie) {
+                <path
+                  [attr.d]="seg.d"
+                  [attr.class]="'surface estado-' + estadoDe(t.fdi, seg.superficie) + (isSelected(t.fdi, seg.superficie) ? ' selected' : '')"
+                  (click)="onSurfaceClick(t.fdi, seg.superficie)"
+                />
+              }
+              <!-- Centro: oclusal / incisal -->
+              <path
+                [attr.d]="pathCentro"
+                [attr.class]="'surface estado-' + estadoDe(t.fdi, 'oclusal_incisal') + (isSelected(t.fdi, 'oclusal_incisal') ? ' selected' : '')"
+                (click)="onSurfaceClick(t.fdi, 'oclusal_incisal')"
+              />
+            }
+          </g>
+        }
+      </svg>
+    </div>
+
+    <!-- Leyenda -->
+    <div class="flex flex-wrap gap-x-4 gap-y-2">
+      @for (e of estados; track e.value) {
+        <div class="flex items-center gap-1.5">
+          <span [attr.class]="'swatch estado-' + e.value"></span>
+          <span class="text-xs text-gray-600">{{ e.label }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal de registro por superficie -->
+<app-modal [title]="tituloModal()" (closed)="onModalClosed()">
+  <div class="space-y-4">
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-2">Estado</label>
+      <div class="grid grid-cols-2 gap-2">
+        @for (e of estados; track e.value) {
+          <button
+            type="button"
+            (click)="formEstado.set(e.value)"
+            [class.ring-2]="formEstado() === e.value"
+            [class.ring-sky-500]="formEstado() === e.value"
+            [class.border-sky-300]="formEstado() === e.value"
+            class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-all"
+          >
+            <span [attr.class]="'swatch estado-' + e.value"></span>
+            {{ e.label }}
+          </button>
+        }
+      </div>
+      @if (formEstado() === 'ausente') {
+        <p class="text-xxs text-gray-400 mt-2">Marcar "Ausente" aplica a toda la pieza y desactiva las demás zonas.</p>
+      }
+    </div>
+
+    <div>
+      <label class="block text-xs font-semibold text-gray-600 mb-1">Notas</label>
+      <textarea
+        [ngModel]="formNotas()"
+        (ngModelChange)="formNotas.set($event)"
+        rows="3"
+        placeholder="Observaciones sobre esta superficie..."
+        class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm resize-y focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500"
+      ></textarea>
+    </div>
+
+    <div class="flex justify-end gap-3 pt-1">
+      <button type="button" (click)="closeModal()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 px-3 py-2">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        (click)="save()"
+        [disabled]="saving()"
+        class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-sky-700 transition-colors shadow-sm disabled:opacity-40"
+      >
+        @if (saving()) {
+          <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+          </svg>
+          Guardando...
+        } @else {
+          Guardar
+        }
+      </button>
+    </div>
+  </div>
+</app-modal>

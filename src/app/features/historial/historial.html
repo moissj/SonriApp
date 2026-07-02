@@ -1,0 +1,20 @@
+<div class="px-4 py-6 max-w-screen-lg mx-auto">
+  <h2 class="text-display sm:text-4xl font-bold text-dark mb-1">Historial</h2>
+  <p class="text-small text-gray-500 mb-6">Consulta el registro de tus visitas y tratamientos anteriores.</p>
+
+  <app-card>
+    <app-empty-state
+      icon="📋"
+      title="Tu historial está vacío"
+      subtitle="Una vez que tengas citas completadas, aparecerán aquí."
+      size="md"
+    >
+      <a
+        routerLink="/citas"
+        class="inline-block text-primary text-small font-semibold hover:underline"
+      >
+        Agendar mi primera cita
+      </a>
+    </app-empty-state>
+  </app-card>
+</div>

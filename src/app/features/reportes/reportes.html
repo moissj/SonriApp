@@ -1,0 +1,108 @@
+<div class="px-4 py-6 max-w-screen-lg mx-auto pb-24 md:pb-6 space-y-6">
+  <header>
+    <h2 class="text-2xl font-bold text-gray-800">Reportes</h2>
+    <p class="text-sm text-gray-500 mt-1 capitalize">{{ mesLabel }}</p>
+  </header>
+
+  @if (error()) {
+    <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="space-y-4">
+      @for (i of [1, 2, 3]; track i) {
+        <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse h-40"></div>
+      }
+    </div>
+  } @else {
+    <!-- 1. Citas por estado (gráfico de barras Chart.js) -->
+    <app-card [bordered]="true" shadow="sm">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-gray-800">Citas por estado (mes)</h3>
+        <button type="button" (click)="exportarCitasPorEstado()" class="text-xs font-semibold text-sky-600 hover:text-sky-700 inline-flex items-center gap-1">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          CSV
+        </button>
+      </div>
+      <div class="h-64">
+        <app-chart [config]="citasChart()" />
+      </div>
+    </app-card>
+
+    <!-- 2. Facturado vs cobrado (dona Chart.js) -->
+    <app-card [bordered]="true" shadow="sm">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-semibold text-gray-800">Facturado vs cobrado (mes)</h3>
+        <button type="button" (click)="exportarFacturacion()" class="text-xs font-semibold text-sky-600 hover:text-sky-700 inline-flex items-center gap-1">
+          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          </svg>
+          CSV
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
+        <div class="h-56">
+          <app-chart [config]="facturacionChart()" />
+        </div>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between">
+            <span class="text-gray-500">Facturado</span>
+            <span class="font-semibold text-gray-800">{{ facturadoMes() | copCurrency }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-gray-500">Cobrado</span>
+            <span class="font-semibold text-emerald-600">{{ cobradoMes() | copCurrency }}</span>
+          </div>
+          <div class="flex justify-between pt-2 border-t border-gray-100">
+            <span class="text-gray-500">Por cobrar</span>
+            <span class="font-bold" [class.text-red-600]="porCobrar() > 0" [class.text-gray-800]="porCobrar() === 0">
+              {{ porCobrar() | copCurrency }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </app-card>
+
+    <!-- 3. Pacientes sin cita en 60 días (reactivación) -->
+    <app-card [bordered]="true" shadow="sm">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="font-semibold text-gray-800">Pacientes para reactivar</h3>
+          <p class="text-xs text-gray-500 mt-0.5">Sin cita en los últimos 60 días</p>
+        </div>
+        @if (pacientesInactivos().length > 0) {
+          <button type="button" (click)="exportarInactivos()" class="text-xs font-semibold text-sky-600 hover:text-sky-700 inline-flex items-center gap-1 shrink-0">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+            CSV
+          </button>
+        }
+      </div>
+
+      @if (pacientesInactivos().length > 0) {
+        <div class="divide-y divide-gray-100">
+          @for (p of pacientesInactivos(); track p.id) {
+            <a [routerLink]="['/pacientes', p.id]" class="flex items-center justify-between gap-3 py-2.5 hover:bg-gray-50/60 -mx-2 px-2 rounded-lg transition-colors">
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-800 truncate">{{ p.nombre_completo }}</p>
+                <p class="text-xs text-gray-400">{{ p.telefono || 'Sin teléfono' }}</p>
+              </div>
+              <span class="text-xs text-gray-500 shrink-0">Última: {{ formatFecha(p.ultima_cita) }}</span>
+            </a>
+          }
+        </div>
+      } @else {
+        <app-empty-state
+          icon="✅"
+          title="Todo al día"
+          subtitle="No hay pacientes sin cita en los últimos 60 días."
+          size="sm"
+        />
+      }
+    </app-card>
+  }
+</div>

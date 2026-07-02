@@ -1,0 +1,249 @@
+<div class="px-4 py-6 max-w-screen-md mx-auto pb-24 md:pb-6">
+  <!-- Cabecera -->
+  <div class="flex items-center gap-3 mb-6">
+    <button
+      (click)="goBack()"
+      class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
+      aria-label="Regresar"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <div>
+      <h2 class="text-2xl font-bold text-dark mb-0">
+        {{ isEditMode() ? 'Editar paciente' : 'Registrar paciente' }}
+      </h2>
+      <p class="text-xs text-gray-500 mt-0.5">
+        {{ isEditMode() ? 'Modifica los datos del expediente del paciente.' : 'Agrega un nuevo paciente a tu base de datos.' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" class="space-y-6">
+    @if (errorMessage()) {
+      <app-alert [message]="errorMessage()!" type="error" [dismissible]="true" (dismissed)="errorMessage.set(null)" />
+    }
+    @if (successMessage()) {
+      <app-alert [message]="successMessage()!" type="success" />
+    }
+
+    <!-- Cargando datos -->
+    @if (isLoading() && isEditMode() && !patientForm.value.nombre_completo) {
+      <app-card>
+        <div class="space-y-4 animate-pulse py-4">
+          <div class="h-4 bg-gray-100 rounded w-1/4"></div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="h-10 bg-gray-100 rounded"></div>
+            <div class="h-10 bg-gray-100 rounded"></div>
+          </div>
+          <div class="h-20 bg-gray-100 rounded"></div>
+        </div>
+      </app-card>
+    } @else {
+      <!-- Tarjeta 1: Información Básica -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Información Básica</h3>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Nombre Completo -->
+          <app-input
+            id="nombre_completo"
+            formControlName="nombre_completo"
+            label="Nombre Completo *"
+            placeholder="Ej. Juan Andrés Pérez Díaz"
+            [error]="getFieldError('nombre_completo')"
+          />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Tipo Documento -->
+            <div class="flex flex-col gap-1.5">
+              <label for="tipo_documento" class="text-sm font-medium text-gray-700">Tipo de Documento *</label>
+              <select
+                id="tipo_documento"
+                formControlName="tipo_documento"
+                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+              >
+                <option value="CC">Cédula de Ciudadanía (CC)</option>
+                <option value="TI">Tarjeta de Identidad (TI)</option>
+                <option value="CE">Cédula de Extranjería (CE)</option>
+                <option value="PA">Pasaporte (PA)</option>
+              </select>
+            </div>
+
+            <!-- Número Documento -->
+            <app-input
+              id="numero_documento"
+              formControlName="numero_documento"
+              label="Número de Documento *"
+              placeholder="Ej. 1098765432"
+              [error]="getFieldError('numero_documento')"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Teléfono Celular -->
+            <app-input
+              id="telefono"
+              formControlName="telefono"
+              label="Teléfono Celular"
+              type="tel"
+              placeholder="Ej. 3001234567"
+              [error]="getFieldError('telefono')"
+              hint="Celular de 10 dígitos en Colombia"
+            />
+
+            <!-- Correo Electrónico -->
+            <app-input
+              id="email"
+              formControlName="email"
+              label="Correo Electrónico"
+              type="email"
+              placeholder="Ej. paciente@correo.com"
+              [error]="getFieldError('email')"
+            />
+          </div>
+
+          <!-- Fecha de Nacimiento -->
+          <div class="flex flex-col gap-1.5">
+            <label for="fecha_nacimiento" class="text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
+            <input
+              type="date"
+              id="fecha_nacimiento"
+              formControlName="fecha_nacimiento"
+              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+            />
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Tarjeta 2: Ubicación -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Dirección y Ubicación</h3>
+        </div>
+
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Departamento -->
+            <div class="flex flex-col gap-1.5">
+              <label for="departamento" class="text-sm font-medium text-gray-700">Departamento</label>
+              <select
+                id="departamento"
+                formControlName="departamento"
+                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+              >
+                <option value="">Selecciona un departamento</option>
+                @for (dep of departamentos(); track dep.id) {
+                  <option [value]="dep.nombre">{{ dep.nombre }}</option>
+                }
+              </select>
+            </div>
+
+            <!-- Ciudad / Municipio -->
+            <div class="flex flex-col gap-1.5">
+              <label for="ciudad" class="text-sm font-medium text-gray-700">Ciudad / Municipio</label>
+              <select
+                id="ciudad"
+                formControlName="ciudad"
+                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+              >
+                <option value="">{{ municipios().length ? 'Selecciona un municipio' : 'Elige primero un departamento' }}</option>
+                @for (m of municipios(); track m.id) {
+                  <option [value]="m.nombre">{{ m.nombre }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <app-input
+            id="direccion"
+            formControlName="direccion"
+            label="Dirección de residencia"
+            placeholder="Ej. Calle 35 # 12-45 Apto 301"
+          />
+        </div>
+      </app-card>
+
+      <!-- Tarjeta 3: Antecedentes e Información Médica -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Información Clínica</h3>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Afiliación Salud -->
+          <app-input
+            id="afiliacion_salud"
+            formControlName="afiliacion_salud"
+            label="Afiliación de Salud (EPS / Medicina Prepagada)"
+            placeholder="Ej. EPS Sanitas, Sura"
+          />
+
+          <!-- Alergias -->
+          <div class="flex flex-col gap-1.5">
+            <label for="alergias" class="text-sm font-medium text-gray-700">Alergias Conocidas</label>
+            <textarea
+              id="alergias"
+              formControlName="alergias"
+              rows="2"
+              placeholder="Ej. Alérgico a la Penicilina, Látex, AINES..."
+              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+            ></textarea>
+          </div>
+
+          <!-- Antecedentes Médicos -->
+          <div class="flex flex-col gap-1.5">
+            <label for="antecedentes_medicos" class="text-sm font-medium text-gray-700">Antecedentes Médicos</label>
+            <textarea
+              id="antecedentes_medicos"
+              formControlName="antecedentes_medicos"
+              rows="3"
+              placeholder="Ej. Hipertensión controlada, Diabetes tipo 2, cirugías previas, problemas de coagulación..."
+              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+            ></textarea>
+          </div>
+
+          <!-- Notas Generales -->
+          <div class="flex flex-col gap-1.5">
+            <label for="notas_generales" class="text-sm font-medium text-gray-700">Observaciones Generales</label>
+            <textarea
+              id="notas_generales"
+              formControlName="notas_generales"
+              rows="3"
+              placeholder="Notas generales, comentarios de interés para la atención u otras observaciones..."
+              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
+            ></textarea>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Botones de Acción -->
+      <div class="flex items-center gap-3 pt-2">
+        <app-button
+          variant="secondary"
+          size="md"
+          [disabled]="isLoading()"
+          class="flex-1"
+          (click)="goBack()"
+        >
+          Cancelar
+        </app-button>
+        <app-button
+          variant="primary"
+          type="submit"
+          size="md"
+          [loading]="isLoading()"
+          [disabled]="isLoading() || patientForm.invalid"
+          class="flex-1"
+        >
+          {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
+        </app-button>
+      </div>
+    }
+  </form>
+</div>

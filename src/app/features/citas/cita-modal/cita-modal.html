@@ -1,0 +1,119 @@
+<dialog #dialogRef class="backdrop:bg-black/50 p-0 bg-transparent border-none outline-none focus:outline-none overflow-visible max-w-lg w-full">
+  <div class="rounded-2xl border border-neutral-200 shadow-2xl bg-white max-h-[92vh] flex flex-col overflow-hidden w-full">
+    <!-- Cabecera Fija -->
+  <header class="px-5 py-3.5 border-b border-neutral-100 flex items-center justify-between bg-neutral-50/80 shrink-0">
+    <h3 class="text-base font-bold text-neutral-900">
+      {{ isEditing() ? 'Editar Cita' : 'Nueva Cita' }}
+    </h3>
+    <button (click)="close()" class="text-neutral-450 hover:text-neutral-600 text-xl font-bold leading-none">&times;</button>
+  </header>
+
+  <!-- Formulario con Cuerpo Desplazable y Footer Fijo -->
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col flex-1 overflow-hidden">
+    <!-- Cuerpo del Formulario Desplazable -->
+    <div class="p-5 space-y-3.5 overflow-y-auto flex-1 custom-modal-scroll">
+      
+      <!-- Buscador de Pacientes -->
+      <div>
+        <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Paciente</label>
+        <app-patient-autocomplete #patientAutocomplete (pacienteSeleccionado)="onPacienteSeleccionado($event)"></app-patient-autocomplete>
+      </div>
+
+      <!-- Fecha y Hora -->
+      <div>
+        <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Fecha y Hora</label>
+        <input type="datetime-local" formControlName="fecha_hora" class="w-full px-3.5 py-2 border border-neutral-300 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white">
+      </div>
+
+      <!-- Duración y Tratamiento -->
+      <div class="grid grid-cols-2 gap-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Duración (min)</label>
+          <input type="number" formControlName="duracion_minutos" class="w-full px-3.5 py-2 border border-neutral-300 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white">
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Tratamiento</label>
+          <select
+            formControlName="tipo_tratamiento"
+            (change)="onTipoChange($any($event.target).value)"
+            class="w-full px-3.5 py-2 border border-neutral-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 cursor-pointer"
+          >
+            <option value="" disabled>Selecciona un tratamiento</option>
+            @if (form.controls.tipo_tratamiento.value && !existeEnCatalogo(form.controls.tipo_tratamiento.value)) {
+              <option [value]="form.controls.tipo_tratamiento.value">{{ form.controls.tipo_tratamiento.value }} (personalizado)</option>
+            }
+            @for (t of tratamientos(); track t.id) {
+              <option [value]="t.nombre">{{ t.nombre }} · {{ t.precio_base | copCurrency }}</option>
+            }
+          </select>
+          @if (tratamientos().length === 0) {
+            <p class="text-xxs text-neutral-400 mt-1">Aún no tienes tratamientos en el catálogo.</p>
+          }
+        </div>
+      </div>
+
+      <!-- Estado y Canal de origen -->
+      <div class="grid grid-cols-2 gap-3.5">
+        <div>
+          <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Estado</label>
+          <select formControlName="estado" class="w-full px-3.5 py-2 border border-neutral-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 cursor-pointer">
+            <option value="pendiente">Pendiente</option>
+            <option value="confirmada">Confirmada</option>
+            <option value="atendida">Atendida</option>
+            <option value="cancelada">Cancelada</option>
+            <option value="no_asistio">No asistió</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Canal de Registro</label>
+          <select formControlName="canal_origen" class="w-full px-3.5 py-2 border border-neutral-300 rounded-xl text-sm bg-white focus:ring-2 focus:ring-sky-500 focus:border-sky-500 cursor-pointer">
+            <option value="manual">Manual</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="portal">Portal</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Notas -->
+      <div>
+        <label class="block text-[11px] font-bold text-neutral-600 uppercase tracking-wider mb-1.5">Notas / Comentarios</label>
+        <textarea formControlName="notas" rows="2" placeholder="Notas adicionales sobre la consulta..." class="w-full px-3.5 py-2 border border-neutral-300 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500 bg-white resize-none"></textarea>
+      </div>
+
+      <!-- Alerta de Solapamiento -->
+      @if (overlapCitas().length > 0) {
+        <app-alert type="warning" [message]="overlapWarningMessage()"></app-alert>
+      }
+
+      <!-- Alerta de Error Base de Datos -->
+      @if (errorMessage()) {
+        <app-alert type="error" [message]="errorMessage()"></app-alert>
+      }
+    </div>
+
+    <!-- Acciones Fijas al Pie -->
+    <div class="flex justify-end items-center gap-3 px-5 py-3.5 border-t border-neutral-100 bg-neutral-50/80 shrink-0">
+      @if (isEditing()) {
+        <button type="button" (click)="onDelete()" class="px-4 py-2 rounded-xl bg-red-50 text-red-650 hover:bg-red-100 font-semibold text-xs transition-colors mr-auto shadow-3xs active:scale-95">
+          Eliminar
+        </button>
+      }
+      <button type="button" (click)="close()" class="px-4 py-2 rounded-xl bg-white hover:bg-neutral-100 border border-neutral-200 text-neutral-700 font-semibold text-xs transition-colors shadow-3xs active:scale-95">
+        Cancelar
+      </button>
+      <button type="submit" [disabled]="form.invalid || !selectedPatient()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+        Guardar
+      </button>
+    </div>
+  </form>
+</div>
+</dialog>
+
+<app-confirm-modal
+  #confirmModal
+  title="Eliminar Cita"
+  message="¿Estás seguro de que deseas eliminar esta cita? Esta acción no se puede deshacer."
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  (confirm)="onConfirmDelete()">
+</app-confirm-modal>

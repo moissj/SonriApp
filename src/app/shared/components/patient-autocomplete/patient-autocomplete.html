@@ -1,0 +1,75 @@
+<div class="relative w-full">
+  @if (selectedPatient()) {
+    <div class="flex items-center justify-between bg-sky-50 border border-sky-200 rounded-xl p-3">
+      <div>
+        <h5 class="text-sm font-semibold text-sky-900">{{ selectedPatient()?.nombre_completo }}</h5>
+        <span class="text-xs text-sky-700">Documento: {{ selectedPatient()?.numero_documento }} | Celular: {{ selectedPatient()?.telefono }}</span>
+      </div>
+      <button type="button" (click)="clearSelection()" class="text-xs text-red-600 font-bold hover:underline">Cambiar</button>
+    </div>
+  } @else if (isCreatingNew()) {
+    <!-- Formulario de Registro Rápido Inline -->
+    <form [formGroup]="quickForm" (ngSubmit)="$event.preventDefault(); onCreatePatient()" class="bg-neutral-50 border border-neutral-200 rounded-xl p-4 space-y-3">
+      <h4 class="text-xs font-bold text-neutral-800 uppercase tracking-wider">Registro Rápido de Paciente</h4>
+      
+      @if (errorMessage()) {
+        <div class="bg-red-50 text-red-600 text-xs p-2 rounded-lg border border-red-200">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <div>
+        <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Nombre Completo</label>
+        <input type="text" formControlName="nombre_completo" class="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Tipo Doc.</label>
+          <select formControlName="tipo_documento" class="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+            <option value="CC">CC</option>
+            <option value="TI">TI</option>
+            <option value="CE">CE</option>
+            <option value="PA">PA</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Nro. Documento</label>
+          <input type="text" formControlName="numero_documento" class="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Celular (10 dígitos)</label>
+        <input type="text" formControlName="telefono" placeholder="3001234567" class="w-full px-3 py-2 border border-neutral-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t border-neutral-200">
+        <button type="button" (click)="cancelCreate()" class="px-3 py-1.5 text-xs bg-neutral-200 hover:bg-neutral-300 rounded-lg font-medium">Cancelar</button>
+        <button type="submit" [disabled]="quickForm.invalid || isSaving()" class="px-3 py-1.5 text-xs bg-sky-600 hover:bg-sky-700 text-white rounded-lg font-medium disabled:opacity-50">Guardar</button>
+      </div>
+    </form>
+  } @else {
+    <!-- Buscador -->
+    <input type="text" [formControl]="searchControl" placeholder="Buscar paciente por nombre o documento..." class="w-full px-4 py-2.5 border border-neutral-300 rounded-xl text-sm focus:ring-2 focus:ring-sky-500 focus:border-sky-500">
+    
+    @if (searchControl.value) {
+      <div class="absolute z-20 w-full bg-white border border-neutral-200 rounded-xl mt-1 max-h-48 overflow-y-auto divide-y divide-neutral-100 shadow-lg">
+        @for (p of patients$ | async; track p.id) {
+          <div (click)="selectPatient(p)" class="p-3 hover:bg-neutral-50 cursor-pointer text-sm flex items-center justify-between">
+            <div>
+              <p class="font-bold text-neutral-800">{{ p.nombre_completo }}</p>
+              <p class="text-xs text-neutral-500">Doc: {{ p.numero_documento }}</p>
+            </div>
+            <span class="text-xs text-sky-600 font-medium">Seleccionar</span>
+          </div>
+        }
+        <!-- Opción de creación rápida inline -->
+        <div (click)="showCreateForm()" class="p-3 hover:bg-neutral-50 cursor-pointer text-sm text-sky-600 font-bold flex items-center gap-1">
+          <span>+ Crear Paciente Nuevo:</span>
+          <span class="italic text-neutral-500">"{{ searchControl.value }}"</span>
+        </div>
+      </div>
+    }
+  }
+</div>

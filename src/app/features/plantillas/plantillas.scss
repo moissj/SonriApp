@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+/* Mantiene legible el texto de las plantillas al editar */
+textarea {
+  font-family: inherit;
+  min-height: 6rem;
+}

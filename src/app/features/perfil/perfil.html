@@ -1,0 +1,158 @@
+<div class="px-4 py-6 max-w-screen-lg mx-auto pb-24 md:pb-6 space-y-6">
+  <div>
+    <h2 class="text-2xl font-bold text-gray-800">Mi perfil</h2>
+    <p class="text-sm text-gray-500 mt-1">Administra la información de tu consultorio y tu cuenta.</p>
+  </div>
+
+  @if (error()) {
+    <app-alert [message]="error()!" type="error" [dismissible]="true" (dismissed)="error.set(null)" class="block" />
+  }
+  @if (success()) {
+    <app-alert [message]="success()!" type="success" [dismissible]="true" (dismissed)="success.set(null)" class="block" />
+  }
+
+  <!-- Cabecera con avatar/logo -->
+  <app-card [bordered]="true" shadow="sm">
+    <div class="flex items-center gap-4">
+      <div class="h-16 w-16 rounded-2xl overflow-hidden bg-sky-50 border border-sky-100 text-sky-700 font-bold text-xl flex items-center justify-center shrink-0">
+        @if (logoPreview()) {
+          <img [src]="logoPreview()" alt="Logo" class="w-full h-full object-cover" />
+        } @else if (profile()?.logo_url) {
+          <img [src]="profile()!.logo_url" alt="Logo" class="w-full h-full object-cover" />
+        } @else {
+          <span>{{ initials() }}</span>
+        }
+      </div>
+      <div class="min-w-0">
+        <h3 class="font-semibold text-gray-800 truncate">{{ profile()?.nombre_completo || 'Tu nombre' }}</h3>
+        <p class="text-sm text-sky-700 truncate">{{ profile()?.nombre_consultorio || 'Tu consultorio' }}</p>
+        <p class="text-xs text-gray-400 truncate">{{ email() }}</p>
+      </div>
+      <label class="ml-auto shrink-0 text-xs font-semibold text-sky-600 hover:text-sky-700 cursor-pointer">
+        Cambiar logo
+        <input type="file" accept="image/*" class="hidden" (change)="onLogoSelected($event)" />
+      </label>
+    </div>
+  </app-card>
+
+  <!-- Formulario de datos -->
+  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-6">
+    <app-card [bordered]="true" shadow="sm">
+      <h3 class="text-sm font-semibold text-gray-700 mb-4">Datos del consultorio</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre completo *</label>
+          <input type="text" formControlName="nombre_completo"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+          @if (form.controls.nombre_completo.touched && form.controls.nombre_completo.invalid) {
+            <p class="text-xs text-red-600 mt-1">Ingresa tu nombre (mínimo 3 caracteres).</p>
+          }
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Nombre del consultorio *</label>
+          <input type="text" formControlName="nombre_consultorio"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+          @if (form.controls.nombre_consultorio.touched && form.controls.nombre_consultorio.invalid) {
+            <p class="text-xs text-red-600 mt-1">El nombre del consultorio es obligatorio.</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Teléfono de contacto</label>
+          <input type="tel" formControlName="telefono_contacto" placeholder="+57 3001234567"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+          @if (form.controls.telefono_contacto.touched && form.controls.telefono_contacto.invalid) {
+            <p class="text-xs text-red-600 mt-1">Formato: +57 seguido de 10 dígitos.</p>
+          }
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Correo electrónico</label>
+          <input type="email" [value]="email()" disabled
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 text-gray-500 cursor-not-allowed" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Ciudad / Municipio</label>
+          <select formControlName="ciudad"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500">
+            <option value="">{{ municipios().length ? 'Selecciona un municipio' : 'Elige primero un departamento' }}</option>
+            @for (m of municipios(); track m.id) {
+              <option [value]="m.nombre">{{ m.nombre }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Departamento</label>
+          <select formControlName="departamento"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500">
+            <option value="">Selecciona…</option>
+            @for (dep of departamentos(); track dep.id) {
+              <option [value]="dep.nombre">{{ dep.nombre }}</option>
+            }
+          </select>
+        </div>
+      </div>
+    </app-card>
+
+    <app-card [bordered]="true" shadow="sm">
+      <h3 class="text-sm font-semibold text-gray-700 mb-4">Horarios y citas</h3>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Hora de apertura</label>
+          <input type="time" formControlName="horario_apertura"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Hora de cierre</label>
+          <input type="time" formControlName="horario_cierre"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-gray-600 mb-1">Duración de cita (min)</label>
+          <select formControlName="duracion_cita_defecto"
+            class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm bg-white cursor-pointer focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500">
+            @for (d of duraciones; track d) {
+              <option [ngValue]="d">{{ d }} minutos</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-5">
+        <button type="submit" [disabled]="saving()"
+          class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-sky-700 transition-colors shadow-sm disabled:opacity-40">
+          @if (saving()) {
+            <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+            </svg>
+            Guardando...
+          } @else {
+            Guardar cambios
+          }
+        </button>
+      </div>
+    </app-card>
+  </form>
+
+  <!-- Cuenta y seguridad -->
+  <app-card [bordered]="true" shadow="sm">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4">Cuenta y seguridad</h3>
+    <div class="flex flex-col sm:flex-row gap-3">
+      <button type="button" (click)="cambiarPassword()" [disabled]="enviandoReset()"
+        class="inline-flex items-center justify-center gap-2 border border-gray-200 text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-40">
+        {{ enviandoReset() ? 'Enviando...' : 'Cambiar contraseña' }}
+      </button>
+      <button type="button" (click)="logout()"
+        class="inline-flex items-center justify-center gap-2 border border-red-200 text-red-600 text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-red-50 transition-colors">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
+  </app-card>
+</div>

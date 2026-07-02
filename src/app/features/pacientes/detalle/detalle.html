@@ -1,0 +1,400 @@
+<div class="px-4 py-6 max-w-screen-lg mx-auto pb-24 md:pb-6">
+  <!-- Cabecera de control -->
+  <div class="flex items-center justify-between mb-6">
+    <button
+      (click)="goBack()"
+      class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
+      aria-label="Regresar"
+    >
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+
+    <div class="flex items-center gap-2">
+      <!-- Editar -->
+      <a
+        [routerLink]="['/pacientes', patientId, 'editar']"
+        class="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
+      >
+        <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+        Editar
+      </a>
+
+      <!-- Eliminar -->
+      <button
+        (click)="triggerDelete()"
+        class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-red-200 text-red-600 hover:bg-red-50 active:scale-95 transition-all"
+        aria-label="Eliminar paciente"
+      >
+        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  @if (errorMessage()) {
+    <app-alert [message]="errorMessage()!" type="error" [dismissible]="true" (dismissed)="errorMessage.set(null)" class="mb-6" />
+  }
+
+  @if (isLoading()) {
+    <!-- Skeletons carga de detalles -->
+    <div class="space-y-6 animate-pulse">
+      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-center">
+        <div class="h-20 w-20 rounded-full bg-gray-100 mb-4"></div>
+        <div class="h-6 bg-gray-100 rounded w-1/3 mb-2"></div>
+        <div class="h-4 bg-gray-100 rounded w-1/4"></div>
+      </div>
+      <div class="h-10 bg-gray-100 rounded w-full"></div>
+      <div class="h-40 bg-gray-100 rounded w-full"></div>
+    </div>
+  } @else {
+    @if (patient()) {
+      <!-- Tarjeta del Perfil del Paciente -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6 text-center">
+        <div class="flex flex-col items-center">
+          <div class="h-20 w-20 rounded-full bg-sky-50 border-2 border-sky-100 text-sky-700 font-bold text-2xl flex items-center justify-center mb-4">
+            {{ getInitials(patient()!.nombre_completo) }}
+          </div>
+          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+            {{ patient()!.nombre_completo }}
+          </h1>
+          <span class="inline-flex items-center gap-1.5 mt-2 bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
+            {{ patient()!.tipo_documento }} {{ patient()!.numero_documento }}
+          </span>
+        </div>
+
+        <!-- Acciones rápidas de comunicación -->
+        @if (patient()!.telefono) {
+          <div class="flex justify-center gap-4 mt-6 border-t border-gray-50 pt-5">
+            <!-- Botón Llamar -->
+            <a
+              [href]="'tel:' + patient()!.telefono"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm"
+            >
+              <svg class="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
+              Llamar
+            </a>
+
+            <!-- Botón WhatsApp (usa WhatsappService, sin lógica duplicada) -->
+            <button
+              type="button"
+              (click)="enviarWhatsApp()"
+              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors shadow-sm"
+            >
+              <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97C16.579 1.966 14.11 .94 11.479.94c-5.436 0-9.86 4.37-9.864 9.8.001 2.01.536 3.97 1.549 5.679L2.126 21.84l5.521-1.446zm11.385-6.666c-.33-.164-1.952-.951-2.251-1.06-.3-.108-.518-.163-.736.164-.218.327-.844 1.06-.1.163v-.001c.218-.328.844-1.06 1.06-1.332.218-.272.108-.544-.027-.708-.136-.165-1.226-2.915-1.68-3.997-.443-1.053-.896-.91-1.226-.927-.318-.016-.681-.02-.1.163l.635-.064c.318.016.681.018 1.044.201.363.182 1.225.817 1.633 1.635.408.816.408 1.5.204 1.907-.204.408-.816 1.089-1.225 1.498a3.1 3.1 0 01-2.179.882c-.328 0-.612-.016-.844-.049l.608.033c.328 0 .612.015.953-.163.34-.18 1.96-.952 2.259-1.062.3-.109.52-.164.738.163z" />
+              </svg>
+              WhatsApp
+            </button>
+          </div>
+        }
+      </div>
+
+      <!-- Selector de Pestañas (Tabs) -->
+      <div class="tab-bar flex border-b border-gray-100 mb-6 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1">
+        <button
+          (click)="changeTab('info')"
+          [class.bg-sky-50]="activeTab() === 'info'"
+          [class.text-sky-700]="activeTab() === 'info'"
+          class="flex-1 text-center px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+        >
+          Información
+        </button>
+        <button
+          (click)="changeTab('citas')"
+          [class.bg-sky-50]="activeTab() === 'citas'"
+          [class.text-sky-700]="activeTab() === 'citas'"
+          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5"
+        >
+          Citas
+          @if (citas().length > 0) {
+            <span class="inline-flex items-center justify-center h-4.5 min-w-4.5 bg-sky-200 text-sky-800 text-xxs px-1 py-0.5 rounded-full font-bold">
+              {{ citas().length }}
+            </span>
+          }
+        </button>
+        <button
+          (click)="changeTab('historias')"
+          [class.bg-sky-50]="activeTab() === 'historias'"
+          [class.text-sky-700]="activeTab() === 'historias'"
+          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+        >
+          Historia
+        </button>
+        <button
+          (click)="changeTab('odontograma')"
+          [class.bg-sky-50]="activeTab() === 'odontograma'"
+          [class.text-sky-700]="activeTab() === 'odontograma'"
+          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+        >
+          Odontograma
+        </button>
+        <button
+          (click)="changeTab('presupuestos')"
+          [class.bg-sky-50]="activeTab() === 'presupuestos'"
+          [class.text-sky-700]="activeTab() === 'presupuestos'"
+          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+        >
+          Presupuestos
+        </button>
+        <button
+          (click)="changeTab('pagos')"
+          [class.bg-sky-50]="activeTab() === 'pagos'"
+          [class.text-sky-700]="activeTab() === 'pagos'"
+          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
+        >
+          Pagos
+        </button>
+        <button
+          (click)="changeTab('comunicacion')"
+          [class.bg-sky-50]="activeTab() === 'comunicacion'"
+          [class.text-sky-700]="activeTab() === 'comunicacion'"
+          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5"
+        >
+          Comunicación
+          @if (mensajes().length > 0) {
+            <span class="inline-flex items-center justify-center h-4.5 min-w-4.5 bg-sky-200 text-sky-800 text-xxs px-1 py-0.5 rounded-full font-bold">
+              {{ mensajes().length }}
+            </span>
+          }
+        </button>
+      </div>
+
+      <!-- Contenedores de Pestañas -->
+
+      <!-- 1. Información Personal -->
+      @if (activeTab() === 'info') {
+        <div class="space-y-6">
+          <!-- Alerta Crítica de Alergias -->
+          @if (patient()!.alergias) {
+            <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3 text-red-950">
+              <svg class="h-5 w-5 text-red-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <h4 class="font-bold text-xs uppercase tracking-wider text-red-800">Alerta de Alergia</h4>
+                <p class="text-sm mt-1 font-semibold">{{ patient()!.alergias }}</p>
+              </div>
+            </div>
+          }
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Columna Datos Personales -->
+            <app-card [bordered]="true" shadow="sm">
+              <div class="border-b border-gray-100 pb-2.5 mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Datos Personales</h3>
+              </div>
+
+              <div class="space-y-3.5 text-sm">
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Fecha Nacimiento</span>
+                  <span class="text-gray-800 font-medium">
+                    {{ patient()!.fecha_nacimiento ? (patient()!.fecha_nacimiento | date: 'dd/MM/yyyy') : 'No registrada' }}
+                    @if (getAge(patient()!.fecha_nacimiento)) {
+                      <span class="text-gray-500 text-xs">({{ getAge(patient()!.fecha_nacimiento) }} años)</span>
+                    }
+                  </span>
+                </div>
+
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Correo Electrónico</span>
+                  <span class="text-gray-800 font-medium break-all">{{ patient()!.email || 'No registrado' }}</span>
+                </div>
+
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Teléfono de contacto</span>
+                  <span class="text-gray-800 font-medium">{{ patient()!.telefono || 'No registrado' }}</span>
+                </div>
+
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Ciudad / Dpto</span>
+                  <span class="text-gray-800 font-medium">
+                    @if (patient()!.ciudad || patient()!.departamento) {
+                      {{ patient()!.ciudad || '' }}{{ patient()!.ciudad && patient()!.departamento ? ', ' : '' }}{{ patient()!.departamento || '' }}
+                    } @else {
+                      No registrado
+                    }
+                  </span>
+                </div>
+
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Dirección</span>
+                  <span class="text-gray-800 font-medium">{{ patient()!.direccion || 'No registrada' }}</span>
+                </div>
+              </div>
+            </app-card>
+
+            <!-- Columna Datos Médicos -->
+            <app-card [bordered]="true" shadow="sm" class="flex flex-col h-full">
+              <div class="border-b border-gray-100 pb-2.5 mb-4">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Información Clínica</h3>
+              </div>
+
+              <div class="space-y-4 text-sm flex-1">
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Afiliación de Salud / EPS</span>
+                  <span class="text-gray-800 font-semibold">{{ patient()!.afiliacion_salud || 'No registrada' }}</span>
+                </div>
+
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Antecedentes Médicos</span>
+                  <p class="text-gray-700 mt-1 whitespace-pre-line leading-relaxed text-xs">
+                    {{ patient()!.antecedentes_medicos || 'Sin antecedentes registrados.' }}
+                  </p>
+                </div>
+
+                <div>
+                  <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Observaciones Generales</span>
+                  <p class="text-gray-700 mt-1 whitespace-pre-line leading-relaxed text-xs">
+                    {{ patient()!.notas_generales || 'Sin observaciones.' }}
+                  </p>
+                </div>
+              </div>
+            </app-card>
+          </div>
+        </div>
+      }
+
+      <!-- 2. Historial de Citas -->
+      @if (activeTab() === 'citas') {
+        <div class="space-y-4">
+          @if (citas().length > 0) {
+            @for (cita of citas(); track cita.id) {
+              <app-card [bordered]="true" shadow="sm" padding="sm">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <h4 class="font-semibold text-gray-900 text-sm sm:text-base">
+                      {{ cita.tipo_tratamiento || 'Consulta Odontológica' }}
+                    </h4>
+                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                      <svg class="h-3.5 w-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {{ cita.fecha_hora | date: 'dd/MM/yyyy - hh:mm a' }}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
+                      <svg class="h-3.5 w-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Duración: {{ cita.duracion_minutos }} minutos
+                    </p>
+                  </div>
+
+                  <!-- Badge de Estado -->
+                  <span
+                    [class.bg-green-50]="cita.estado === 'completada'"
+                    [class.text-green-800]="cita.estado === 'completada'"
+                    [class.border-green-200]="cita.estado === 'completada'"
+                    [class.bg-amber-50]="cita.estado === 'pendiente'"
+                    [class.text-amber-800]="cita.estado === 'pendiente'"
+                    [class.border-amber-200]="cita.estado === 'pendiente'"
+                    [class.bg-red-50]="cita.estado === 'cancelada'"
+                    [class.text-red-800]="cita.estado === 'cancelada'"
+                    [class.border-red-200]="cita.estado === 'cancelada'"
+                    class="inline-flex items-center text-xxs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
+                  >
+                    {{ cita.estado }}
+                  </span>
+                </div>
+              </app-card>
+            }
+          } @else {
+            <app-card>
+              <app-empty-state
+                icon="📅"
+                title="Sin citas agendadas"
+                subtitle="Este paciente no tiene citas en su historial."
+                size="md"
+              />
+            </app-card>
+          }
+        </div>
+      }
+
+      <!-- 3. Historia Clínica -->
+      @if (activeTab() === 'historias') {
+        <app-historia-clinica [pacienteId]="patientId" />
+      }
+
+      <!-- 4. Odontograma -->
+      @if (activeTab() === 'odontograma') {
+        <app-odontograma [pacienteId]="patientId" />
+      }
+
+      <!-- 5. Presupuestos -->
+      @if (activeTab() === 'presupuestos') {
+        <app-presupuestos
+          [pacienteId]="patientId"
+          [paciente]="{ id: patient()!.id, nombre_completo: patient()!.nombre_completo, telefono: patient()!.telefono }"
+        />
+      }
+
+      <!-- 6. Pagos -->
+      @if (activeTab() === 'pagos') {
+        <app-pagos [pacienteId]="patientId" />
+      }
+
+      <!-- 4. Comunicación: historial de mensajes enviados -->
+      @if (activeTab() === 'comunicacion') {
+        <div class="space-y-4">
+          @if (mensajes().length > 0) {
+            @for (msg of mensajes(); track msg.id) {
+              <app-card [bordered]="true" shadow="sm" padding="sm">
+                <div class="flex items-start gap-3">
+                  <div class="bg-emerald-50 text-emerald-600 rounded-xl p-2 shrink-0">
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97C16.579 1.966 14.11.94 11.479.94c-5.436 0-9.86 4.37-9.864 9.8.001 2.01.536 3.97 1.549 5.679L2.126 21.84l5.521-1.446z" />
+                    </svg>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center flex-wrap gap-2">
+                      @if (msg.tipo_plantilla) {
+                        <span class="inline-flex items-center bg-sky-50 text-sky-700 text-xxs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-sky-100">
+                          {{ msg.tipo_plantilla }}
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center bg-gray-50 text-gray-500 text-xxs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-gray-100">
+                          Mensaje
+                        </span>
+                      }
+                      <span class="text-xxs text-gray-400 font-medium">
+                        {{ msg.created_at | date: 'dd/MM/yyyy · hh:mm a' }}
+                      </span>
+                    </div>
+                    <p class="text-sm text-gray-700 mt-1.5 leading-relaxed line-clamp-3">
+                      {{ msg.texto_enviado }}
+                    </p>
+                  </div>
+                </div>
+              </app-card>
+            }
+          } @else {
+            <app-card>
+              <app-empty-state
+                icon="💬"
+                title="Sin mensajes enviados"
+                subtitle="Aún no le has enviado mensajes por WhatsApp a este paciente. Usa el botón de WhatsApp para comenzar."
+                size="md"
+              />
+            </app-card>
+          }
+        </div>
+      }
+    }
+  }
+</div>
+
+<app-confirm-modal
+  #confirmModal
+  title="Eliminar Paciente"
+  message="¿Estás seguro de que deseas eliminar este paciente? Esta acción borrará permanentemente sus datos e historias clínicas asociadas."
+  confirmText="Eliminar Paciente"
+  cancelText="Conservar"
+  (confirm)="onDeleteConfirmed()"
+></app-confirm-modal>

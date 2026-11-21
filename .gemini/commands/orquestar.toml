@@ -1,0 +1,7 @@
+# GENERADO desde tools/skills/fuente/orquestar.md — no editar a mano.
+description = "Coordina una tarea multi-archivo o multi-especialista como N0 siguiendo docs/agentes/protocolo.md, contrato primero y tracker actualizado."
+prompt = """
+Sigue exactamente el procedimiento definido en @{tools/skills/fuente/orquestar.md}.
+
+Contexto adicional del usuario: {{args}}
+"""

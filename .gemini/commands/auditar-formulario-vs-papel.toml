@@ -1,0 +1,7 @@
+# GENERADO desde tools/skills/fuente/auditar-formulario-vs-papel.md — no editar a mano.
+description = "Compara las fotos del formato en papel de historia clínica contra los formularios Angular y esquema Supabase actuales, produciendo docs/clinica/matriz-brechas.md sin modificar código funcional."
+prompt = """
+Sigue exactamente el procedimiento definido en @{tools/skills/fuente/auditar-formulario-vs-papel.md}.
+
+Contexto adicional del usuario: {{args}}
+"""

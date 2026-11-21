@@ -1,0 +1,30 @@
+{
+  "includeCoAuthoredBy": false,
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  },
+  "autoCompactWindow": 300000,
+  "hooks": {},
+  "permissions": {
+    "allow": [
+      "Bash(npm run build)",
+      "Bash(npm test -- --watch=false)",
+      "Bash(npx tsc --noEmit -p tsconfig.app.json)",
+      "Bash(node tools/agentes/sincronizar.mjs --check)",
+      "Bash(node tools/agentes/sincronizar.mjs)",
+      "Bash(node --test tools/agentes/tests/*.test.mjs)",
+      "Bash(node --test tools/plan/tests/*.test.mjs)",
+      "Bash(git status *)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git branch *)"
+    ],
+    "deny": [
+      "Read(.env*)",
+      "Read(**/.env*)",
+      "Read(.mcp.json)"
+    ]
+  }
+}
+

@@ -1,0 +1,18 @@
+# Secretos, configuración sensible local y artefactos pesados
+.env
+.env.*
+!.env.example
+.mcp.json
+supabase/.temp/
+*.key
+*.pem
+credentials*.json
+
+# Dependencias y builds
+node_modules/
+dist/
+.angular/
+android/
+ios/
+SonriApp.rar
+

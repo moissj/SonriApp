@@ -1,0 +1,7 @@
+# GENERADO desde tools/skills/fuente/nuevo-formulario-clinico.md — no editar a mano.
+description = "Guía paso a paso para implementar o ampliar una sección del formulario clínico con contrato, migración+RLS, tipos, controles reutilizables tri-estado, validaciones, tests y manual."
+prompt = """
+Sigue exactamente el procedimiento definido en @{tools/skills/fuente/nuevo-formulario-clinico.md}.
+
+Contexto adicional del usuario: {{args}}
+"""

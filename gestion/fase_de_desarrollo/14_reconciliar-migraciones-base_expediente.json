@@ -1,0 +1,42 @@
+{
+  "plan": "14_reconciliar-migraciones-base",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "objetivo": "Hacer que `supabase db reset` reproduzca producción desde cero. Hoy 6 tablas base existen en prod pero no tienen CREATE TABLE en el repo (drift repo<->prod).",
+  "fuente_verdad": "gestion/fase_de_desarrollo/14_reconciliar-migraciones-base_ddl-vivo.md (snapshot vivo via Management API, solo lectura, 2026-11-24)",
+  "tablas_objetivo": ["profiles", "pacientes", "citas", "historias_clinicas", "mensajes_enviados", "plantillas_mensajes"],
+  "estrategia": {
+    "enfoque": "Baseline original insertada ANTES de la cadena aplicada. Un único archivo nuevo con timestamp anterior al primero existente (20260701224838), p.ej. 20260701000000_baseline_tablas_base.sql.",
+    "razon": "Las migraciones ya aplicadas (20260701224838+) asumen estas tablas existentes y las evolucionan con ALTER. Insertar la baseline al inicio deja que la cadena incremental aplique encima sin colisión. No se reescribe ninguna migración aplicada.",
+    "forma_original": "La baseline recrea cada tabla en su forma ORIGINAL = estado actual MENOS las columnas/constraints que agregan migraciones posteriores ya versionadas. Subconjuntos a RESTAR (confirmar leyendo cada archivo):",
+    "restar": {
+      "profiles": "columnas rol, estado_cuenta, plan_contratado, fecha_vencimiento_plan, creado_por (y su FK y CHECK) las agrega 20260702010429_profiles_control_acceso; email la agrega 20260702010628_profiles_add_email. NO incluirlas en baseline.",
+      "pacientes": "todo el bloque de 20260705040728_expand_pacientes_identificacion (nombres..nombre_completo, eps_id+FK, checks de telefono_fijo/laboral/sexo/estado_civil/tipo_vinculacion). NO incluirlo en baseline. El telefono_check basico y la UNIQUE(odontologo_id,numero_documento) sí son originales — confirmar contra el archivo de expand.",
+      "mensajes_enviados": "columna tipo_plantilla la agrega 20260701231318_add_tipo_plantilla_to_mensajes. NO incluirla en baseline.",
+      "citas / historias_clinicas / plantillas_mensajes": "no se detectaron ALTERs posteriores; recrear forma actual completa."
+    }
+  },
+  "incluir_en_baseline": [
+    "CREATE TABLE IF NOT EXISTS de las 6 tablas en forma original (ver DDL doc).",
+    "PK, UNIQUE, FK y CHECK originales (excluir las que dependan de columnas restadas o de catalogo_eps).",
+    "Indices no-constraint originales (los idx_* del DDL doc que apliquen a columnas originales).",
+    "ALTER TABLE ... ENABLE ROW LEVEL SECURITY en las 6.",
+    "Funcion handle_updated_at (CREATE OR REPLACE) y trigger profiles_updated_at (la otra func/trigger de profiles dependen de columnas tardias -> van en 20260702010429, no aqui).",
+    "Policies SOLO-prod (drift) que ninguna migracion del repo crea: writes own (INSERT/UPDATE/DELETE con odontologo_id=auth.uid()) de pacientes/citas/historias_clinicas/mensajes_enviados/plantillas_mensajes; y profiles 'ver propio' (SELECT id=auth.uid()) + 'actualizar propio' (UPDATE id=auth.uid())."
+  ],
+  "excluir_de_baseline": [
+    "Policies SELECT '... ver propios/propias' de las 5 tablas de negocio (ya en 20260702015419_enforce_cuenta_activa_rls).",
+    "Policies profiles super_admin (ya en 20260702010429_profiles_control_acceso).",
+    "Funciones is_cuenta_activa, is_super_admin, handle_new_user, protect_profile_privileged_cols y trigger on_auth_user_created / trg_protect_profile_cols (dependen de columnas tardias; ya nacen en sus migraciones).",
+    "Columna generada nombre_completo, eps_id y demas del expand (van en su ALTER)."
+  ],
+  "idempotencia": "create table if not exists; create index if not exists; enable rls es idempotente; para policies usar 'drop policy if exists <nombre> on <tabla>;' seguido de create policy; create or replace function; para triggers usar create or replace trigger (PG14+) o drop trigger if exists + create. Objetivo: aplicar en prod = no-op; aplicar en db reset limpio = crea todo.",
+  "verificacion": [
+    "No duplicar nombres de policy/trigger/function que ya existan en otra migracion del repo (grep antes de escribir).",
+    "Orden de FKs: profiles y pacientes antes de citas/historias/mensajes. Dentro del archivo, crear profiles y pacientes primero.",
+    "Idealmente: supabase db reset local — BLOQUEADO (sin Docker/CLI). Dejar constancia en el informe de que no se pudo correr db reset y que la verificacion fue logica + grep de colisiones.",
+    "gates que apliquen: tsc/build/test no afectan SQL; correr node tools/agentes/sincronizar.mjs --check solo si se tocaron agentes/reglas (no es el caso)."
+  ],
+  "no_tocar": "No modificar ninguna migracion existente. No hacer db push ni aplicar nada a prod (requiere OK explicito del usuario). Solo crear el archivo nuevo en supabase/migrations/.",
+  "terminado": "Archivo supabase/migrations/20260701000000_baseline_tablas_base.sql creado, idempotente, coherente con el DDL doc y la estrategia; informe JSON con colisiones revisadas y limitacion de db reset documentada."
+}

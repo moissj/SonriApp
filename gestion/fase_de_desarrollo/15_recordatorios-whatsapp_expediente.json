@@ -1,0 +1,43 @@
+{
+  "plan": "15_recordatorios-whatsapp",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "objetivo": "Panel 'Recordatorios': lista las citas de MAÑANA (zona America/Bogota) que aún no tienen recordatorio WhatsApp enviado, y permite enviarlo con un clic reusando el flujo actual (wa.me). Mejora inspirada en Dentalink, versión manual-asistida.",
+  "decisiones_usuario": {
+    "enfoque": "Panel de pendientes (manual-asistido, wa.me). NO WhatsApp Business API, NO Edge Function, NO cron, NO costo, NO consentimiento nuevo.",
+    "ventana": "Citas del día siguiente (mañana) en America/Bogota."
+  },
+  "sin_cambios_bd": "No hay migración. Reusa tablas citas y mensajes_enviados y los servicios existentes WhatsappService, PlantillaService, CitaService. 'Recordatorio ya enviado' = existe fila en mensajes_enviados con ese cita_id y tipo_plantilla='recordatorio'.",
+  "reusar": {
+    "WhatsappService.enviar({paciente, tipo:'recordatorio', cita})": "src/app/core/services/whatsapp.service.ts — ya renderiza plantilla, abre wa.me y registra en mensajes_enviados. NO reimplementar envío ni URLs.",
+    "WhatsappService.preloadPlantillas()": "llamar en ngOnInit del panel para que enviar() pueda abrir wa.me dentro del gesto del clic.",
+    "CitaService.getCitas(inicioISO, finISO)": "src/app/core/services/cita.service.ts — trae citas con paciente{nombre_completo, telefono} por rango.",
+    "shared/components": "card, button, empty-state, status-badge según aplique (no duplicar clases Tailwind largas)."
+  },
+  "archivos_crear": [
+    "src/app/features/recordatorios/funciones/ventana-manana.funcion.ts — PURA: ventanaManana(now: Date): { inicio: string; fin: string }. Devuelve los límites del DÍA SIGUIENTE en America/Bogota como ISO con offset -05:00 (ej. `${yyyy-mm-dd}T00:00:00-05:00` y `...T23:59:59.999-05:00`). PROHIBIDO new Date('YYYY-MM-DD') (medianoche local). Colombia no tiene DST: offset fijo -05:00.",
+    "src/app/features/recordatorios/funciones/ventana-manana.funcion.spec.ts — test con now fijo (ej. 2026-07-07T18:00:00-05:00 => inicio 2026-07-08T00:00:00-05:00).",
+    "src/app/features/recordatorios/funciones/pendientes.funcion.ts — PURA: filtrarPendientes(citas: Cita[], enviados: Set<string>): Cita[]. Excluye estado en ('cancelada','no_asistio','atendida') y las citas cuyo id está en `enviados`. Orden por fecha_hora asc.",
+    "src/app/features/recordatorios/funciones/pendientes.funcion.spec.ts — test de exclusión por estado y por recordatorio ya enviado.",
+    "src/app/features/recordatorios/services/recordatorio.service.ts — getPendientes(): calcula ventanaManana(new Date()), llama CitaService.getCitas, consulta mensajes_enviados (select('cita_id') where odontologo_id=auth.uid(), tipo_plantilla='recordatorio', in('cita_id', ids)) para armar el Set, aplica filtrarPendientes y retorna. Verifica SIEMPRE el error de Supabase (lanzar, no tragar). Sin select('*').",
+    "src/app/features/recordatorios/recordatorios.ts — componente standalone OnPush con signals. ngOnInit: await preloadPlantillas() y cargar pendientes (signal pendientes, signal cargando con finally). Acción enviar(cita): llama WhatsappService.enviar(...) DIRECTO en el handler del clic (sin await previo, para no perder el gesto); si retorna true, agrega cita.id a un signal 'enviados' y la quita de pendientes; si el paciente no tiene telefono, deshabilitar el botón. Mostrar hora con WhatsappService.formatHora.",
+    "src/app/features/recordatorios/recordatorios.html — lista accesible: por cada pendiente nombre del paciente, hora (America/Bogota), teléfono, botón 'Enviar recordatorio' (min-h-10 min-w-10, [disabled]=\"sin telefono || enviando()\", aria-label). Empty-state cuando no hay pendientes. @for con track por cita.id."
+  ],
+  "archivos_editar": [
+    "src/app/app.routes.ts — agregar ruta { path: 'recordatorios', canActivate: [authGuard, onboardingGuard], data: { title: 'Recordatorios' }, loadComponent: () => import('./features/recordatorios/recordatorios').then(m => m.RecordatoriosComponent) }.",
+    "src/app/layout/sidenav/sidenav.ts — agregar a navItems { route: '/recordatorios', label: 'Recordatorios', icon: <path de campana>, exact: false } siguiendo la forma existente.",
+    "src/app/layout/bottom-nav/bottom-nav.ts — agregar el mismo link a masItems (hoja 'Más')."
+  ],
+  "reglas": [
+    "OnPush explícito + signals (no mutar props tras async).",
+    "Archivos ≤200 líneas, funciones ≤30, strict sin any injustificado.",
+    "Fechas/horas en America/Bogota; nunca new Date('YYYY-MM-DD').",
+    "Toda consulta Supabase verifica y propaga error; nada de [] silencioso.",
+    "Cero datos de paciente en console.log/errores.",
+    "Botones táctiles ≥40x40, <label>/aria-label, foco visible.",
+    "No importar desde el interior de otro feature; reusar core/shared.",
+    "Cada función pura nueva lleva su .spec.ts."
+  ],
+  "validacion": "npx tsc --noEmit -p tsconfig.app.json; npm run build; npm test -- --watch=false (incluye los nuevos .spec). Reporta salida real.",
+  "terminado": "Ruta /recordatorios navegable desde sidenav y 'Más' móvil; muestra citas de mañana sin recordatorio; al enviar, abre wa.me, registra y la cita desaparece de pendientes; specs nuevos verdes; tsc+build+test verdes."
+}

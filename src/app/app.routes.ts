@@ -33,6 +33,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/citas/citas').then((m) => m.CitasComponent),
   },
   {
+    path: 'recordatorios',
+    canActivate: [authGuard, onboardingGuard],
+    data: { title: 'Recordatorios' },
+    loadComponent: () =>
+      import('./features/recordatorios/recordatorios').then((m) => m.RecordatoriosComponent),
+  },
+  {
     path: 'pacientes',
     canActivate: [authGuard, onboardingGuard],
     data: { title: 'Pacientes' },

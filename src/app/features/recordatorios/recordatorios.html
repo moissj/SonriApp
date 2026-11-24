@@ -1,0 +1,42 @@
+<section class="mx-auto max-w-3xl space-y-4 p-4">
+  <h1 class="text-xl font-semibold text-dark">Recordatorios de mañana</h1>
+
+  @if (error()) {
+    <app-alert [message]="error()!" />
+  }
+
+  @if (cargando()) {
+    <p class="text-sm text-gray-500" role="status">Cargando…</p>
+  } @else if (pendientes().length === 0) {
+    <app-empty-state icon="🔔" title="No hay recordatorios pendientes para mañana." />
+  } @else {
+    <app-card padding="none">
+      <ul class="divide-y divide-gray-100">
+        @for (cita of pendientes(); track cita.id) {
+          <li class="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div class="min-w-0">
+              <p class="truncate font-medium text-dark">{{ cita.paciente?.nombre_completo }}</p>
+              <p class="text-sm text-gray-500">
+                {{ horaDe(cita) }}
+                @if (sinTelefono(cita)) {
+                  · <span class="text-amber-700">Sin teléfono</span>
+                } @else {
+                  · {{ cita.paciente?.telefono }}
+                }
+              </p>
+            </div>
+            <app-button
+              size="lg"
+              [disabled]="sinTelefono(cita) || enviandoId() === cita.id"
+              [loading]="enviandoId() === cita.id"
+              (click)="enviar(cita)"
+            >
+              Enviar recordatorio
+              <span class="sr-only"> a {{ cita.paciente?.nombre_completo }}</span>
+            </app-button>
+          </li>
+        }
+      </ul>
+    </app-card>
+  }
+</section>

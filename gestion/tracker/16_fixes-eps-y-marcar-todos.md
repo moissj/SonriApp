@@ -7,8 +7,9 @@
 - [x] Diagnóstico medido (esquema vivo, solo lectura): 11 EPS en 2 regímenes; dropdown las muestra 2 veces
 - [x] Impacto FK medido: 0 pacientes referencian las filas duplicadas
 - [x] Decisión usuario + OK explícito de borrado: conservar contributivo, borrar 11 subsidiado
-- [x] Ejecutado en prod vía API (sin migración; tabla en rework): 11 borradas → 54 filas, 0 duplicados, verificado
-- [ ] (otro plan) Arreglar el seeder EPS para que no reintroduzca duplicados — pertenece al rework EPS
+- [x] 1ª limpieza: 11 filas subsidiado duplicadas (mismo nombre, 2 regímenes) → borradas, 54 filas
+- [x] 2ª limpieza: reaparecía duplicado por DOS seeders (26 formales MAYÚS EPS_BASE + 28 amigables eps_colombia.json). Usuario eligió conservar FORMALES. Borradas 28 amigables (0 pacientes) → 26 filas, 0 duplicados, 0 FK rotas, verificado en prod
+- [ ] (rework EPS) Dejar UNA sola fuente de catálogo: deshabilitar el seeder amigable (eps_colombia.json/configuracion-eps) o el formal (EPS_BASE/seedComunes). Mientras ambos existan, la duplicación recurre.
 
 ## Tarea B — Botones "marcar todos" en examen de ingreso
 - [x] Implementado (cliente-web): función pura `aplicar-todos-hd` + 3 setters + botonera + CSS 40x40

@@ -1,0 +1,76 @@
+{
+  "plan": "19_recordatorios-mejorados",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "diseno_aprobado": "docs/superpowers/specs/2026-11-24-recordatorios-mejorados-design.md",
+  "alcance": "Frontend-only. Sin migración ni tabla nueva (reutiliza mensajes_enviados). Un especialista: cliente-web.",
+  "decisiones": {
+    "ventana_dias": 7,
+    "volver_a_enviar": "registra un nuevo envío en mensajes_enviados (cada envío real queda auditado)",
+    "enviar_todos": "por día, con confirmación del número N; abre 1 pestaña wa.me por pendiente en el mismo gesto del clic",
+    "popups": "el navegador solo abre varias pestañas si el usuario permite pop-ups; aviso visible la 1ª vez; cita sin teléfono no cuenta en N"
+  },
+  "reglas_criticas": [
+    "window.open DEBE ejecutarse dentro del gesto del clic, antes de cualquier await (si no, el navegador lo bloquea). Patrón ya usado en recordatorios.ts:42 y whatsapp.service.ts:96.",
+    "Reusar SIEMPRE WhatsappService (enviar/buildUrl/registrarEnvio); ninguna parte construye URLs de WhatsApp por su cuenta.",
+    "Informar SIEMPRE el error de Supabase; nunca [] silencioso.",
+    "Fechas agrupadas en America/Bogota sin desfase UTC (no usar medianoche local cruda).",
+    "Cero PII en logs/errores; sin console.log de depuración.",
+    "OnPush explícito; @for con track por cita.id; botones deshabilitados durante envío.",
+    "Objetivos táctiles ≥40×40; confirmación antes de enviar en lote.",
+    "Archivos ≤200 líneas, funciones ≤30; sin código muerto (si una función queda sin uso, se elimina con su spec)."
+  ],
+  "tipos": {
+    "CitaRecordatorio": "{ cita: Cita; ultimoEnvio: string | null }",
+    "DiaRecordatorios": "{ fecha: string; pendientes: CitaRecordatorio[]; enviados: CitaRecordatorio[] }"
+  },
+  "contexto_codigo": {
+    "RecordatorioService": "src/app/features/recordatorios/services/recordatorio.service.ts — hoy getPendientes() solo mañana; usa AuthService.user(), CitaService.getCitas(inicio,fin), consulta mensajes_enviados (cita_id, tipo_plantilla='recordatorio', odontologo_id).",
+    "WhatsappService": "src/app/core/services/whatsapp.service.ts — enviar({paciente:{id,nombre_completo,telefono}, tipo:'recordatorio', cita:{id,fecha_hora}}): Promise<boolean>; preloadPlantillas(); formatHora(iso). window.open dentro del gesto.",
+    "Cita": "src/app/core/services/cita.service.ts — campos usados: id, paciente_id, fecha_hora, paciente?.{nombre_completo, telefono}.",
+    "componente_actual": "src/app/features/recordatorios/recordatorios.ts (OnPush, signals pendientes/cargando/enviandoId/error) + recordatorios.html.",
+    "funciones_existentes": "funciones/pendientes.funcion.ts, funciones/ventana-manana.funcion.ts (+specs) — reevaluar uso; quitar las que queden muertas."
+  },
+  "tareas": {
+    "crear": [
+      "src/app/features/recordatorios/funciones/agrupar-por-dia.funcion.ts",
+      "src/app/features/recordatorios/funciones/agrupar-por-dia.funcion.spec.ts"
+    ],
+    "modificar": [
+      "src/app/features/recordatorios/services/recordatorio.service.ts",
+      "src/app/features/recordatorios/recordatorios.ts",
+      "src/app/features/recordatorios/recordatorios.html"
+    ],
+    "posible_baja": [
+      "src/app/features/recordatorios/funciones/pendientes.funcion.ts (+spec) y/o ventana-manana.funcion.ts (+spec) si quedan sin uso"
+    ]
+  },
+  "interfaces": {
+    "agrupar-por-dia.funcion.ts": "export function agruparPorDia(citas: Cita[], enviadosPorCita: Map<string, string>): DiaRecordatorios[]  // clave de día = fecha local America/Bogota (YYYY-MM-DD) de cita.fecha_hora; días asc; citas por hora asc; enviado = cita.id in map; ultimoEnvio = map.get(cita.id) ?? null; pendiente = resto.",
+    "recordatorio.service.ts": "getRecordatoriosRango(desde: Date, dias = 7): Promise<DiaRecordatorios[]>  // inicio = desde 00:00 local; fin = desde + dias (fin de rango); citas = CitaService.getCitas(inicio, fin); si 0 citas -> []; consulta mensajes_enviados tipo 'recordatorio' de esas cita_id (odontologo_id = user.id) seleccionando cita_id, created_at; construye Map<cita_id, max(created_at)>; return agruparPorDia(citas, map). Propaga error. (getPendientes se elimina o se reimplementa encima; sin código muerto.)"
+  },
+  "componente": "recordatorios.ts: signals dias/cargando/error/enviandoId/avisoPopup. ngOnInit: preloadPlantillas() + cargar(). Render por día (encabezado fecha formateada es-CO) con subgrupos Pendientes (Enviar por cita + 'Enviar todos (N)') y Enviados (hora cita, paciente, 'enviado hace/ a las X', 'Volver a enviar'). enviar(cita): como hoy, mueve la cita de pendientes a enviados tras ok y refresca ultimoEnvio. enviarTodos(dia): ConfirmModal 'se abrirán N pestañas' -> en el gesto del clic itera dia.pendientes (con teléfono) llamando whatsapp.enviar() SIN await previo al primer window.open; set avisoPopup. volverAEnviar(cita): whatsapp.enviar() de nuevo. sinTelefono deshabilita y excluye de N. Reusa app-card, app-button, app-empty-state, app-alert, app-confirm-modal.",
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check"
+  ],
+  "verificacion": {
+    "owner": "verificador",
+    "focos": [
+      "window.open dentro del gesto (no await antes del primer open en enviarTodos).",
+      "Reutiliza WhatsappService (no construye wa.me propio).",
+      "Agrupación por día correcta en America/Bogota (sin desfase).",
+      "Error de Supabase propagado; error de carga muestra estado de error, no 'sin registros'.",
+      "Sin código muerto tras el reshape; sin console.log/PII.",
+      "OnPush, track por id, botones deshabilitados durante envío, táctiles ≥40×40.",
+      "Gates reales verdes."
+    ]
+  },
+  "pendientes_fuera_de_plan": [
+    "Envío automático/programado y API oficial WhatsApp Business (no en este plan).",
+    "Manual de usuario de la pantalla de recordatorios (actualizar si se libera).",
+    "El envío en lote depende de que el usuario permita pop-ups del sitio (limitación del navegador)."
+  ]
+}

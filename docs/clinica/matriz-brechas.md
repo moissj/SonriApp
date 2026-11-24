@@ -41,9 +41,136 @@ Las 4 fotos (`.jfif`, orientadas 90° en sentido antihorario) fueron leídas dir
    - `DESCRIPCION DE MODELOS` (líneas amplias).
 8. **Secciones 8 y 9:** `8. DIAGNOSTICO` (3 líneas) y `9. PLAN DE TRATAMIENTO ORTOPEDICO E INTEGRAL` (4 líneas).
 
-## 2. Matriz de brechas (pendiente de ejecución en Plan `00_auditoria-formularios`)
+## 2. Matriz de brechas (ejecutada en Plan `00_auditoria-formularios`)
 
-| Sección | Campo en papel | Estado (`existe` / `parcial` / `falta` / `sobra`) | Dónde (componente / tabla.columna) | Tipo de dato actual / propuesto | Propuesta | Dudas para OK |
-|---|---|---|---|---|---|---|
-| *(Pendiente)* | *(Se completará ejecutando `/auditar-formulario-vs-papel` dentro del plan `00_auditoria-formularios`)* | — | — | — | — | Confirmar `DIAGNOSTICADA A` en apnea del sueño, obligatoriedad de `remite.parentesco`, y mapeo `PA`/`PP` |
+> **Fuentes:** lado papel = transcripción verificada de §1 (4 fotos). Lado código = inventario `relevador` (`ruta:línea` reales). `historia_dental` y `antecedentes_salud` son columnas JSONB en `historia_clinica_inicial`.
+
+### Encabezado
+
+| Campo en papel | Estado | Dónde (componente / tabla.columna) | Propuesta | Dudas para OK |
+|---|---|---|---|---|
+| Fecha historia (DIA/MES/AÑO) | parcial | sin campo visible en `historia-clinica.html:24-42` | Derivar de `created_at` o número de historia | — |
+| HISTORIA # | falta | — | Número de historia secuencial por consultorio | ¿Numeración requerida o basta `id`? |
+| EST CIVIL (SOLTERO/CASADO/DIVORCIADO/UNION LIBRE/VIUDO) | existe | `formulario.html:112` `estado_civil` | Conservar | — |
+| VINCULACION (COTIZANTE/BENEFICIARIO/SUBSIDIADO) | existe | `formulario.html:183` `tipo_vinculacion` | Conservar | — |
+
+### Sección 1 — Identificación del paciente
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas para OK |
+|---|---|---|---|---|
+| Apellidos / Nombres | existe | `formulario.html:49,50,53` | Conservar | — |
+| TIPO DE ID (CC CE RC TI PP) | parcial | `formulario.html:58` ofrece `CC,TI,CE,PA,RC` | Unificar: papel usa **PP** (pasaporte), app usa **PA** | **(D1)** ¿`PA`→`PP` o conservar `PA`? |
+| Número documento | existe | `formulario.html:66` | Conservar | — |
+| Fecha nacimiento / Edad | existe | `formulario.html:72,76` (edad readonly) | Conservar | — |
+| Sexo (M/F) | existe | `formulario.html:104` | Conservar | — |
+| Correo electrónico | sobra | `formulario.html:135` `email` | Papel no lo pide; **conservar** (mejora) | — |
+| Depto/Ciudad nacimiento | sobra | `formulario.html:83,92` | Papel no separa depto; **conservar** | — |
+| Residencia (depto/ciudad/dirección/barrio) | existe | `formulario.html:140,149,159,160` | Conservar | — |
+| Teléfono / fijo | existe | `formulario.html:131,132` | Conservar | — |
+| Afiliación (EPS) | existe | `formulario.html:174` `eps_id`→`catalogo_eps` | Conservar | — |
+| Ocupación / dir. laboral / tel. laboral | existe | `formulario.html:200,202,203` | Conservar | — |
+| REMITE (línea de texto libre) | parcial | `formulario.html:239-240` `remite` con `nombre_completo`+**`parentesco`** (sin teléfono) | Papel = solo línea libre, sin parentesco | **(D2)** ¿Hacer `remite.parentesco` opcional/eliminar? |
+| RESPONSABLE (parentesco + tel) | existe | `formulario.html:217-241` `responsable` | Conservar | — |
+| ACOMPAÑANTE (parentesco + tel) | existe | `formulario.html:217-241` `acompanante` | Conservar | — |
+
+### Sección 2 — Encabezado clínico y motivo de consulta
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| Motivo de consulta | existe | `evoluciones.html:41` `motivo_consulta` (obligatorio) → `historias_clinicas` | Conservar | — |
+
+### Sección 3 — Antecedentes de salud (21 ítems + obs + PA + temperatura)
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| 21 ítems S/N | existe | `antecedentes_salud` (JSONB) `examen-ingreso.ts:21-40`, HTML `:17-28` | Conservar tri-estado (`null`/sí/no) | — |
+| Ítem 12 `ÚLCERAS GASTRITIS` | parcial | app rotula «Úlceras gástricas» | Ajustar texto al papel | — |
+| Ítem 16 `REACCIONES ALÉRICAS` (errata) | existe | `examen-ingreso.ts:36` «Reacciones alérgicas» | Mantener ortografía correcta | — |
+| OBSERVACIONES | existe | `examen-ingreso.html:31-39` `obs_antecedentes` | Conservar | — |
+| TOMA DE PRESION | existe | `examen-ingreso.html:44-52` `toma_presion` | Conservar | — |
+| TEMPERATURA CORPORAL | existe | `examen-ingreso.html:55-66` `temperatura_corporal` | Conservar | — |
+
+### Sección 4 — Tejidos blandos (16 ítems N/A)
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| 16 ítems Normal/Anormal | existe | app lista **16** ítems `examen-ingreso.ts:45-60` (`TEJIDOS_NOMBRES`, HTML `:78-89`) | Conservar; solo cotejar nombres exactos vs foto | **(D6)** Cerrada lado-código (16 ítems = papel); resta cotejo de nombres vs `.jfif` (no renderiza) |
+| OBSERVACIONES HALLAZGOS (línea única) | sobra | `obs_tejidos_blandos` `:92-100` + obs por ítem (`checklist-item`) | Papel usa una sola línea; app añade obs por ítem — **conservar** | — |
+
+### Sección 5 — Funciones vitales / orales
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| Respiración (nasal/oral) | existe | `examen-ingreso.html:113-119` | Conservar | — |
+| Deglución (normal/atípica) | existe | `examen-ingreso.html:122-128` | Conservar | — |
+| Fonación (normal/alterada) | existe | `examen-ingreso.html:131-137` | Conservar | — |
+| Succión (normal/alterada) | existe | `examen-ingreso.html:140-146` | Conservar | — |
+
+### Sección 6 — Historia dental (JSONB `historia_dental`)
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| Tratamiento ortopédico / recambio tardío | existe | `examen-ingreso.service.ts:18-31` | Conservar | — |
+| ATM: dolor / ruido / apertura / desviación (valor+lado) | existe | `historia_dental` keys | Conservar | — |
+| HABITOS ORALES (interruptor general S/N) | falta | — | Añadir switch general antes de hábitos | — |
+| Succión digital (solo línea, sin S/N) | existe | `succion_digital` | Conservar | — |
+| Hábito lengua / uñas / chupete (S/N) | existe | `habito_lengua,habito_unas,chupete` (HTML `:259-275`) | Conservar | — |
+| SENSIBILIDAD S/N + **UBICACION** | parcial | app pone «ubicación» en `cuellos_expuestos` (`:311`) | **Invertido**: UBICACION pertenece a SENSIBILIDAD | **(D confirmada)** corregir mapeo ubicación |
+| CUELLOS EXP/EROSIÓN S/N (línea sin etiqueta) | parcial | `cuellos_expuestos` con obs ubicación `:311` | Quitar etiqueta «ubicación» de aquí | — |
+| SUPERNUMERIOS / SELLANTES S/N + línea | falta | — | Añadir campos | — |
+| Frecuencia cepillado / seda / enjuague + frecuencia | falta | — | Añadir campos de higiene | — |
+| Traumas/quistes, ausencias congénitas | existe | `traumas_quistes,ausencias_congenitas` | Conservar | — |
+
+### Sección 7 — Exploración facial
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| Toda la sección (asimetría, posición labial, nariz, respirador oral, apnea, CPAP, aparato removible, mordida cruzada/profunda/abierta, anomalías de posición, planos terminales, tipo dentición, descripción de modelos) | **falta** | sin campos en código | Construir sección completa (Plan 09) | **(D3)** `DIAGNOSTICADA … A ___` en apnea: ¿significado de «A»? |
+
+### Sección 8 — Diagnóstico
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| Diagnóstico (3 líneas) | parcial | `evoluciones.html:53` `diagnostico` (por evolución) | Decidir si vive en examen de ingreso o en evolución | ¿Diagnóstico de ingreso separado del de evolución? |
+
+### Sección 9 — Plan de tratamiento ortopédico e integral
+
+| Campo en papel | Estado | Dónde | Propuesta | Dudas |
+|---|---|---|---|---|
+| Plan de tratamiento (4 líneas) | **falta** | sin campo | Construir sección (Plan 11) | **(D5)** ¿texto libre o estructurado por fases? |
+
+## 3. Inventario de columnas con datos sensibles de salud
+
+Clasificación mínima (sin exponer datos de pacientes). Todas requieren RLS fail-closed y cero presencia en logs/analítica/tests.
+
+- **Datos clínicos de salud (alta sensibilidad):** `antecedentes_salud` (JSONB: incluye Sida, Hepatitis, Psiquiátricos/neurológicos, Ginecológicos/embarazo), `historia_dental` (JSONB), `antecedentes_medicos`, `alergias`, `obs_antecedentes`, `obs_tejidos_blandos`, `toma_presion`, `temperatura_corporal`, `diagnostico`, `notas_clinicas`, `motivo_consulta`, `notas_generales`.
+- **Afiliación/salud:** `eps_id`, `tipo_vinculacion`, `afiliacion_salud`.
+- **PII del paciente:** `numero_documento`, `fecha_nacimiento`, `telefono`, `email`, `direccion`.
+- **PII de terceros:** `responsable`, `acompanante`, `remite` (nombre/teléfono/parentesco).
+
+## 4. Mapa de RLS y migraciones (estado actual en repo)
+
+> **Advertencia:** la verificación contra el esquema **vivo** de Supabase quedó **bloqueada** — el MCP de Supabase no conectó en esta sesión (`CONNECT_TIMEOUT`). Lo siguiente se infiere solo de `supabase/migrations/**`.
+
+| Tabla | CREATE TABLE en repo | RLS en repo | Riesgo |
+|---|---|---|---|
+| `historia_clinica_inicial` | **No** | **No hallada**; el cliente hace `upsert` (`examen-ingreso.service.ts:76-85`) | **Alto** — tabla de datos clínicos sin policy fail-closed visible |
+| `historias_clinicas` | **No** | Solo `SELECT` «historias: ver propias» (`20260702015419:21`); sin INSERT/UPDATE/DELETE | **Alto** — faltan policies de escritura |
+| `pacientes` | No (solo `ALTER`, `20260705040728`) | `SELECT` «pacientes: ver propios» (`20260702015419:15`); sin INSERT/UPDATE visible | Medio |
+| `catalogo_eps` | Sí (`20260705043527`) | Sí, pero **sin `is_cuenta_activa()`** | Medio |
+| `odontogramas`, `presupuestos`, `pagos`, `presupuesto_items`, `tratamientos_catalogo`, `departamentos`, `municipios` | Sí | Sí | Bajo |
+
+## 5. Decisiones pendientes de OK explícito del usuario
+
+| ID | Decisión | Para habilitar |
+|---|---|---|
+| **D1** | Tipo de ID: ¿unificar `PA`→`PP` (papel) o conservar `PA`? | Plan 03 |
+| **D2** | `remite`: ¿texto libre (papel) o mantener `parentesco` obligatorio? | Plan 03 |
+| **D3** | Apnea `DIAGNOSTICADA … A ___`: significado de «A» (asintomática/aparente/en estudio) | Plan 09 |
+| **D4** | Confirmar construcción completa de **Sección 7** (exploración facial, hoy ausente) | Plan 09 |
+| **D5** | **Sección 9** plan de tratamiento: ¿texto libre o estructurado por fases? | Plan 11 |
+| **D6** | Tejidos blandos: app ya tiene 16 ítems (= papel); solo resta cotejar **nombres exactos** vs foto (`.jfif` no renderiza vía Read) | Plan 06 |
+| **D7** | **Bloqueo:** verificar esquema y RLS vivos de `historia_clinica_inicial`/`historias_clinicas`/`pacientes` requiere MCP de Supabase (hoy caído) | Plan 01 / Plan 13 |
+
+> **Regla de parada:** no se modifica ningún componente, formulario ni SQL hasta la aprobación de esta matriz (ver tracker `00_auditoria-formularios`).
 

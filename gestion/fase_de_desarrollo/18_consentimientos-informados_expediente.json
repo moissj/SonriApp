@@ -1,7 +1,11 @@
 {
   "plan": "18_consentimientos-informados",
-  "version": 1,
+  "version": 2,
   "fecha": "2026-11-24",
+  "endurecimientos_v2": [
+    "consent_insert_own: el with check ahora exige que paciente_id pertenezca al odontologo (exists sobre pacientes). Reserva #1 del verificador.",
+    "Trigger before update tg_consent_paciente_inmutable: congela columnas inmutables (paciente_id, odontologo_id, catalogo_id, plantilla_version, archivo_path, nombre_archivo, fecha_firma, created_at) e impide des-anular (anulado->vigente). Reserva #2 del verificador (regla historia-clinica-integridad). Ver migracion 20261124130000 lineas 53, 62-80, 11."
+  ],
   "diseno_aprobado": "docs/superpowers/specs/2026-11-24-consentimientos-informados-design.md",
   "roadmap": "Dentalink #3 (consentimientos + firma)",
   "decisiones_usuario": {

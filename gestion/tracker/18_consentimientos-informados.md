@@ -12,8 +12,9 @@
 - [x] **F2 Cliente odontólogo** (`cliente-web`): módulo `features/consentimientos/` + servicio (URL firmada TTL 60s, rollback de objeto, anular con motivo) + sección en detalle paciente + vista imprimible (`@media print` global) + 2 funciones puras con specs (40 tests). Servicio verificado (sin `getPublicUrl`, sin PII, columnas explícitas)
 - [x] **F3 Admin catálogo** (`cliente-web`): pantalla CRUD super_admin (`configuracion/consentimientos`, adminGuard); service += `listarTodos/crear/editar(sube version)/activar`
 - [ ] Gates locales verde (`tsc --noEmit`, `npm run build`, `npm test -- --watch=false`, `sincronizar.mjs --check`)
-- [ ] Revisión adversarial (`verificador`): contrato, RLS fail-closed, integridad, Storage, datos sensibles
-- [ ] Commit (push/prod/aplicar migración → OK explícito)
+- [x] Revisión adversarial (`verificador`): **APROBADO_CON_RESERVAS**, 0 bloqueantes, 4 gates verde; todas las refutaciones de RLS/integridad/storage/PII fallaron
+- [x] Endurecimiento de reservas (contrato v2, `capa-datos`): insert valida pertenencia del paciente; trigger de inmutabilidad + no-des-anular. Migración v2 (sin aplicar)
+- [x] Commits locales (F1, F2+F3, endurecimiento). **Pendiente OK explícito:** push / aplicar migración a prod
 
 ## Pendientes / deuda
 - **Sin verificación e2e contra BD real** (migración no aplicada; sin Supabase CLI local): bucket, policies y join `catalogo:catalogo_consentimientos` sin probar de punta a punta.

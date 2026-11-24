@@ -182,12 +182,12 @@
 
 .si-no-btn,
 .lado-btn {
-  width: 26px;
-  height: 26px;
-  border-radius: 6px;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
   border: 1.5px solid #d1d5db;
   background: #f9fafb;
-  font-size: 0.65rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: #6b7280;
   cursor: pointer;

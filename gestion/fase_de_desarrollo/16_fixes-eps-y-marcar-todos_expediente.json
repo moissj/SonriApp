@@ -1,0 +1,27 @@
+{
+  "plan": "16_fixes-eps-y-marcar-todos",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "objetivo": "Dos fixes reportados por el usuario antes de continuar con mejoras Dentalink.",
+  "tarea_a_eps_duplicada": {
+    "sintoma": "El selector de EPS en registro de pacientes muestra EPS repetidas.",
+    "causa_raiz_medida": "Esquema vivo (Management API, solo lectura): catalogo_eps es GLOBAL (sin odontologo_id; la migración restructure_per_odontologo está sin commitear/aplicar). 65 filas, 54 nombres, 0 filas idénticas (nombre+regimen). 11 EPS sembradas en AMBOS regímenes (contributivo + subsidiado), ambas activas. El dropdown muestra 'nombre - regimen' => la misma EPS aparece dos veces. Data proviene de scripts/eps_colombia.json (nombres amigables), no de EPS_BASE.",
+    "decision_usuario": "Limpiar datos en BD: conservar una fila por EPS, régimen 'contributivo'; borrar las 11 'subsidiado' duplicadas. Confirmado explícitamente el borrado en prod.",
+    "impacto_fk_medido": "Las 22 filas (11x2) tienen 0 pacientes referenciándolas (pacientes.eps_id). Borrado sin orfandad.",
+    "ejecucion": "DELETE directo en prod vía Management API (NO migración, porque catalogo_eps está en pleno rework sin commitear y la historia de migraciones diverge). Condición segura: borra 'subsidiado' solo si existe gemela 'contributivo'. Resultado verificado: 11 borradas; post = 54 filas, 54 nombres, 0 duplicados. 21 filas 'subsidiado' restantes son EPS que solo existen en ese régimen (intactas, correcto).",
+    "reversibilidad": "Reversible solo re-insertando las 11 filas.",
+    "pendiente_critico": "La duplicación REAPARECERÁ si el seeder de EPS (configuracion-eps / eps_colombia.json) vuelve a correr sembrando cada EPS en 2 regímenes. Arreglar el seed (una fila por EPS, o régimen como atributo del paciente) pertenece al REWORK EPS en vuelo, no a este fix puntual."
+  },
+  "tarea_b_marcar_todos": {
+    "objetivo": "Botones 'marcar todos' en las 3 secciones con checklist del examen de ingreso.",
+    "implementacion": "cliente-web. Función pura aplicar-todos-hd.funcion.ts (+spec) para historia dental (apertura 'no'->'normal', 'si'->'alterada'; conserva lado/observacion). Métodos setAllAntecedentes('si'|'no'), setAllTejidos('normal'|'alterado'), setAllHistoriaDental('si'|'no') en examen-ingreso.ts. Botonera en section-header de Antecedentes, Tejidos blandos e Historia dental (Funciones vitales sin tocar). CSS .bulk-btn >=40x40 accesible.",
+    "gates": "tsc OK; build OK (aviso budget CSS examen-ingreso.css +175 bytes, no rompe); test 30/30 verde (incluye 3 specs nuevos de la función pura).",
+    "estado_commit": "NO commiteable aislado: todos los archivos viven dentro de la feature UNTRACKED src/app/features/historias-clinicas/ (WIP de otro plan). Cambios quedan en el working tree y se commitearán cuando el dueño commitee la feature.",
+    "pendientes": [
+      "Aviso budget CSS +175 bytes (baseline del archivo ya rozaba 4kB; el botón accesible 40x40 no se puede comprimir más sin perder táctil). Decisión del dueño de la feature: subir anyComponentStyle budget o compactar CSS base.",
+      "examen-ingreso.ts ~286 líneas (ya >200 antes de este cambio; no se partió, fuera de alcance).",
+      "Manual de usuario: pantalla examen de ingreso aún es WIP sin release; manual se redacta cuando la feature se estabilice."
+    ]
+  },
+  "token": "PAT de Supabase usado para medir y ejecutar el borrado EPS. Revocar/rotar al cerrar (quedó expuesto en el chat en sesión previa)."
+}

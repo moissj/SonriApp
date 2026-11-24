@@ -25,6 +25,7 @@ export class RecordatoriosComponent implements OnInit {
   readonly cargando = signal(true);
   readonly error = signal<string | null>(null);
   readonly enviandoId = signal<string | null>(null);
+  readonly enviandoLote = signal(false);
   readonly avisoPopup = signal(false);
   readonly diaLote = signal<DiaRecordatorios | null>(null);
 
@@ -57,10 +58,13 @@ export class RecordatoriosComponent implements OnInit {
     const dia = this.diaLote();
     if (!dia) return;
     this.avisoPopup.set(true);
+    this.enviandoLote.set(true);
+    const proms: Promise<void>[] = [];
     for (const { cita } of dia.pendientes) {
       if (this.sinTelefono(cita)) continue;
-      this.disparar(cita).catch(() => this.error.set('No se pudo enviar algún recordatorio.'));
+      proms.push(this.disparar(cita).catch(() => this.error.set('No se pudo enviar algún recordatorio.')));
     }
+    Promise.allSettled(proms).finally(() => this.enviandoLote.set(false));
   }
 
   cantidadEnviables(dia: DiaRecordatorios | null): number {

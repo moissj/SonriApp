@@ -15,8 +15,7 @@
 - [x] Commit local. **Pendiente OK explícito:** push
 
 ## Pendientes / deuda
-- Nit (verificador, no bloqueante): `enviarTodos` no fija `enviandoId`, los botones del lote no quedan `[disabled]` durante el envío; cosmético (los `window.open` disparan síncronos, sin doble inserción dañina).
-- Nit (verificador, no bloqueante): tamaño táctil del botón "Enviar todos" sin confirmar ≥40×40 (los por-cita usan `size lg`).
+- ~~Nits del verificador (lote sin deshabilitar, táctil "Enviar todos")~~ → **resueltos**: `enviandoLote` deshabilita botones durante el lote; "Enviar todos" con `size lg`. Gates verde, gesto preservado.
 - Envío en lote depende de que el usuario permita pop-ups del sitio (limitación del navegador).
 - Envío automático/programado y API oficial WhatsApp Business: fuera de alcance (plan aparte).
 - Manual de usuario de recordatorios: actualizar si se libera la pantalla.

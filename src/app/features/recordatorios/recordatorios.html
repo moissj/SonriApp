@@ -27,7 +27,8 @@
               @if (cantidadEnviables(dia) > 0) {
                 <app-button
                   variant="secondary"
-                  [disabled]="enviandoId() !== null"
+                  size="lg"
+                  [disabled]="enviandoLote() || enviandoId() !== null"
                   (click)="pedirConfirmacionLote(dia)"
                 >
                   Enviar todos ({{ cantidadEnviables(dia) }})
@@ -50,7 +51,7 @@
                   </div>
                   <app-button
                     size="lg"
-                    [disabled]="sinTelefono(item.cita) || enviandoId() === item.cita.id"
+                    [disabled]="enviandoLote() || sinTelefono(item.cita) || enviandoId() === item.cita.id"
                     [loading]="enviandoId() === item.cita.id"
                     (click)="enviar(item.cita)"
                   >
@@ -75,7 +76,7 @@
                   </div>
                   <app-button
                     variant="secondary"
-                    [disabled]="sinTelefono(item.cita) || enviandoId() === item.cita.id"
+                    [disabled]="enviandoLote() || sinTelefono(item.cita) || enviandoId() === item.cita.id"
                     [loading]="enviandoId() === item.cita.id"
                     (click)="enviar(item.cita)"
                   >

@@ -148,17 +148,18 @@ Clasificación mínima (sin exponer datos de pacientes). Todas requieren RLS fai
 - **PII del paciente:** `numero_documento`, `fecha_nacimiento`, `telefono`, `email`, `direccion`.
 - **PII de terceros:** `responsable`, `acompanante`, `remite` (nombre/teléfono/parentesco).
 
-## 4. Mapa de RLS y migraciones (estado actual en repo)
+## 4. Mapa de RLS y migraciones (repo vs esquema vivo, verificado 2026-11-24)
 
-> **Advertencia:** la verificación contra el esquema **vivo** de Supabase quedó **bloqueada** — el MCP de Supabase no conectó en esta sesión (`CONNECT_TIMEOUT`). Lo siguiente se infiere solo de `supabase/migrations/**`.
+> **Verificado contra el esquema vivo** (Supabase Management API, 2026-11-24, consulta de solo lectura). RLS está **ON en las 15 tablas** de `public` y las tablas de negocio tienen policies por operación con `odontologo_id = auth.uid()`; el `SELECT` añade `is_cuenta_activa()`. El riesgo real **no es falta de RLS** (la auditoría previa lo supuso sin acceso vivo y era incorrecto) sino **drift repo↔prod** en migraciones.
 
-| Tabla | CREATE TABLE en repo | RLS en repo | Riesgo |
+| Tabla | Migración en repo | RLS viva | Hallazgo |
 |---|---|---|---|
-| `historia_clinica_inicial` | **No** | **No hallada**; el cliente hace `upsert` (`examen-ingreso.service.ts:76-85`) | **Alto** — tabla de datos clínicos sin policy fail-closed visible |
-| `historias_clinicas` | **No** | Solo `SELECT` «historias: ver propias» (`20260702015419:21`); sin INSERT/UPDATE/DELETE | **Alto** — faltan policies de escritura |
-| `pacientes` | No (solo `ALTER`, `20260705040728`) | `SELECT` «pacientes: ver propios» (`20260702015419:15`); sin INSERT/UPDATE visible | Medio |
-| `catalogo_eps` | Sí (`20260705043527`) | Sí, pero **sin `is_cuenta_activa()`** | Medio |
-| `odontogramas`, `presupuestos`, `pagos`, `presupuesto_items`, `tratamientos_catalogo`, `departamentos`, `municipios` | Sí | Sí | Bajo |
+| `historia_clinica_inicial` | **Reconciliada** `20260705060351_create_historia_clinica_inicial.sql` (estaba aplicada en prod sin archivo en repo) | ON — policy `odontologo_own_hci` (`FOR ALL`, `auth.uid()=odontologo_id`) | Policy **sin `is_cuenta_activa()`** (las demás sí lo llevan en SELECT); evaluar homogeneizar en Plan 01 |
+| `historias_clinicas` | **Sin CREATE** (ni archivo ni registro remoto) | ON — SELECT/INSERT/UPDATE/DELETE «historias: …» completos; SELECT con `is_cuenta_activa()` | CRUD RLS correcto; falta `CREATE TABLE` para reproducir desde cero → Plan 13 |
+| `pacientes` | Solo `ALTER` (`20260705040728`+); sin CREATE | ON — SELECT propio + `is_cuenta_activa()`, más INSERT/UPDATE/DELETE propios | Falta `CREATE TABLE` para reproducir → Plan 13 |
+| `citas`, `profiles` | **Sin CREATE** (el historial remoto arranca en `20260701224838` asumiéndolas existentes) | ON — policies completas (`profiles` incluye reglas `super_admin`) | Falta `CREATE TABLE` para reproducir → Plan 13 |
+| `catalogo_eps` | Sí (`20260705043527`) | ON — SELECT `authenticated` `USING (true)` (catálogo global, intencional); escritura solo `super_admin` | OK por diseño |
+| `odontogramas`, `presupuestos`, `pagos`, `presupuesto_items`, `tratamientos_catalogo`, `mensajes_enviados`, `plantillas_mensajes`, `departamentos`, `municipios` | Sí | ON — policies completas | Bajo |
 
 ## 5. Decisiones pendientes de OK explícito del usuario
 
@@ -170,7 +171,7 @@ Clasificación mínima (sin exponer datos de pacientes). Todas requieren RLS fai
 | **D4** | Confirmar construcción completa de **Sección 7** (exploración facial, hoy ausente) | Plan 09 |
 | **D5** | **Sección 9** plan de tratamiento: ¿texto libre o estructurado por fases? | Plan 11 |
 | **D6** | Tejidos blandos: app ya tiene 16 ítems (= papel); solo resta cotejar **nombres exactos** vs foto (`.jfif` no renderiza vía Read) | Plan 06 |
-| **D7** | **Bloqueo:** verificar esquema y RLS vivos de `historia_clinica_inicial`/`historias_clinicas`/`pacientes` requiere MCP de Supabase (hoy caído) | Plan 01 / Plan 13 |
+| **D7** | **RESUELTO** (2026-11-24): esquema y RLS vivos verificados vía Management API. RLS ON en las 15 tablas; policies por operación correctas. Único hallazgo abierto: **drift de migraciones** (tablas base sin `CREATE TABLE` en repo) → Plan 13 | — |
 
 > **Regla de parada:** no se modifica ningún componente, formulario ni SQL hasta la aprobación de esta matriz (ver tracker `00_auditoria-formularios`).
 

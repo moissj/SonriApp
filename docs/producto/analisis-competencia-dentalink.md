@@ -34,7 +34,7 @@ Contact Center IA, dictado por voz con IA, RX con IA, simulador de sonrisa, vide
 
 ## Diferencia crítica de seguridad
 
-Dentalink promociona ISO 27001 / HIPAA / GDPR y respaldos diarios. La auditoría de SonriApp (Plan 00) encontró lo contrario: `historia_clinica_inicial` e `historias_clinicas` **sin RLS completa ni `CREATE TABLE` en el repo**. **Cerrar esta brecha (Plan 01/13) es prerrequisito** antes de competir en «seguridad».
+Dentalink promociona ISO 27001 / HIPAA / GDPR y respaldos diarios. SonriApp (verificado contra el esquema vivo, 2026-11-24) **sí tiene RLS activa en las 15 tablas** con policies fail-closed por `odontologo_id = auth.uid()` + `is_cuenta_activa()`. La brecha real es de **reproducibilidad**: varias tablas base (`pacientes`, `historias_clinicas`, `citas`, `profiles`) existen en producción **sin `CREATE TABLE` en el repo** (drift repo↔prod) → cerrar en **Plan 13** antes de presumir trazabilidad/respaldos.
 
 ## Orden sugerido
 

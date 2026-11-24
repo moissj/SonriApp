@@ -5,7 +5,7 @@
 
 ## Checklist
 - [x] Relevar formularios actuales de paciente e historia clínica (`relevador`)
-- [~] Inventariar esquema actual de BD y RLS en Supabase (confirmando proyecto SonriApp) — hecho desde `supabase/migrations/**`; verificación del esquema **vivo** BLOQUEADA (MCP Supabase caído, `CONNECT_TIMEOUT`) → decisión **D7**
+- [x] Inventariar esquema actual de BD y RLS en Supabase — verificado contra el **esquema vivo** vía Supabase Management API (2026-11-24, solo lectura). RLS ON en 15 tablas; policies por operación correctas. **D7 resuelto.** Hallazgo nuevo: drift repo↔prod (tablas base sin `CREATE TABLE` en repo) → Plan 13. HCI reconciliada: `supabase/migrations/20260705060351_create_historia_clinica_inicial.sql`
 - [x] Completar `docs/clinica/matriz-brechas.md` campo por campo vs las 4 fotos en papel
 - [x] Inventariar columnas con datos sensibles de salud y hallazgos RLS (`historia_clinica_inicial`, `catalogo_eps`)
 - [ ] Resolver dudas clínicas marcadas (`DIAGNOSTICADA A` en apnea, `remite.parentesco`, `PA`/`PP`) con OK del usuario → ver decisiones **D1–D7** en matriz §5

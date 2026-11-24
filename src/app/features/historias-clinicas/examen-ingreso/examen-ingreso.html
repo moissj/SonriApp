@@ -1,0 +1,423 @@
+<div class="examen-ingreso">
+
+  @if (loading()) {
+    <div class="examen-ingreso__skeleton">
+      <div class="skeleton-line" style="width:40%"></div>
+      <div class="skeleton-line" style="width:100%; height: 200px; border-radius: 12px;"></div>
+    </div>
+  } @else {
+
+  <!-- ── SECCIÓN 1: Antecedentes de salud ───────────────────────────────── -->
+  <section class="examen-section">
+    <div class="section-header">
+      <span class="section-num">3</span>
+      <h3 class="section-title">Antecedentes de salud</h3>
+      <div class="bulk-actions">
+        <button type="button" class="bulk-btn" aria-label="Marcar todos los antecedentes como Sí"
+          (click)="setAllAntecedentes('si')">Todos Sí</button>
+        <button type="button" class="bulk-btn" aria-label="Marcar todos los antecedentes como No"
+          (click)="setAllAntecedentes('no')">Todos No</button>
+      </div>
+    </div>
+
+    <div class="checklist-grid">
+      @for (nombre of antecedentesNombres; track nombre; let i = $index) {
+        <app-checklist-item
+          [nombre]="nombre"
+          mode="si-no"
+          [valor]="antecedentes()[i].valor"
+          (valorChange)="patchEntry(antecedentes, i, {valor: $event})"
+          [observacion]="antecedentes()[i].observacion"
+          (observacionChange)="patchEntry(antecedentes, i, {observacion: $event})"
+        />
+      }
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="obs-antecedentes">Observaciones</label>
+      <textarea
+        id="obs-antecedentes"
+        class="field-textarea"
+        rows="3"
+        placeholder="Observaciones generales de antecedentes de salud…"
+        [ngModel]="obsAntecedentes()"
+        (ngModelChange)="obsAntecedentes.set($event)"
+      ></textarea>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label class="field-label" for="toma-presion">Toma de presión</label>
+        <input
+          id="toma-presion"
+          type="text"
+          class="field-input"
+          placeholder="ej. 120/80 mmHg"
+          [ngModel]="tomaPresion()"
+          (ngModelChange)="tomaPresion.set($event)"
+        />
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="temperatura">Temperatura corporal (°C)</label>
+        <input
+          id="temperatura"
+          type="number"
+          step="0.1"
+          min="30"
+          max="45"
+          class="field-input"
+          placeholder="36.5"
+          [ngModel]="temperatura()"
+          (ngModelChange)="temperatura.set($event)"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECCIÓN 2: Tejidos blandos ────────────────────────────────────── -->
+  <section class="examen-section">
+    <div class="section-header">
+      <span class="section-num">4</span>
+      <h3 class="section-title">Tejidos blandos</h3>
+      <div class="bulk-actions">
+        <button type="button" class="bulk-btn" aria-label="Marcar todos los tejidos blandos como Normal"
+          (click)="setAllTejidos('normal')">Todos Normal</button>
+        <button type="button" class="bulk-btn" aria-label="Marcar todos los tejidos blandos como Alterado"
+          (click)="setAllTejidos('alterado')">Todos Alterado</button>
+      </div>
+    </div>
+
+    <div class="checklist-grid">
+      @for (nombre of tejidosNombres; track nombre; let i = $index) {
+        <app-checklist-item
+          [nombre]="nombre"
+          mode="normal-alterado"
+          [valor]="tejidos()[i].valor"
+          (valorChange)="patchEntry(tejidos, i, {valor: $event})"
+          [observacion]="tejidos()[i].observacion"
+          (observacionChange)="patchEntry(tejidos, i, {observacion: $event})"
+        />
+      }
+    </div>
+
+    <div class="field-group">
+      <label class="field-label" for="obs-tejidos">Observaciones / hallazgos clínicos</label>
+      <textarea
+        id="obs-tejidos"
+        class="field-textarea"
+        rows="3"
+        placeholder="Hallazgos clínicos relevantes…"
+        [ngModel]="obsTejidos()"
+        (ngModelChange)="obsTejidos.set($event)"
+      ></textarea>
+    </div>
+  </section>
+
+  <!-- ── SECCIÓN 3: Funciones vitales ──────────────────────────────────── -->
+  <section class="examen-section">
+    <div class="section-header">
+      <span class="section-num">5</span>
+      <h3 class="section-title">Funciones vitales</h3>
+    </div>
+
+    <div class="funciones-grid">
+      <div class="field-group">
+        <label class="field-label" for="respiracion">Respiración</label>
+        <select id="respiracion" class="field-select"
+          [ngModel]="respiracion()" (ngModelChange)="respiracion.set($event)">
+          <option value="">—</option>
+          <option value="nasal">Nasal</option>
+          <option value="oral">Oral</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="deglucion">Deglución</label>
+        <select id="deglucion" class="field-select"
+          [ngModel]="deglucion()" (ngModelChange)="deglucion.set($event)">
+          <option value="">—</option>
+          <option value="normal">Normal</option>
+          <option value="atipica">Atípica</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="fonacion">Fonación</label>
+        <select id="fonacion" class="field-select"
+          [ngModel]="fonacion()" (ngModelChange)="fonacion.set($event)">
+          <option value="">—</option>
+          <option value="normal">Normal</option>
+          <option value="alterada">Alterada</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label" for="succion">Succión</label>
+        <select id="succion" class="field-select"
+          [ngModel]="succion()" (ngModelChange)="succion.set($event)">
+          <option value="">—</option>
+          <option value="normal">Normal</option>
+          <option value="alterada">Alterada</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── SECCIÓN 4: Historia dental ────────────────────────────────────── -->
+  <section class="examen-section">
+    <div class="section-header">
+      <span class="section-num">6</span>
+      <h3 class="section-title">Historia dental</h3>
+      <div class="bulk-actions">
+        <button type="button" class="bulk-btn" aria-label="Marcar toda la historia dental como Sí (apertura alterada)"
+          (click)="setAllHistoriaDental('si')">Todos Sí</button>
+        <button type="button" class="bulk-btn" aria-label="Marcar toda la historia dental como No (apertura normal)"
+          (click)="setAllHistoriaDental('no')">Todos No</button>
+      </div>
+    </div>
+
+    <div class="hd-grid">
+
+      <!-- Tratamiento ortopédico anterior -->
+      <div class="hd-row">
+        <span class="hd-label">¿Tratamiento ortopédico anterior?</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().tratamiento_ortopedico.valor === 'si'"
+            (click)="patchHd('tratamiento_ortopedico', {valor: hd().tratamiento_ortopedico.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().tratamiento_ortopedico.valor === 'no'"
+            (click)="patchHd('tratamiento_ortopedico', {valor: hd().tratamiento_ortopedico.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <input type="text" class="hd-obs" placeholder="Descripción…"
+          [ngModel]="hd().tratamiento_ortopedico.observacion"
+          (ngModelChange)="patchHd('tratamiento_ortopedico', {observacion: $event})" />
+      </div>
+
+      <!-- Recambio tardío -->
+      <div class="hd-row">
+        <span class="hd-label">Recambio tardío</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().recambio_tardio.valor === 'si'"
+            (click)="patchHd('recambio_tardio', {valor: hd().recambio_tardio.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().recambio_tardio.valor === 'no'"
+            (click)="patchHd('recambio_tardio', {valor: hd().recambio_tardio.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+      </div>
+
+      <!-- Dolor ATM -->
+      <div class="hd-row">
+        <span class="hd-label">Dolor ATM</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().dolor_atm.valor === 'si'"
+            (click)="patchHd('dolor_atm', {valor: hd().dolor_atm.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().dolor_atm.valor === 'no'"
+            (click)="patchHd('dolor_atm', {valor: hd().dolor_atm.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <div class="hd-lado">
+          <button type="button" class="lado-btn" [class.active]="hd().dolor_atm.lado === 'derecho'"
+            (click)="patchHd('dolor_atm', {lado: hd().dolor_atm.lado === 'derecho' ? null : 'derecho'})">D</button>
+          <button type="button" class="lado-btn" [class.active]="hd().dolor_atm.lado === 'izquierdo'"
+            (click)="patchHd('dolor_atm', {lado: hd().dolor_atm.lado === 'izquierdo' ? null : 'izquierdo'})">I</button>
+        </div>
+      </div>
+
+      <!-- Ruido articular -->
+      <div class="hd-row">
+        <span class="hd-label">Ruido articular</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().ruido_articular.valor === 'si'"
+            (click)="patchHd('ruido_articular', {valor: hd().ruido_articular.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().ruido_articular.valor === 'no'"
+            (click)="patchHd('ruido_articular', {valor: hd().ruido_articular.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <div class="hd-lado">
+          <button type="button" class="lado-btn" [class.active]="hd().ruido_articular.lado === 'derecho'"
+            (click)="patchHd('ruido_articular', {lado: hd().ruido_articular.lado === 'derecho' ? null : 'derecho'})">D</button>
+          <button type="button" class="lado-btn" [class.active]="hd().ruido_articular.lado === 'izquierdo'"
+            (click)="patchHd('ruido_articular', {lado: hd().ruido_articular.lado === 'izquierdo' ? null : 'izquierdo'})">I</button>
+        </div>
+      </div>
+
+      <!-- Apertura -->
+      <div class="hd-row">
+        <span class="hd-label">Apertura</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().apertura.valor === 'normal'"
+            (click)="patchHd('apertura', {valor: hd().apertura.valor === 'normal' ? null : 'normal'})">N</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().apertura.valor === 'alterada'"
+            (click)="patchHd('apertura', {valor: hd().apertura.valor === 'alterada' ? null : 'alterada'})">A</button>
+        </div>
+      </div>
+
+      <!-- Desviación en apertura -->
+      <div class="hd-row">
+        <span class="hd-label">Desviación en apertura</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().desviacion_apertura.valor === 'si'"
+            (click)="patchHd('desviacion_apertura', {valor: hd().desviacion_apertura.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().desviacion_apertura.valor === 'no'"
+            (click)="patchHd('desviacion_apertura', {valor: hd().desviacion_apertura.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <div class="hd-lado">
+          <button type="button" class="lado-btn" [class.active]="hd().desviacion_apertura.lado === 'derecho'"
+            (click)="patchHd('desviacion_apertura', {lado: hd().desviacion_apertura.lado === 'derecho' ? null : 'derecho'})">D</button>
+          <button type="button" class="lado-btn" [class.active]="hd().desviacion_apertura.lado === 'izquierdo'"
+            (click)="patchHd('desviacion_apertura', {lado: hd().desviacion_apertura.lado === 'izquierdo' ? null : 'izquierdo'})">I</button>
+        </div>
+      </div>
+
+      <!-- Ausencias congénitas -->
+      <div class="hd-row">
+        <span class="hd-label">Ausencias congénitas</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().ausencias_congenitas.valor === 'si'"
+            (click)="patchHd('ausencias_congenitas', {valor: hd().ausencias_congenitas.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().ausencias_congenitas.valor === 'no'"
+            (click)="patchHd('ausencias_congenitas', {valor: hd().ausencias_congenitas.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+      </div>
+
+      <!-- ¿Hábitos orales? (interruptor general) -->
+      <div class="hd-row">
+        <span class="hd-label">¿Hábitos orales?</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().habitos_orales.valor === 'si'"
+            (click)="toggleHdValor('habitos_orales', 'si')">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().habitos_orales.valor === 'no'"
+            (click)="toggleHdValor('habitos_orales', 'no')">N</button>
+        </div>
+      </div>
+
+      <!-- Hábitos orales -->
+      <div class="hd-subsection">
+        <span class="hd-subsection-title">Hábitos orales</span>
+      </div>
+
+      @for (habito of habitosOrales; track habito.key) {
+        <div class="hd-row">
+          <span class="hd-label">{{ habito.label }}</span>
+          <div class="hd-btns">
+            <button type="button" class="si-no-btn"
+              [class.active]="getHdValor(habito.key) === 'si'"
+              (click)="toggleHdValor(habito.key, 'si')">S</button>
+            <button type="button" class="si-no-btn"
+              [class.active]="getHdValor(habito.key) === 'no'"
+              (click)="toggleHdValor(habito.key, 'no')">N</button>
+          </div>
+        </div>
+      }
+
+      <!-- Traumas o quistes -->
+      <div class="hd-row">
+        <span class="hd-label">Traumas o quistes</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().traumas_quistes.valor === 'si'"
+            (click)="patchHd('traumas_quistes', {valor: hd().traumas_quistes.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().traumas_quistes.valor === 'no'"
+            (click)="patchHd('traumas_quistes', {valor: hd().traumas_quistes.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <input type="text" class="hd-obs" placeholder="Descripción…"
+          [ngModel]="hd().traumas_quistes.observacion"
+          (ngModelChange)="patchHd('traumas_quistes', {observacion: $event})" />
+      </div>
+
+      <!-- Sensibilidad -->
+      <div class="hd-row">
+        <span class="hd-label">Sensibilidad</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().sensibilidad.valor === 'si'"
+            (click)="patchHd('sensibilidad', {valor: hd().sensibilidad.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().sensibilidad.valor === 'no'"
+            (click)="patchHd('sensibilidad', {valor: hd().sensibilidad.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <input type="text" class="hd-obs" placeholder="Ubicación…" aria-label="Sensibilidad: ubicación"
+          [ngModel]="hd().sensibilidad.observacion"
+          (ngModelChange)="patchHd('sensibilidad', {observacion: $event})" />
+      </div>
+
+      <!-- Cuellos expuestos / erosión -->
+      <div class="hd-row">
+        <span class="hd-label">Cuellos expuestos / erosión</span>
+        <div class="hd-btns">
+          <button type="button" class="si-no-btn" [class.active]="hd().cuellos_expuestos.valor === 'si'"
+            (click)="patchHd('cuellos_expuestos', {valor: hd().cuellos_expuestos.valor === 'si' ? null : 'si'})">S</button>
+          <button type="button" class="si-no-btn" [class.active]="hd().cuellos_expuestos.valor === 'no'"
+            (click)="patchHd('cuellos_expuestos', {valor: hd().cuellos_expuestos.valor === 'no' ? null : 'no'})">N</button>
+        </div>
+        <input type="text" class="hd-obs" placeholder="Descripción…" aria-label="Cuellos expuestos: descripción"
+          [ngModel]="hd().cuellos_expuestos.observacion"
+          (ngModelChange)="patchHd('cuellos_expuestos', {observacion: $event})" />
+      </div>
+
+      @for (f of hdExtras; track f.key) {
+        <div class="hd-row">
+          <span class="hd-label">{{ f.label }}</span>
+          <div class="hd-btns">
+            <button type="button" class="si-no-btn" [class.active]="getHdValor(f.key) === 'si'"
+              (click)="toggleHdValor(f.key, 'si')">S</button>
+            <button type="button" class="si-no-btn" [class.active]="getHdValor(f.key) === 'no'"
+              (click)="toggleHdValor(f.key, 'no')">N</button>
+          </div>
+          @if (f.obs) {
+            <input type="text" class="hd-obs" [placeholder]="f.obs" [attr.aria-label]="f.label + ': ' + f.obs"
+              [ngModel]="hd()[f.key].observacion"
+              (ngModelChange)="patchHd(f.key, {observacion: $event})" />
+          }
+        </div>
+      }
+
+      <!-- Frecuencia de cepillado -->
+      <div class="hd-row">
+        <label class="hd-label" for="frecuencia-cepillado">Frecuencia de cepillado (# veces/día)</label>
+        <select id="frecuencia-cepillado" class="field-select"
+          [ngModel]="hd().frecuencia_cepillado.valor"
+          (ngModelChange)="patchHd('frecuencia_cepillado', {valor: $event || null})">
+          <option value="">—</option>
+          @for (n of vecesDia; track n) {
+            <option [value]="n">{{ n }}</option>
+          }
+        </select>
+      </div>
+
+    </div><!-- /hd-grid -->
+  </section>
+
+  <!-- ── SECCIÓN 7: Exploración facial ─────────────────────────────────── -->
+  <section class="examen-section">
+    <div class="section-header">
+      <span class="section-num">7</span>
+      <h3 class="section-title">Exploración facial</h3>
+    </div>
+    <app-exploracion-facial [(exploracionFacial)]="exploracionFacial" />
+  </section>
+
+  <!-- ── SECCIÓN 9: Plan de tratamiento ────────────────────────────────── -->
+  <section class="examen-section">
+    <div class="section-header">
+      <span class="section-num">9</span>
+      <h3 class="section-title">Plan de tratamiento ortopédico e integral</h3>
+    </div>
+    <div class="field-group">
+      <label class="field-label" for="plan-tratamiento">Plan de tratamiento</label>
+      <textarea id="plan-tratamiento" class="field-textarea" rows="4"
+        [ngModel]="planTratamiento()" (ngModelChange)="planTratamiento.set($event)"></textarea>
+    </div>
+  </section>
+
+  <!-- ── ERROR / GUARDAR ────────────────────────────────────────────────── -->
+  @if (error()) {
+    <div class="examen-error" role="alert">{{ error() }}</div>
+  }
+
+  <div class="examen-footer">
+    @if (saved()) {
+      <span class="save-ok">✔ Guardado</span>
+    }
+    <button
+      type="button"
+      class="btn-save"
+      [disabled]="saving()"
+      (click)="save()"
+    >
+      @if (saving()) { Guardando… } @else { Guardar examen de ingreso }
+    </button>
+  </div>
+
+  }<!-- /else loading -->
+</div>

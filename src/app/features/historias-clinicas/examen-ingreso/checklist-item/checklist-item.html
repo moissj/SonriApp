@@ -1,0 +1,26 @@
+<div class="checklist-item">
+  <span class="checklist-item__label">{{ nombre() }}</span>
+
+  <div class="checklist-item__btns" role="group" [attr.aria-label]="nombre()">
+    @for (op of opciones; track op.value) {
+      <button
+        type="button"
+        class="checklist-item__btn"
+        [class.checklist-item__btn--active]="valor() === op.value"
+        [attr.aria-pressed]="valor() === op.value"
+        (click)="selectValor(op.value)"
+      >
+        {{ op.label }}
+      </button>
+    }
+  </div>
+
+  <input
+    class="checklist-item__obs"
+    type="text"
+    placeholder="Observación…"
+    [ngModel]="observacion()"
+    (ngModelChange)="observacion.set($event)"
+    [attr.aria-label]="'Observación ' + nombre()"
+  />
+</div>

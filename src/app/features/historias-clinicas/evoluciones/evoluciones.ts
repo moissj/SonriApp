@@ -8,23 +8,26 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HistoriaService, HistoriaClinica } from '../../../../core/services/historia.service';
-import { CardComponent } from '../../../../shared/components/card/card';
-import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state';
+import {
+  HistoriasClinicasService,
+  HistoriaClinica,
+} from '../../../core/services/historias-clinicas.service';
+import { CardComponent } from '../../../shared/components/card/card';
+import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 
 @Component({
-  selector: 'app-historia-clinica',
+  selector: 'app-evoluciones',
   standalone: true,
   imports: [ReactiveFormsModule, DatePipe, CardComponent, EmptyStateComponent],
-  templateUrl: './historia-clinica.html',
-  styleUrl: './historia-clinica.css',
+  templateUrl: './evoluciones.html',
+  styleUrl: './evoluciones.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HistoriaClinicaComponent implements OnInit {
-  private readonly historiaService = inject(HistoriaService);
+export class EvolucionesComponent implements OnInit {
+  private readonly historiasService = inject(HistoriasClinicasService);
   private readonly fb = inject(FormBuilder);
 
-  /** Id del paciente cuya historia clínica se gestiona */
+  /** Id del paciente cuyas evoluciones se gestionan */
   readonly pacienteId = input.required<string>();
 
   readonly historias = signal<HistoriaClinica[]>([]);
@@ -52,10 +55,10 @@ export class HistoriaClinicaComponent implements OnInit {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      this.historias.set(await this.historiaService.getHistorias(this.pacienteId()));
+      this.historias.set(await this.historiasService.getHistorias(this.pacienteId()));
     } catch (err) {
-      console.error('Error cargando historia clínica:', err);
-      this.error.set('No se pudo cargar la historia clínica.');
+      console.error('Error cargando evoluciones:', err);
+      this.error.set('No se pudieron cargar las evoluciones.');
     } finally {
       this.loading.set(false);
     }
@@ -80,7 +83,7 @@ export class HistoriaClinicaComponent implements OnInit {
     this.error.set(null);
     try {
       const { motivo_consulta, diagnostico, notas_clinicas } = this.form.getRawValue();
-      const nueva = await this.historiaService.addHistoria(this.pacienteId(), {
+      const nueva = await this.historiasService.addHistoria(this.pacienteId(), {
         motivo_consulta,
         diagnostico: diagnostico.trim() || null,
         notas_clinicas: notas_clinicas.trim() || null,
@@ -90,7 +93,7 @@ export class HistoriaClinicaComponent implements OnInit {
       this.form.reset();
       this.showForm.set(false);
     } catch (err) {
-      console.error('Error guardando entrada clínica:', err);
+      console.error('Error guardando evolución:', err);
       this.error.set('No se pudo guardar la entrada. Intenta de nuevo.');
     } finally {
       this.saving.set(false);

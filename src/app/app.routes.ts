@@ -47,6 +47,15 @@ export const routes: Routes = [
       import('./features/pacientes/pacientes.routes').then((m) => m.pacientesRoutes),
   },
   {
+    path: 'historia-clinica/:pacienteId',
+    canActivate: [authGuard, onboardingGuard],
+    data: { title: 'Historia clínica' },
+    loadComponent: () =>
+      import('./features/historias-clinicas/historia-clinica').then(
+        (m) => m.HistoriaClinicaCompletaComponent
+      ),
+  },
+  {
     path: 'historial',
     canActivate: [authGuard, onboardingGuard],
     data: { title: 'Historial' },
@@ -57,6 +66,13 @@ export const routes: Routes = [
     canActivate: [authGuard, onboardingGuard],
     data: { title: 'Mi perfil' },
     loadComponent: () => import('./features/perfil/perfil').then((m) => m.PerfilComponent),
+  },
+  {
+    path: 'configuracion/eps',
+    canActivate: [authGuard, onboardingGuard],
+    data: { title: 'Gestionar EPS' },
+    loadComponent: () =>
+      import('./features/configuracion-eps/configuracion-eps').then((m) => m.ConfiguracionEpsComponent),
   },
   {
     path: 'plantillas',

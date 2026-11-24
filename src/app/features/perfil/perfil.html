@@ -138,6 +138,28 @@
     </app-card>
   </form>
 
+  <!-- Configuración del consultorio -->
+  <app-card [bordered]="true" shadow="sm">
+    <h3 class="text-sm font-semibold text-gray-700 mb-4">Configuración del consultorio</h3>
+    <a routerLink="/configuracion/eps"
+      class="flex items-center justify-between gap-3 border border-gray-200 rounded-xl px-4 py-3 hover:bg-gray-50 transition-colors">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="h-10 w-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0">
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4a4 4 0 014-4h.5M12 3v18m-4.5-9H16a4 4 0 014 4v4M9 7h6" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-gray-800">Gestionar EPS</p>
+          <p class="text-xs text-gray-500 truncate">Administra las EPS disponibles al registrar pacientes.</p>
+        </div>
+      </div>
+      <svg class="h-5 w-5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+      </svg>
+    </a>
+  </app-card>
+
   <!-- Cuenta y seguridad -->
   <app-card [bordered]="true" shadow="sm">
     <h3 class="text-sm font-semibold text-gray-700 mb-4">Cuenta y seguridad</h3>

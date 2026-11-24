@@ -1,0 +1,110 @@
+@let ef = exploracionFacial();
+<div class="ef-grid">
+
+  @for (s of selectsPerfil; track s.key) {
+    <div class="ef-row">
+      <label class="ef-label" [for]="'ef-' + s.key">{{ s.label }}</label>
+      <select class="ef-select" [id]="'ef-' + s.key"
+        [ngModel]="ef[s.key]" (ngModelChange)="patch(s.key, $event || null)">
+        <option value="">—</option>
+        @for (o of s.opciones; track o.v) {
+          <option [value]="o.v">{{ o.l }}</option>
+        }
+      </select>
+    </div>
+  }
+
+  @for (c of siNo; track c.key) {
+    <div class="ef-row">
+      <span class="ef-label" [id]="'ef-lbl-' + c.key">{{ c.label }}</span>
+      <div class="ef-btns" role="group" [attr.aria-labelledby]="'ef-lbl-' + c.key">
+        <button type="button" class="ef-btn" [class.active]="ef[c.key] === 'si'"
+          [attr.aria-pressed]="ef[c.key] === 'si'" [attr.aria-label]="c.label + ': sí'"
+          (click)="toggle(c.key, 'si')">S</button>
+        <button type="button" class="ef-btn" [class.active]="ef[c.key] === 'no'"
+          [attr.aria-pressed]="ef[c.key] === 'no'" [attr.aria-label]="c.label + ': no'"
+          (click)="toggle(c.key, 'no')">N</button>
+      </div>
+      @if (c.key === 'asimetria_facial') {
+        <input type="text" class="ef-input" aria-label="Asimetría facial: detalle" placeholder="Detalle…"
+          [ngModel]="ef.asimetria_obs" (ngModelChange)="patch('asimetria_obs', $event)" />
+      }
+    </div>
+  }
+
+  <div class="ef-row">
+    <span class="ef-label" id="ef-lbl-apnea-dx">Apnea diagnosticada</span>
+    <div class="ef-btns" role="group" aria-labelledby="ef-lbl-apnea-dx">
+      @for (o of apneaOpciones; track o.v) {
+        <button type="button" class="ef-btn" [class.active]="ef.apnea_diagnosticada === o.v"
+          [attr.aria-pressed]="ef.apnea_diagnosticada === o.v"
+          [attr.aria-label]="'Apnea diagnosticada: ' + (o.v === 'alterada' ? 'alterada' : o.v === 'si' ? 'sí' : 'no')"
+          (click)="toggle('apnea_diagnosticada', o.v)">{{ o.l }}</button>
+      }
+    </div>
+  </div>
+
+  <div class="ef-row">
+    <label class="ef-label" for="ef-posicion-labial">Posición labial</label>
+    <input id="ef-posicion-labial" type="text" class="ef-input"
+      [ngModel]="ef.posicion_labial" (ngModelChange)="patch('posicion_labial', $event)" />
+  </div>
+
+  @for (m of mordidas; track m.key) {
+    <div class="ef-row">
+      <span class="ef-label" [id]="'ef-lbl-' + m.key">{{ m.label }}</span>
+      <div class="ef-btns" role="group" [attr.aria-labelledby]="'ef-lbl-' + m.key">
+        <button type="button" class="ef-btn" [class.active]="ef[m.key].valor === 'si'"
+          [attr.aria-pressed]="ef[m.key].valor === 'si'" [attr.aria-label]="m.label + ': sí'"
+          (click)="toggleMordida(m.key, 'si')">S</button>
+        <button type="button" class="ef-btn" [class.active]="ef[m.key].valor === 'no'"
+          [attr.aria-pressed]="ef[m.key].valor === 'no'" [attr.aria-label]="m.label + ': no'"
+          (click)="toggleMordida(m.key, 'no')">N</button>
+        @for (l of lateralidades; track l.sub) {
+          <button type="button" class="ef-btn" [class.active]="ef[m.key][l.sub]"
+            [attr.aria-pressed]="ef[m.key][l.sub]" [attr.aria-label]="m.label + ': ' + l.label"
+            (click)="patchMordida(m.key, l.sub, !ef[m.key][l.sub])">{{ l.label }}</button>
+        }
+      </div>
+    </div>
+  }
+
+  @for (a of anomalias; track a.key) {
+    <div class="ef-row">
+      <span class="ef-label" [id]="'ef-lbl-' + a.key">{{ a.label }}</span>
+      <div class="ef-btns" role="group" [attr.aria-labelledby]="'ef-lbl-' + a.key">
+        <button type="button" class="ef-btn" [class.active]="ef.anomalias[a.key] === 'si'"
+          [attr.aria-pressed]="ef.anomalias[a.key] === 'si'" [attr.aria-label]="a.label + ': sí'"
+          (click)="toggleAnomalia(a.key, 'si')">S</button>
+        <button type="button" class="ef-btn" [class.active]="ef.anomalias[a.key] === 'no'"
+          [attr.aria-pressed]="ef.anomalias[a.key] === 'no'" [attr.aria-label]="a.label + ': no'"
+          (click)="toggleAnomalia(a.key, 'no')">N</button>
+      </div>
+    </div>
+  }
+
+  <div class="ef-block">
+    <label class="ef-label" for="ef-anomalias-desc">Descripción de anomalías de posición</label>
+    <textarea id="ef-anomalias-desc" class="ef-textarea" rows="2"
+      [ngModel]="ef.anomalias.descripcion" (ngModelChange)="patchAnomalia('descripcion', $event)"></textarea>
+  </div>
+
+  @for (s of selectsOclusion; track s.key) {
+    <div class="ef-row">
+      <label class="ef-label" [for]="'ef-' + s.key">{{ s.label }}</label>
+      <select class="ef-select" [id]="'ef-' + s.key"
+        [ngModel]="ef[s.key]" (ngModelChange)="patch(s.key, $event || null)">
+        <option value="">—</option>
+        @for (o of s.opciones; track o.v) {
+          <option [value]="o.v">{{ o.l }}</option>
+        }
+      </select>
+    </div>
+  }
+
+  <div class="ef-block">
+    <label class="ef-label" for="ef-desc-modelos">Descripción de modelos</label>
+    <textarea id="ef-desc-modelos" class="ef-textarea" rows="3"
+      [ngModel]="ef.descripcion_modelos" (ngModelChange)="patch('descripcion_modelos', $event)"></textarea>
+  </div>
+</div>

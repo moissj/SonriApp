@@ -1,0 +1,114 @@
+<div class="pb-24 md:pb-6">
+  <!-- Encabezado fijo con identificación del paciente -->
+  <div class="sticky top-0 z-20 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+    <div class="max-w-screen-lg mx-auto px-4 py-3">
+      <div class="flex items-center gap-3">
+        <button
+          (click)="goBack()"
+          class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all shrink-0"
+          aria-label="Regresar"
+        >
+          <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        @if (loading()) {
+          <div class="flex-1 animate-pulse flex items-center gap-3">
+            <div class="h-12 w-12 rounded-full bg-gray-100"></div>
+            <div class="flex-1 space-y-2">
+              <div class="h-4 bg-gray-100 rounded w-1/3"></div>
+              <div class="h-3 bg-gray-100 rounded w-1/2"></div>
+            </div>
+          </div>
+        } @else if (paciente(); as p) {
+          <div class="h-12 w-12 rounded-full bg-sky-50 border-2 border-sky-100 text-sky-700 font-bold text-lg flex items-center justify-center shrink-0">
+            {{ getInitials(p.nombre_completo) }}
+          </div>
+          <div class="min-w-0 flex-1">
+            <h1 class="text-base sm:text-lg font-bold text-gray-900 leading-tight truncate">
+              {{ p.nombre_completo }}
+            </h1>
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xxs sm:text-xs text-gray-500 mt-0.5">
+              <span class="font-medium text-gray-700">{{ p.tipo_documento }} {{ p.numero_documento }}</span>
+              @if (getAge(p.fecha_nacimiento); as edad) {
+                <span>· {{ edad }} años</span>
+              }
+              <span>· EPS: {{ p.afiliacion_salud || 'No registrada' }}</span>
+            </div>
+          </div>
+          <span class="hidden sm:inline-flex items-center gap-1.5 bg-sky-50 text-sky-700 text-xxs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border border-sky-100 shrink-0">
+            Historia clínica
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-screen-lg mx-auto px-4 py-6 space-y-8">
+    @if (error()) {
+      <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
+    }
+
+    @if (!loading() && paciente()) {
+      <!-- Sección: Historia clínica inicial -->
+      <section>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">📋</span>
+          <h2 class="text-base font-semibold text-gray-800">Historia clínica inicial — Examen de ingreso</h2>
+        </div>
+        <app-examen-ingreso [pacienteId]="pacienteId" />
+      </section>
+
+      <!-- Sección: Historial de evoluciones -->
+      <section>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">🗓️</span>
+          <h2 class="text-base font-semibold text-gray-800">Historial de evoluciones</h2>
+        </div>
+        <app-evoluciones [pacienteId]="pacienteId" />
+      </section>
+
+      <!-- Sección: Ayudas diagnósticas -->
+      <section>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">🖼️</span>
+          <h2 class="text-base font-semibold text-gray-800">Ayudas diagnósticas</h2>
+        </div>
+        <app-card [bordered]="true" shadow="sm">
+          <app-empty-state
+            icon="📷"
+            title="Radiografías e imágenes"
+            subtitle="La carga de ayudas diagnósticas estará disponible próximamente."
+            size="sm"
+          />
+        </app-card>
+      </section>
+
+      <!-- Sección: Odontograma -->
+      <section>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">🦷</span>
+          <h2 class="text-base font-semibold text-gray-800">Odontograma</h2>
+        </div>
+        <app-odontograma [pacienteId]="pacienteId" />
+      </section>
+
+      <!-- Sección: Consentimiento informado -->
+      <section>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-lg">✍️</span>
+          <h2 class="text-base font-semibold text-gray-800">Consentimiento informado</h2>
+        </div>
+        <app-card [bordered]="true" shadow="sm">
+          <app-empty-state
+            icon="📄"
+            title="Consentimientos"
+            subtitle="La gestión de consentimientos informados estará disponible próximamente."
+            size="sm"
+          />
+        </app-card>
+      </section>
+    }
+  </div>
+</div>

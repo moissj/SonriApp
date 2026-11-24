@@ -7,6 +7,8 @@ import {
   signal,
   computed,
   OnInit,
+  HostListener,
+  viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DatePipe } from '@angular/common';
@@ -23,11 +25,12 @@ import { WhatsappService, PacienteMensaje } from '../../../../core/services/what
 import { CopCurrencyPipe } from '../../../../shared/pipes/cop-currency.pipe';
 import { CardComponent } from '../../../../shared/components/card/card';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state';
+import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-presupuestos',
   standalone: true,
-  imports: [FormsModule, DatePipe, CopCurrencyPipe, CardComponent, EmptyStateComponent],
+  imports: [FormsModule, DatePipe, CopCurrencyPipe, CardComponent, EmptyStateComponent, ConfirmModalComponent],
   templateUrl: './presupuestos.html',
   styleUrl: './presupuestos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +59,13 @@ export class PresupuestosComponent implements OnInit {
   readonly lineas = signal<PresupuestoItem[]>([]);
   readonly descuentoTipo = signal<DescuentoTipo>('ninguno');
   readonly descuentoValor = signal<number>(0);
+
+  // --- Edición / eliminación ---
+  readonly editingId = signal<string | null>(null);
+  readonly editWarning = signal<string | null>(null);
+  readonly openMenuId = signal<string | null>(null);
+  readonly aEliminar = signal<Presupuesto | null>(null);
+  readonly confirmModal = viewChild(ConfirmModalComponent);
 
   readonly subtotal = computed(() =>
     this.lineas().reduce((sum, l) => sum + (l.precio || 0) * (l.cantidad || 1), 0)
@@ -101,6 +111,19 @@ export class PresupuestosComponent implements OnInit {
     this.lineas.set([]);
     this.descuentoTipo.set('ninguno');
     this.descuentoValor.set(0);
+    this.editingId.set(null);
+    this.editWarning.set(null);
+  }
+
+  // --- Menú de acciones por presupuesto ---
+  toggleMenu(id: string, event: Event): void {
+    event.stopPropagation();
+    this.openMenuId.update((cur) => (cur === id ? null : id));
+  }
+
+  @HostListener('document:click')
+  closeMenu(): void {
+    this.openMenuId.set(null);
   }
 
   /** Agrega una línea desde el catálogo */
@@ -132,22 +155,103 @@ export class PresupuestosComponent implements OnInit {
     this.saving.set(true);
     this.error.set(null);
     try {
-      const nuevo = await this.presupuestoService.createPresupuesto(this.pacienteId(), {
+      const datos = {
         subtotal: this.subtotal(),
         descuento_tipo: this.descuentoTipo(),
         descuento_valor: this.descuentoValor() || 0,
         total: this.total(),
         notas: null,
         items: this.lineas(),
-      });
-      this.presupuestos.update((prev) => [nuevo, ...prev]);
+      };
+
+      const id = this.editingId();
+      if (id) {
+        const actualizado = await this.presupuestoService.updatePresupuesto(id, datos);
+        this.presupuestos.update((prev) =>
+          prev.map((x) => (x.id === id ? { ...x, ...actualizado } : x))
+        );
+      } else {
+        const nuevo = await this.presupuestoService.createPresupuesto(this.pacienteId(), datos);
+        this.presupuestos.update((prev) => [nuevo, ...prev]);
+      }
+
       this.resetBuilder();
       this.showBuilder.set(false);
+      this.cambio.emit();
     } catch (err) {
       console.error('Error guardando presupuesto:', err);
       this.error.set('No se pudo guardar el presupuesto.');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  /** Abre el constructor en modo edición con los datos del presupuesto */
+  async editarPresupuesto(p: Presupuesto): Promise<void> {
+    this.closeMenu();
+    this.error.set(null);
+    this.editingId.set(p.id);
+    this.lineas.set(
+      (p.items ?? []).map((it) => ({
+        tratamiento_id: it.tratamiento_id,
+        nombre: it.nombre,
+        precio: it.precio,
+        cantidad: it.cantidad,
+      }))
+    );
+    this.descuentoTipo.set(p.descuento_tipo);
+    this.descuentoValor.set(p.descuento_valor || 0);
+
+    this.editWarning.set(null);
+    if (p.estado === 'aceptado') {
+      try {
+        const n = await this.presupuestoService.contarPagos(p.id);
+        if (n > 0) {
+          this.editWarning.set(
+            `Este presupuesto está aceptado y tiene ${n} pago${n > 1 ? 's' : ''} registrado${n > 1 ? 's' : ''}. Al modificarlo, los totales podrían no coincidir con lo ya cobrado.`
+          );
+        }
+      } catch (err) {
+        console.error('Error contando pagos:', err);
+      }
+    }
+
+    this.showBuilder.set(true);
+  }
+
+  /** Solicita eliminar un presupuesto (bloquea si tiene pagos asociados) */
+  async pedirEliminar(p: Presupuesto): Promise<void> {
+    this.closeMenu();
+    this.error.set(null);
+    try {
+      const n = await this.presupuestoService.contarPagos(p.id);
+      if (n > 0) {
+        this.error.set(
+          `No se puede eliminar: este presupuesto tiene ${n} pago${n > 1 ? 's' : ''} asociado${n > 1 ? 's' : ''}. Elimina primero los pagos vinculados.`
+        );
+        return;
+      }
+    } catch (err) {
+      console.error('Error contando pagos:', err);
+      this.error.set('No se pudo verificar los pagos asociados.');
+      return;
+    }
+    this.aEliminar.set(p);
+    this.confirmModal()?.open();
+  }
+
+  async confirmarEliminar(): Promise<void> {
+    const p = this.aEliminar();
+    if (!p) return;
+    try {
+      await this.presupuestoService.deletePresupuesto(p.id);
+      this.presupuestos.update((prev) => prev.filter((x) => x.id !== p.id));
+      this.cambio.emit();
+    } catch (err) {
+      console.error('Error eliminando presupuesto:', err);
+      this.error.set('No se pudo eliminar el presupuesto.');
+    } finally {
+      this.aEliminar.set(null);
     }
   }
 

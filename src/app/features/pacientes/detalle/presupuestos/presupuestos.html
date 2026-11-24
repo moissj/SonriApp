@@ -24,6 +24,19 @@
   @if (showBuilder()) {
     <app-card [bordered]="true" shadow="sm">
       <div class="space-y-4">
+        @if (editingId()) {
+          <div class="flex items-center gap-2 text-sm font-semibold text-sky-700">
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Editando presupuesto
+          </div>
+        }
+        @if (editWarning()) {
+          <div class="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl px-3.5 py-2.5">
+            ⚠️ {{ editWarning() }}
+          </div>
+        }
         <!-- Selector para agregar tratamiento -->
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Agregar tratamiento</label>
@@ -120,7 +133,7 @@
               [disabled]="saving() || lineas().length === 0"
               class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-sky-700 transition-colors shadow-sm disabled:opacity-40"
             >
-              Guardar presupuesto
+              {{ editingId() ? 'Guardar cambios' : 'Guardar presupuesto' }}
             </button>
           </div>
         } @else {
@@ -150,6 +163,26 @@
               </div>
               <p class="text-xs text-gray-500 mt-1 truncate">{{ resumenItems(p) }}</p>
               <p class="text-xxs text-gray-400 mt-0.5">{{ p.created_at | date: 'dd/MM/yyyy' }}</p>
+            </div>
+
+            <!-- Menú de acciones -->
+            <div class="relative inline-block text-left shrink-0" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                (click)="toggleMenu(p.id, $event)"
+                class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-500 hover:bg-gray-100 transition-colors"
+                aria-label="Acciones"
+              >
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01" />
+                </svg>
+              </button>
+              @if (openMenuId() === p.id) {
+                <div class="absolute right-0 mt-1 w-44 bg-white rounded-xl shadow-lg ring-1 ring-black/5 py-1 z-30" role="menu">
+                  <button type="button" (click)="editarPresupuesto(p)" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">Editar</button>
+                  <button type="button" (click)="pedirEliminar(p)" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">Eliminar</button>
+                </div>
+              }
             </div>
           </div>
 
@@ -186,3 +219,13 @@
     </app-card>
   }
 </div>
+
+<!-- Confirmación de eliminación -->
+<app-confirm-modal
+  title="Eliminar presupuesto"
+  [message]="'¿Seguro que deseas eliminar este presupuesto por ' + (aEliminar()?.total ?? 0 | copCurrency) + '? Esta acción no se puede deshacer.'"
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  (confirm)="confirmarEliminar()"
+  (cancel)="aEliminar.set(null)"
+/>

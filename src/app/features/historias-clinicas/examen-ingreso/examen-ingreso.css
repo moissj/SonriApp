@@ -1,0 +1,308 @@
+.examen-ingreso {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* ── Skeleton ─────────────────────────────────────────────────────────────── */
+.examen-ingreso__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.skeleton-line {
+  height: 16px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Secciones ────────────────────────────────────────────────────────────── */
+.examen-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%);
+  border-bottom: 1px solid #dbeafe;
+}
+
+.bulk-actions { display: flex; gap: 8px; margin-left: auto; }
+
+.bulk-btn {
+  min-height: 40px; min-width: 40px; padding: 0 12px;
+  border: 1.5px solid #93c5fd; border-radius: 6px; background: #fff;
+  font-size: .75rem; font-weight: 700; color: #1d4ed8; cursor: pointer;
+}
+
+.bulk-btn:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+
+.section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.section-title {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1e40af;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ── Checklist grid ───────────────────────────────────────────────────────── */
+.checklist-grid {
+  padding: 4px 16px;
+}
+
+/* ── Campos generales ─────────────────────────────────────────────────────── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 12px 16px;
+  border-top: 1px solid #f3f4f6;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 16px;
+}
+
+.field-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.field-input,
+.field-select,
+.field-textarea {
+  font-size: 0.8rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: #111827;
+  background: #f9fafb;
+  outline: none;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: inherit;
+}
+
+.field-input:focus,
+.field-select:focus,
+.field-textarea:focus {
+  border-color: #60a5fa;
+  background: #fff;
+}
+
+.field-textarea {
+  resize: vertical;
+  min-height: 64px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Funciones vitales grid ───────────────────────────────────────────────── */
+.funciones-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0;
+  padding: 8px 0;
+}
+
+@media (min-width: 640px) {
+  .funciones-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* ── Historia dental ──────────────────────────────────────────────────────── */
+.hd-grid {
+  padding: 4px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.hd-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.hd-row:last-child {
+  border-bottom: none;
+}
+
+.hd-label {
+  font-size: 0.73rem;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.3;
+}
+
+.hd-btns,
+.hd-lado {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.si-no-btn,
+.lado-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 1.5px solid #d1d5db;
+  background: #f9fafb;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #6b7280;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.si-no-btn:hover,
+.lado-btn:hover {
+  border-color: #93c5fd;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.si-no-btn.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.lado-btn.active {
+  background: #0369a1;
+  border-color: #0369a1;
+  color: #fff;
+}
+
+.hd-obs {
+  font-size: 0.7rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #374151;
+  background: #f9fafb;
+  outline: none;
+  width: 130px;
+  min-width: 80px;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.hd-obs:focus {
+  border-color: #93c5fd;
+  background: #fff;
+}
+
+.hd-subsection {
+  padding: 8px 0 4px;
+}
+
+.hd-subsection-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ── Footer / Guardar ─────────────────────────────────────────────────────── */
+.examen-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.save-ok {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.btn-save {
+  background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.btn-save:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.examen-error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.78rem;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+@media (max-width: 480px) {
+  .field-row {
+    grid-template-columns: 1fr;
+  }
+  .hd-row {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    flex-wrap: wrap;
+  }
+  .hd-obs {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

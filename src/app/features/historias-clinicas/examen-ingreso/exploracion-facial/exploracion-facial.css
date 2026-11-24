@@ -1,0 +1,33 @@
+.ef-grid { padding: 4px 16px 12px; display: flex; flex-direction: column; }
+
+.ef-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid #f3f4f6;
+}
+
+.ef-label { flex: 1 1 160px; font-size: .73rem; font-weight: 500; color: #374151; line-height: 1.3; }
+.ef-btns { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+
+.ef-btn {
+  min-width: 40px; min-height: 40px; padding: 0 8px;
+  border-radius: 6px; border: 1.5px solid #d1d5db; background: #f9fafb;
+  font-size: .75rem; font-weight: 700; color: #6b7280; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.ef-btn:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }
+.ef-btn.active { background: #1d4ed8; border-color: #1d4ed8; color: #fff; }
+.ef-btn:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
+
+.ef-input, .ef-select, .ef-textarea {
+  font-size: .8rem; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 10px;
+  color: #111827; background: #f9fafb; font-family: inherit; min-height: 40px;
+  box-sizing: border-box;
+}
+.ef-input:focus-visible, .ef-select:focus-visible, .ef-textarea:focus-visible {
+  outline: 2px solid #1d4ed8; outline-offset: 1px; background: #fff;
+}
+.ef-input { flex: 1 1 160px; }
+.ef-select { flex: 0 1 200px; }
+.ef-textarea { width: 100%; min-height: 64px; resize: vertical; }
+
+.ef-block { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }

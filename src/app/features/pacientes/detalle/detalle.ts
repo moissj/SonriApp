@@ -7,12 +7,10 @@ import { CardComponent } from '../../../shared/components/card/card';
 import { AlertComponent } from '../../../shared/components/alert/alert';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal';
-import { HistoriaClinicaComponent } from './historia-clinica/historia-clinica';
-import { OdontogramaComponent } from './odontograma/odontograma';
 import { PresupuestosComponent } from './presupuestos/presupuestos';
 import { PagosComponent } from './pagos/pagos';
 
-type TabId = 'info' | 'citas' | 'historias' | 'odontograma' | 'presupuestos' | 'pagos' | 'comunicacion';
+type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'comunicacion';
 
 @Component({
   selector: 'app-paciente-detalle',
@@ -24,8 +22,6 @@ type TabId = 'info' | 'citas' | 'historias' | 'odontograma' | 'presupuestos' | '
     AlertComponent,
     EmptyStateComponent,
     ConfirmModalComponent,
-    HistoriaClinicaComponent,
-    OdontogramaComponent,
     PresupuestosComponent,
     PagosComponent,
   ],

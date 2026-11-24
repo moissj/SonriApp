@@ -1,0 +1,45 @@
+<div class="flex flex-col gap-1.5">
+  @if (label) {
+    <label [attr.for]="id" class="text-sm font-medium text-gray-700">{{ label }}</label>
+  }
+
+  <select
+    [id]="id"
+    [value]="seleccion()"
+    [disabled]="isDisabled()"
+    (change)="onSelectChange($any($event.target).value)"
+    (blur)="onBlur()"
+    class="w-full rounded-lg border px-3 py-2 text-sm text-gray-800 bg-white transition-colors focus:outline-none focus:ring-2"
+    [class.border-red-400]="error"
+    [class.focus:ring-red-200]="error"
+    [class.border-gray-300]="!error"
+    [class.focus:border-sky-500]="!error"
+    [class.focus:ring-sky-200]="!error"
+  >
+    <option value="" disabled>Selecciona parentesco</option>
+    @for (op of opciones; track op) {
+      <option [value]="op">{{ op }}</option>
+    }
+  </select>
+
+  @if (esOtro) {
+    <input
+      type="text"
+      [value]="otroTexto()"
+      [disabled]="isDisabled()"
+      (input)="onOtroChange($any($event.target).value)"
+      (blur)="onBlur()"
+      placeholder="Especifica el parentesco"
+      class="w-full rounded-lg border px-3 py-2 text-sm text-gray-800 bg-white transition-colors focus:outline-none focus:ring-2"
+      [class.border-red-400]="error"
+      [class.focus:ring-red-200]="error"
+      [class.border-gray-300]="!error"
+      [class.focus:border-sky-500]="!error"
+      [class.focus:ring-sky-200]="!error"
+    />
+  }
+
+  @if (error) {
+    <p class="text-xs text-red-600">{{ error }}</p>
+  }
+</div>

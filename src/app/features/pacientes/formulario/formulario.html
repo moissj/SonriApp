@@ -14,13 +14,10 @@
       <h2 class="text-2xl font-bold text-dark mb-0">
         {{ isEditMode() ? 'Editar paciente' : 'Registrar paciente' }}
       </h2>
-      <p class="text-xs text-gray-500 mt-0.5">
-        {{ isEditMode() ? 'Modifica los datos del expediente del paciente.' : 'Agrega un nuevo paciente a tu base de datos.' }}
-      </p>
+      <p class="text-xs text-gray-500 mt-0.5">Bloque 1 · Identificación de la historia clínica.</p>
     </div>
   </div>
 
-  <!-- Formulario -->
   <form [formGroup]="patientForm" (ngSubmit)="onSubmit()" class="space-y-6">
     @if (errorMessage()) {
       <app-alert [message]="errorMessage()!" type="error" [dismissible]="true" (dismissed)="errorMessage.set(null)" />
@@ -29,8 +26,7 @@
       <app-alert [message]="successMessage()!" type="success" />
     }
 
-    <!-- Cargando datos -->
-    @if (isLoading() && isEditMode() && !patientForm.value.nombre_completo) {
+    @if (isLoading() && isEditMode() && !patientForm.value.nombres) {
       <app-card>
         <div class="space-y-4 animate-pulse py-4">
           <div class="h-4 bg-gray-100 rounded w-1/4"></div>
@@ -42,115 +38,115 @@
         </div>
       </app-card>
     } @else {
-      <!-- Tarjeta 1: Información Básica -->
+      <!-- ===== Identificación ===== -->
       <app-card [bordered]="true" shadow="sm">
         <div class="border-b border-gray-100 pb-3 mb-4">
-          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Información Básica</h3>
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Identificación</h3>
         </div>
 
         <div class="space-y-4">
-          <!-- Nombre Completo -->
-          <app-input
-            id="nombre_completo"
-            formControlName="nombre_completo"
-            label="Nombre Completo *"
-            placeholder="Ej. Juan Andrés Pérez Díaz"
-            [error]="getFieldError('nombre_completo')"
-          />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <app-input id="primer_apellido" formControlName="primer_apellido" label="Primer apellido *" placeholder="Ej. Pérez" [error]="getFieldError('primer_apellido')" />
+            <app-input id="segundo_apellido" formControlName="segundo_apellido" label="Segundo apellido" placeholder="Ej. Díaz" />
+          </div>
+
+          <app-input id="nombres" formControlName="nombres" label="Nombres *" placeholder="Ej. Juan Andrés" [error]="getFieldError('nombres')" />
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Tipo Documento -->
             <div class="flex flex-col gap-1.5">
-              <label for="tipo_documento" class="text-sm font-medium text-gray-700">Tipo de Documento *</label>
-              <select
-                id="tipo_documento"
-                formControlName="tipo_documento"
-                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-              >
+              <label for="tipo_documento" class="text-sm font-medium text-gray-700">Tipo de documento *</label>
+              <select id="tipo_documento" formControlName="tipo_documento" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
                 <option value="CC">Cédula de Ciudadanía (CC)</option>
                 <option value="TI">Tarjeta de Identidad (TI)</option>
                 <option value="CE">Cédula de Extranjería (CE)</option>
                 <option value="PA">Pasaporte (PA)</option>
+                <option value="RC">Registro Civil (RC)</option>
               </select>
             </div>
-
-            <!-- Número Documento -->
-            <app-input
-              id="numero_documento"
-              formControlName="numero_documento"
-              label="Número de Documento *"
-              placeholder="Ej. 1098765432"
-              [error]="getFieldError('numero_documento')"
-            />
+            <app-input id="numero_documento" formControlName="numero_documento" label="Número de documento *" placeholder="Ej. 1098765432" [error]="getFieldError('numero_documento')" />
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Teléfono Celular -->
-            <app-input
-              id="telefono"
-              formControlName="telefono"
-              label="Teléfono Celular"
-              type="tel"
-              placeholder="Ej. 3001234567"
-              [error]="getFieldError('telefono')"
-              hint="Celular de 10 dígitos en Colombia"
-            />
-
-            <!-- Correo Electrónico -->
-            <app-input
-              id="email"
-              formControlName="email"
-              label="Correo Electrónico"
-              type="email"
-              placeholder="Ej. paciente@correo.com"
-              [error]="getFieldError('email')"
-            />
-          </div>
-
-          <!-- Fecha de Nacimiento -->
-          <div class="flex flex-col gap-1.5">
-            <label for="fecha_nacimiento" class="text-sm font-medium text-gray-700">Fecha de Nacimiento</label>
-            <input
-              type="date"
-              id="fecha_nacimiento"
-              formControlName="fecha_nacimiento"
-              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-            />
-          </div>
-        </div>
-      </app-card>
-
-      <!-- Tarjeta 2: Ubicación -->
-      <app-card [bordered]="true" shadow="sm">
-        <div class="border-b border-gray-100 pb-3 mb-4">
-          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Dirección y Ubicación</h3>
-        </div>
-
-        <div class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <!-- Departamento -->
             <div class="flex flex-col gap-1.5">
-              <label for="departamento" class="text-sm font-medium text-gray-700">Departamento</label>
-              <select
-                id="departamento"
-                formControlName="departamento"
-                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-              >
+              <label for="fecha_nacimiento" class="text-sm font-medium text-gray-700">Fecha de nacimiento</label>
+              <input type="date" id="fecha_nacimiento" formControlName="fecha_nacimiento" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="edad" class="text-sm font-medium text-gray-700">Edad</label>
+              <input id="edad" type="text" [value]="edad() !== null ? edad() + ' años' : ''" placeholder="Se calcula automáticamente" readonly class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-500 bg-gray-50 cursor-not-allowed" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="lugar_nacimiento_departamento" class="text-sm font-medium text-gray-700">Lugar de nacimiento · Departamento</label>
+              <select id="lugar_nacimiento_departamento" formControlName="lugar_nacimiento_departamento" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
                 <option value="">Selecciona un departamento</option>
                 @for (dep of departamentos(); track dep.id) {
                   <option [value]="dep.nombre">{{ dep.nombre }}</option>
                 }
               </select>
             </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="lugar_nacimiento_ciudad" class="text-sm font-medium text-gray-700">Lugar de nacimiento · Municipio</label>
+              <select id="lugar_nacimiento_ciudad" formControlName="lugar_nacimiento_ciudad" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
+                <option value="">{{ municipiosNacimiento().length ? 'Selecciona un municipio' : 'Elige primero un departamento' }}</option>
+                @for (m of municipiosNacimiento(); track m.id) {
+                  <option [value]="m.nombre">{{ m.nombre }}</option>
+                }
+              </select>
+            </div>
+          </div>
 
-            <!-- Ciudad / Municipio -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="sexo" class="text-sm font-medium text-gray-700">Sexo</label>
+              <select id="sexo" formControlName="sexo" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
+                <option value="">Selecciona</option>
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label for="estado_civil" class="text-sm font-medium text-gray-700">Estado civil</label>
+              <select id="estado_civil" formControlName="estado_civil" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
+                <option value="">Selecciona</option>
+                @for (ec of estadosCiviles; track ec) {
+                  <option [value]="ec">{{ ec }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- ===== Contacto y ubicación ===== -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Contacto y ubicación</h3>
+        </div>
+
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <app-input id="telefono" formControlName="telefono" label="Teléfono celular" type="tel" placeholder="Ej. 3001234567" [error]="getFieldError('telefono')" hint="Celular de 10 dígitos (Colombia)" />
+            <app-input id="telefono_fijo" formControlName="telefono_fijo" label="Teléfono fijo" type="tel" placeholder="Ej. 6015551234" [error]="getFieldError('telefono_fijo')" />
+          </div>
+
+          <app-input id="email" formControlName="email" label="Correo electrónico" type="email" placeholder="Ej. paciente@correo.com" [error]="getFieldError('email')" />
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="flex flex-col gap-1.5">
+              <label for="departamento" class="text-sm font-medium text-gray-700">Departamento</label>
+              <select id="departamento" formControlName="departamento" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
+                <option value="">Selecciona un departamento</option>
+                @for (dep of departamentos(); track dep.id) {
+                  <option [value]="dep.nombre">{{ dep.nombre }}</option>
+                }
+              </select>
+            </div>
             <div class="flex flex-col gap-1.5">
               <label for="ciudad" class="text-sm font-medium text-gray-700">Ciudad / Municipio</label>
-              <select
-                id="ciudad"
-                formControlName="ciudad"
-                class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-              >
+              <select id="ciudad" formControlName="ciudad" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
                 <option value="">{{ municipios().length ? 'Selecciona un municipio' : 'Elige primero un departamento' }}</option>
                 @for (m of municipios(); track m.id) {
                   <option [value]="m.nombre">{{ m.nombre }}</option>
@@ -159,88 +155,122 @@
             </div>
           </div>
 
-          <!-- Dirección -->
-          <app-input
-            id="direccion"
-            formControlName="direccion"
-            label="Dirección de residencia"
-            placeholder="Ej. Calle 35 # 12-45 Apto 301"
-          />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <app-input id="direccion" formControlName="direccion" label="Dirección de residencia" placeholder="Ej. Calle 35 # 12-45 Apto 301" />
+            <app-input id="barrio" formControlName="barrio" label="Barrio" placeholder="Ej. La Nevada" />
+          </div>
         </div>
       </app-card>
 
-      <!-- Tarjeta 3: Antecedentes e Información Médica -->
+      <!-- ===== Datos de afiliación en salud ===== -->
       <app-card [bordered]="true" shadow="sm">
         <div class="border-b border-gray-100 pb-3 mb-4">
-          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Información Clínica</h3>
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Datos de afiliación en salud</h3>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="eps_id" class="text-sm font-medium text-gray-700">EPS</label>
+            <select id="eps_id" formControlName="eps_id" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
+              <option value="">{{ epsList().length ? 'Selecciona una EPS' : 'Catálogo de EPS no disponible aún' }}</option>
+              @for (e of epsList(); track e.id) {
+                <option [value]="e.id">{{ e.nombre }} - {{ e.regimen }}</option>
+              }
+            </select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="tipo_vinculacion" class="text-sm font-medium text-gray-700">Tipo de vinculación</label>
+            <select id="tipo_vinculacion" formControlName="tipo_vinculacion" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white">
+              <option value="">Selecciona</option>
+              @for (tv of tiposVinculacion; track tv) {
+                <option [value]="tv">{{ tv }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- ===== Ocupación ===== -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Ocupación</h3>
         </div>
 
         <div class="space-y-4">
-          <!-- Afiliación Salud -->
-          <app-input
-            id="afiliacion_salud"
-            formControlName="afiliacion_salud"
-            label="Afiliación de Salud (EPS / Medicina Prepagada)"
-            placeholder="Ej. EPS Sanitas, Sura"
-          />
-
-          <!-- Alergias -->
-          <div class="flex flex-col gap-1.5">
-            <label for="alergias" class="text-sm font-medium text-gray-700">Alergias Conocidas</label>
-            <textarea
-              id="alergias"
-              formControlName="alergias"
-              rows="2"
-              placeholder="Ej. Alérgico a la Penicilina, Látex, AINES..."
-              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-            ></textarea>
-          </div>
-
-          <!-- Antecedentes Médicos -->
-          <div class="flex flex-col gap-1.5">
-            <label for="antecedentes_medicos" class="text-sm font-medium text-gray-700">Antecedentes Médicos</label>
-            <textarea
-              id="antecedentes_medicos"
-              formControlName="antecedentes_medicos"
-              rows="3"
-              placeholder="Ej. Hipertensión controlada, Diabetes tipo 2, cirugías previas, problemas de coagulación..."
-              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-            ></textarea>
-          </div>
-
-          <!-- Notas Generales -->
-          <div class="flex flex-col gap-1.5">
-            <label for="notas_generales" class="text-sm font-medium text-gray-700">Observaciones Generales</label>
-            <textarea
-              id="notas_generales"
-              formControlName="notas_generales"
-              rows="3"
-              placeholder="Notas generales, comentarios de interés para la atención u otras observaciones..."
-              class="w-full rounded-xl border border-gray-300 px-4 py-3 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"
-            ></textarea>
+          <app-input id="ocupacion" formControlName="ocupacion" label="Ocupación" placeholder="Ej. Docente, Comerciante, Estudiante" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <app-input id="direccion_laboral" formControlName="direccion_laboral" label="Dirección laboral" placeholder="Opcional" />
+            <app-input id="telefono_laboral" formControlName="telefono_laboral" label="Teléfono laboral" type="tel" placeholder="Opcional" [error]="getFieldError('telefono_laboral')" />
           </div>
         </div>
       </app-card>
 
-      <!-- Botones de Acción -->
+      <!-- ===== Responsable, acompañante y remite ===== -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Responsable, acompañante y remite</h3>
+          <p class="text-xs text-gray-500 mt-1">Los tres bloques son obligatorios.</p>
+        </div>
+
+        <div class="space-y-6">
+          <!-- Responsable -->
+          <div formGroupName="responsable" class="space-y-4">
+            <h4 class="text-xs font-bold text-sky-700 uppercase tracking-wider">1. Responsable</h4>
+            <app-input id="resp_nombre" formControlName="nombre_completo" label="Nombre completo *" placeholder="Nombre del responsable" [error]="getFieldError('responsable.nombre_completo')" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <app-parentesco-select id="resp_parentesco" formControlName="parentesco" label="Parentesco *" [error]="getFieldError('responsable.parentesco')" />
+              <app-input id="resp_telefono" formControlName="telefono" label="Teléfono *" type="tel" placeholder="Ej. 3001234567" [error]="getFieldError('responsable.telefono')" />
+            </div>
+          </div>
+
+          <!-- Acompañante -->
+          <div formGroupName="acompanante" class="space-y-4 border-t border-gray-100 pt-5">
+            <h4 class="text-xs font-bold text-sky-700 uppercase tracking-wider">2. Acompañante</h4>
+            <app-input id="acom_nombre" formControlName="nombre_completo" label="Nombre completo *" placeholder="Nombre del acompañante" [error]="getFieldError('acompanante.nombre_completo')" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <app-parentesco-select id="acom_parentesco" formControlName="parentesco" label="Parentesco *" [error]="getFieldError('acompanante.parentesco')" />
+              <app-input id="acom_telefono" formControlName="telefono" label="Teléfono *" type="tel" placeholder="Ej. 3001234567" [error]="getFieldError('acompanante.telefono')" />
+            </div>
+          </div>
+
+          <!-- Remite -->
+          <div formGroupName="remite" class="space-y-4 border-t border-gray-100 pt-5">
+            <h4 class="text-xs font-bold text-sky-700 uppercase tracking-wider">3. Remite (quién refirió al paciente)</h4>
+            <app-input id="rem_nombre" formControlName="nombre_completo" label="Nombre completo *" placeholder="Quién refirió al paciente" [error]="getFieldError('remite.nombre_completo')" />
+            <app-parentesco-select id="rem_parentesco" formControlName="parentesco" label="Parentesco *" [error]="getFieldError('remite.parentesco')" />
+          </div>
+        </div>
+      </app-card>
+
+      <!-- ===== Antecedentes médicos (resumen) ===== -->
+      <app-card [bordered]="true" shadow="sm">
+        <div class="border-b border-gray-100 pb-3 mb-4">
+          <h3 class="text-sm font-semibold text-gray-900 uppercase tracking-wider">Antecedentes médicos (resumen)</h3>
+          <p class="text-xs text-gray-500 mt-1">El detalle exhaustivo se registra en el módulo de Historia Clínica.</p>
+        </div>
+
+        <div class="space-y-4">
+          <div class="flex flex-col gap-1.5">
+            <label for="alergias" class="text-sm font-medium text-gray-700">Alergias conocidas</label>
+            <textarea id="alergias" formControlName="alergias" rows="2" placeholder="Ej. Alérgico a la Penicilina, Látex, AINES..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"></textarea>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="antecedentes_medicos" class="text-sm font-medium text-gray-700">Antecedentes médicos</label>
+            <textarea id="antecedentes_medicos" formControlName="antecedentes_medicos" rows="3" placeholder="Ej. Hipertensión controlada, Diabetes tipo 2, cirugías previas..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"></textarea>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label for="notas_generales" class="text-sm font-medium text-gray-700">Observaciones generales</label>
+            <textarea id="notas_generales" formControlName="notas_generales" rows="3" placeholder="Notas generales u otras observaciones de interés..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-sky-500 focus:ring-sky-200 bg-white"></textarea>
+          </div>
+        </div>
+      </app-card>
+
+      <!-- Botones de acción -->
       <div class="flex items-center gap-3 pt-2">
-        <app-button
-          variant="secondary"
-          size="md"
-          [disabled]="isLoading()"
-          class="flex-1"
-          (click)="goBack()"
-        >
+        <app-button variant="secondary" size="md" [disabled]="isLoading()" class="flex-1" (click)="goBack()">
           Cancelar
         </app-button>
-        <app-button
-          variant="primary"
-          type="submit"
-          size="md"
-          [loading]="isLoading()"
-          [disabled]="isLoading() || patientForm.invalid"
-          class="flex-1"
-        >
+        <app-button variant="primary" type="submit" size="md" [loading]="isLoading()" [disabled]="isLoading()" class="flex-1">
           {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
         </app-button>
       </div>

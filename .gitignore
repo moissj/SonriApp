@@ -52,3 +52,4 @@ Thumbs.db
 # Supabase temporal / entorno
 supabase/.temp
 .env
+.vercel

@@ -27,9 +27,9 @@ export class ButtonComponent {
     };
 
     const sizes: Record<string, string> = {
-      sm: 'text-sm px-4 py-2',
-      md: 'text-base px-5 py-3',
-      lg: 'text-base px-6 py-3.5',
+      sm: 'text-xs px-3 py-1.5',
+      md: 'text-sm px-4 py-2',
+      lg: 'text-sm px-5 py-2.5',
     };
 
     return [base, variants[this.variant], sizes[this.size], this.fullWidth ? 'w-full' : '']

@@ -2,8 +2,8 @@
   <!-- Cabecera con acción de agregar -->
   <div class="flex items-center justify-between gap-3">
     <div>
-      <h3 class="text-base font-semibold text-gray-800">Historia clínica</h3>
-      <p class="text-xs text-gray-500 mt-0.5">Registro cronológico de la evolución del paciente.</p>
+      <h3 class="text-base font-semibold text-gray-800">Historial de evoluciones</h3>
+      <p class="text-xs text-gray-500 mt-0.5">Registro cronológico de las consultas del paciente.</p>
     </div>
     <button
       type="button"
@@ -13,7 +13,7 @@
       <svg class="h-4 w-4 transition-transform" [class.rotate-45]="showForm()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
       </svg>
-      <span class="hidden sm:inline">{{ showForm() ? 'Cancelar' : 'Nueva entrada' }}</span>
+      <span class="hidden sm:inline">{{ showForm() ? 'Cancelar' : 'Nueva evolución' }}</span>
     </button>
   </div>
 
@@ -83,7 +83,7 @@
               </svg>
               Guardando...
             } @else {
-              Guardar entrada
+              Guardar evolución
             }
           </button>
         </div>
@@ -158,8 +158,8 @@
     <app-card>
       <app-empty-state
         icon="📝"
-        title="Sin historia clínica"
-        subtitle="Agrega la primera entrada para llevar el registro clínico de este paciente."
+        title="Sin evoluciones"
+        subtitle="Agrega la primera evolución para llevar el registro clínico de este paciente."
         size="md"
       />
     </app-card>

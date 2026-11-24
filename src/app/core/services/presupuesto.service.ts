@@ -111,6 +111,62 @@ export class PresupuestoService {
     if (error) throw error;
   }
 
+  /** Actualiza un presupuesto y reemplaza sus líneas */
+  async updatePresupuesto(id: string, p: NuevoPresupuesto): Promise<Presupuesto> {
+    const user = this.auth.user();
+    if (!user) throw new Error('No hay usuario autenticado.');
+
+    const { data: presupuesto, error } = await supabase
+      .from('presupuestos')
+      .update({
+        subtotal: p.subtotal,
+        descuento_tipo: p.descuento_tipo,
+        descuento_valor: p.descuento_valor,
+        total: p.total,
+        notas: p.notas,
+      })
+      .eq('id', id)
+      .eq('odontologo_id', user.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    // Reemplazar líneas: borrar las actuales e insertar las nuevas
+    const { error: delErr } = await supabase.from('presupuesto_items').delete().eq('presupuesto_id', id);
+    if (delErr) throw delErr;
+
+    const items = p.items.map((it) => ({
+      presupuesto_id: id,
+      tratamiento_id: it.tratamiento_id,
+      nombre: it.nombre,
+      precio: it.precio,
+      cantidad: it.cantidad,
+    }));
+    const { data: itemsData, error: itemsError } = await supabase
+      .from('presupuesto_items')
+      .insert(items)
+      .select();
+    if (itemsError) throw itemsError;
+
+    return { ...(presupuesto as Presupuesto), items: (itemsData ?? []) as PresupuestoItem[] };
+  }
+
+  /** Número de pagos asociados a un presupuesto */
+  async contarPagos(presupuestoId: string): Promise<number> {
+    const user = this.auth.user();
+    if (!user) return 0;
+
+    const { count, error } = await supabase
+      .from('pagos')
+      .select('id', { count: 'exact', head: true })
+      .eq('odontologo_id', user.id)
+      .eq('presupuesto_id', presupuestoId);
+
+    if (error) throw error;
+    return count ?? 0;
+  }
+
   async deletePresupuesto(id: string): Promise<void> {
     const user = this.auth.user();
     if (!user) throw new Error('No hay usuario autenticado.');

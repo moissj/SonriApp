@@ -1,0 +1,103 @@
+{
+  "plan": "17_completar-examen-ingreso",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "objetivo": "Completar el examen de ingreso con lo que falta del formato en papel (matriz-brechas): resto de Sección 6 (Historia dental), Sección 7 (Exploración facial, hoy ausente) y Sección 9 (Plan de tratamiento, texto libre). Sección 8 (Diagnóstico) NO se toca (decisión usuario: reusa el diagnóstico de evolución).",
+  "decisiones_usuario": {
+    "apnea_A": "En 'DIAGNOSTICADA S/N/A', A = 'Alterada'. Campo apnea_diagnosticada es tri-valor: 'si'|'no'|'alterada'|null.",
+    "diagnostico_s8": "Reusar el diagnóstico de evolución (historias_clinicas.diagnostico). No se agrega campo en historia_clinica_inicial.",
+    "plan_s9": "Texto libre: una columna plan_tratamiento text + un textarea."
+  },
+  "fuente_verdad_papel": "docs/clinica/matriz-brechas.md §1.6 (Sección 6), §1.7 (Sección 7), §1.8 (Sección 9). Fotos en docs/superpowers/referencias/historia-clinica-papel/.",
+  "integridad_nota": "Estos son campos ADITIVOS sobre el mismo ExamenIngresoService.upsert existente (sin versionado). El versionado/inmutabilidad de HC es Plan 01 (sin aprobar) y es ortogonal; no se resuelve aquí. La policy RLS de historia_clinica_inicial carece de is_cuenta_activa() (Plan 01); no se cambia en este plan.",
+  "migracion": {
+    "archivo": "supabase/migrations/20261124000000_add_exploracion_facial_y_plan_tratamiento.sql",
+    "ddl": [
+      "alter table public.historia_clinica_inicial add column if not exists exploracion_facial jsonb default '{}'::jsonb;",
+      "alter table public.historia_clinica_inicial add column if not exists plan_tratamiento text;"
+    ],
+    "idempotente": "add column if not exists",
+    "reversibilidad": "drop column exploracion_facial; drop column plan_tratamiento; (sin pérdida de otras columnas). Datos clínicos nuevos: columnas vacías por defecto, sin backfill.",
+    "rls": "Sin cambio: policy odontologo_own_hci es FOR ALL y cubre las columnas nuevas.",
+    "nota_timestamp": "20261124000000 es posterior a la última migración del repo (20260705060351_create_historia_clinica_inicial) → sin colisión de orden."
+  },
+  "tipos": {
+    "archivo": "src/app/features/historias-clinicas/examen-ingreso/examen-ingreso.service.ts (tipado a mano; no hay archivo de tipos generado adoptado aún)",
+    "HistoriaDental_nuevas_keys (§6, HistorialDentalItem)": {
+      "habitos_orales": "valor 'si'|'no'|null — interruptor general antes de la lista de hábitos",
+      "supernumerarios": "valor 'si'|'no'|null, observacion (línea)",
+      "sellantes": "valor 'si'|'no'|null, observacion (línea)",
+      "frecuencia_cepillado": "valor '1'..'6'|null (# veces al día)",
+      "uso_seda": "valor 'si'|'no'|null",
+      "uso_enjuague": "valor 'si'|'no'|null, observacion = frecuencia #"
+    },
+    "fix_ubicacion_§6": "sensibilidad pasa a {valor, observacion} con placeholder 'Ubicación…' (UBICACION pertenece a SENSIBILIDAD). cuellos_expuestos conserva {valor, observacion} pero su placeholder deja de ser 'Ubicación…' y pasa a 'Descripción…' (línea sin etiqueta ubicación). Actualizar DEFAULT_HISTORIA_DENTAL en consecuencia.",
+    "ExploracionFacial (§7, nueva interface, se guarda en columna exploracion_facial jsonb)": {
+      "perfil": "'recto'|'concavo'|'convexo'|null",
+      "asimetria_facial": "'si'|'no'|null",
+      "asimetria_obs": "string (línea de detalle)",
+      "forma_cara": "'redonda'|'ovalada'|'cuadrada'|null",
+      "patron_crecimiento": "'normo'|'dolico'|'braqui'|null",
+      "nariz": "'recta'|'desviacion'|null",
+      "posicion_labial": "string (línea libre)",
+      "respirador_oral": "'si'|'no'|null",
+      "ronca": "'si'|'no'|null",
+      "apnea_sueno": "'si'|'no'|null",
+      "apnea_diagnosticada": "'si'|'no'|'alterada'|null",
+      "uso_cpap": "'si'|'no'|null",
+      "aparato_removible_no_cpap": "'si'|'no'|null",
+      "menton": "'normal'|'hipotonico'|'hipertonico'|null",
+      "ojeras": "'si'|'no'|null",
+      "mordida_abierta": "LateralidadMordida",
+      "mordida_cruzada": "LateralidadMordida",
+      "mordida_profunda": "LateralidadMordida",
+      "anomalias": "AnomaliasPosicion",
+      "planos_terminales": "'escalon_recto'|'escalon_mesial'|'escalon_distal'|null",
+      "tipo_denticion": "'temporal'|'mixta'|'permanente'|null",
+      "descripcion_modelos": "string (texto amplio)"
+    },
+    "LateralidadMordida": {
+      "valor": "'si'|'no'|null",
+      "anterior": "boolean",
+      "posterior": "boolean",
+      "izquierda": "boolean",
+      "derecha": "boolean"
+    },
+    "AnomaliasPosicion": {
+      "rotaciones": "'si'|'no'|null",
+      "diastemas": "'si'|'no'|null",
+      "translocaciones": "'si'|'no'|null",
+      "giroversiones": "'si'|'no'|null",
+      "ausencias": "'si'|'no'|null",
+      "retenidos": "'si'|'no'|null",
+      "apinamientos": "'si'|'no'|null",
+      "descripcion": "string"
+    },
+    "HistoriaClinicaInicial_nuevas_columnas": {
+      "exploracion_facial": "ExploracionFacial",
+      "plan_tratamiento": "string | null"
+    }
+  },
+  "cliente": {
+    "nuevo_subcomponente": "src/app/features/historias-clinicas/examen-ingreso/exploracion-facial/exploracion-facial.{ts,html,css} — standalone, OnPush, model<ExploracionFacial>() con two-way; reusa ChecklistItemComponent donde aplique y botones S/N/N-A/lateralidad con objetivo táctil ≥40x40. .ts ≤200 líneas (usar un patch(key,val)/patchGrupo genérico + arrays de config para DRY).",
+    "examen_ingreso": "Agregar al componente/plantilla: filas §6 faltantes (habitos_orales switch, supernumerarios, sellantes, frecuencia_cepillado 1-6, uso_seda, uso_enjuague) + fix ubicación; incluir <app-exploracion-facial> como Sección 7 (num 7); textarea Plan de tratamiento como Sección 9 (num 9, signal planTratamiento). Cablear en save() (exploracion_facial, plan_tratamiento) y hydrate().",
+    "DEFAULT_EXPLORACION_FACIAL": "constante con todos null/''/false; mordidas con los 4 booleanos en false; anomalias con 7 null + descripcion ''.",
+    "funciones_puras_spec": "Si se agrega lógica de 'marcar todos' u otra transformación para §7, va en funciones/*.funcion.ts con su .spec.ts (como aplicar-todos-hd)."
+  },
+  "reglas_clave": [
+    "codigo-limpio: archivos ≤200 líneas (por eso §7 es subcomponente); funciones ≤30; sin any injustificado; sin console.log de depuración.",
+    "formularios-clinicos: tri-estado con null explícito (nunca false por defecto en S/N); observación solo visible al elegir Sí/Alterado en ítems que la tengan; Reactive/ngModel consistente con el patrón actual.",
+    "uso-clinico-y-accesibilidad: botones clínicos ≥40x40px (min-h-10 min-w-10), label/aria por control, foco visible.",
+    "change-detection: OnPush + signals; sin getters que devuelvan arrays/objetos nuevos por ciclo (ChecklistItem.opciones ya es deuda conocida, no replicar).",
+    "consultas-eficientes: el upsert ya informa error; no romper eso.",
+    "datos-sensibles: cero PII/datos clínicos en logs/tests; seeds/tests solo sintéticos."
+  ],
+  "validacion_terminado": [
+    "npx tsc --noEmit -p tsconfig.app.json en verde",
+    "npm run build en verde (avisos de budget CSS no bloquean)",
+    "npm test -- --watch=false en verde (incluye specs nuevos)",
+    "node tools/agentes/sincronizar.mjs --check sin drift",
+    "Migración idempotente (re-aplicable) y reversible; verificada contra prod vía Management API tras aplicar (columnas presentes)."
+  ],
+  "commit": "La migración es commiteable (migrations/ está trackeado). El código Angular vive en feature UNTRACKED historias-clinicas/ → queda en working tree (como Plan 16) hasta que se commitee la feature completa. Manual de usuario: diferido (pantalla WIP sin release)."
+}

@@ -2,21 +2,52 @@ import { Injectable, inject, signal } from '@angular/core';
 import { supabase } from '../supabase.client';
 import { AuthService } from './auth.service';
 
+/** Contacto relacionado (responsable / acompañante / remite) almacenado como JSONB */
+export interface ContactoRelacionado {
+  nombre_completo: string;
+  parentesco: string;
+  telefono?: string | null;
+}
+
 export interface Patient {
   id: string;
   odontologo_id: string;
+  /** Columna generada en BD a partir de nombres + apellidos (solo lectura) */
   nombre_completo: string;
-  tipo_documento: 'CC' | 'TI' | 'CE' | 'PA';
+  // Identificación estructurada
+  nombres: string;
+  primer_apellido: string;
+  segundo_apellido: string | null;
+  tipo_documento: 'CC' | 'TI' | 'CE' | 'PA' | 'RC';
   numero_documento: string;
-  telefono: string | null;
-  email: string | null;
   fecha_nacimiento: string | null;
+  lugar_nacimiento_ciudad: string | null;
+  lugar_nacimiento_departamento: string | null;
+  sexo: 'M' | 'F' | null;
+  estado_civil: string | null;
+  // Contacto y ubicación
+  telefono: string | null;
+  telefono_fijo: string | null;
+  email: string | null;
+  direccion: string | null;
+  barrio: string | null;
   ciudad: string | null;
   departamento: string | null;
-  direccion: string | null;
+  // Afiliación en salud
+  eps_id: string | null;
+  tipo_vinculacion: string | null;
+  afiliacion_salud: string | null;
+  // Ocupación
+  ocupacion: string | null;
+  direccion_laboral: string | null;
+  telefono_laboral: string | null;
+  // Responsable, acompañante y remite (JSONB)
+  responsable: ContactoRelacionado | null;
+  acompanante: ContactoRelacionado | null;
+  remite: ContactoRelacionado | null;
+  // Antecedentes médicos (resumen rápido)
   antecedentes_medicos: string | null;
   alergias: string | null;
-  afiliacion_salud: string | null;
   notas_generales: string | null;
   created_at?: string;
   // Computed client-side fields
@@ -132,16 +163,16 @@ export class PatientService {
   }
 
   /** Crear un nuevo paciente */
-  async createPatient(
-    patient: Omit<Patient, 'id' | 'odontologo_id' | 'created_at' | 'ultima_cita'>
-  ): Promise<Patient> {
+  async createPatient(patient: Partial<Patient>): Promise<Patient> {
     const user = this.auth.user();
     if (!user) throw new Error('No hay usuario autenticado.');
 
     this._loading.set(true);
     try {
+      // nombre_completo es una columna generada: nunca debe enviarse a la BD
+      const { nombre_completo, ...rest } = patient as any;
       const newPatient = {
-        ...patient,
+        ...rest,
         odontologo_id: user.id,
       };
 
@@ -168,8 +199,9 @@ export class PatientService {
 
     this._loading.set(true);
     try {
-      // Eliminar campos que son calculados en el frontend para evitar mandarlos a Supabase
-      const { ultima_cita, ...validUpdates } = updates as any;
+      // Eliminar campos calculados/generados para evitar mandarlos a Supabase
+      // (ultima_cita es del frontend; nombre_completo es columna generada en BD)
+      const { ultima_cita, nombre_completo, ...validUpdates } = updates as any;
 
       const { data, error } = await supabase
         .from('pacientes')

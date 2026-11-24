@@ -1,22 +1,22 @@
-<div class="px-4 py-6 max-w-screen-lg mx-auto pb-24 md:pb-6">
+<div class="px-4 py-5 max-w-screen-lg mx-auto pb-24 md:pb-6">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex items-center justify-between mb-5">
     <div>
-      <div class="flex items-center gap-2.5">
-        <h2 class="text-display font-bold text-dark mb-0">Mis pacientes</h2>
+      <div class="flex items-center gap-2">
+        <h2 class="text-lg md:text-xl font-bold text-dark mb-0">Mis pacientes</h2>
         @if (patients().length > 0 && !patientService.loading()) {
           <span class="inline-flex items-center justify-center bg-sky-100 text-sky-700 text-xs font-semibold px-2 py-0.5 rounded-full">
             {{ patients().length }}
           </span>
         }
       </div>
-      <p class="text-small text-gray-500 mt-1">Gestiona el historial y datos de tus pacientes.</p>
+      <p class="text-xs text-gray-500 mt-0.5">Gestiona el historial y datos de tus pacientes.</p>
     </div>
 
     <!-- Botón visible en Desktop (md y superior) -->
     <a
       routerLink="/pacientes/nuevo"
-      class="hidden md:inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:bg-sky-700 transition-colors shadow-sm"
+      class="hidden md:inline-flex items-center gap-1.5 bg-sky-600 text-white text-sm font-semibold px-3.5 py-2 rounded-lg hover:bg-sky-700 transition-colors shadow-sm"
     >
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -37,9 +37,9 @@
   }
 
   <!-- Buscador -->
-  <div class="relative mb-6">
-    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-      <svg class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <div class="relative mb-5 max-w-md">
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+      <svg class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
       </svg>
     </div>
@@ -47,15 +47,15 @@
       type="text"
       [formControl]="searchControl"
       placeholder="Buscar por nombre, documento o teléfono..."
-      class="w-full pl-11 pr-4 py-3.5 bg-white border border-gray-200 rounded-2xl text-sm placeholder-gray-400 text-gray-800 transition-all focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 shadow-sm"
+      class="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-lg text-sm placeholder-gray-400 text-gray-800 transition-all focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500 shadow-sm"
     />
     @if (searchControl.value) {
       <button
         (click)="searchControl.setValue('')"
-        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600"
+        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
         aria-label="Limpiar búsqueda"
       >
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
         </svg>
       </button>
@@ -112,43 +112,43 @@
             <ng-template pTemplate="body" let-patient>
               <tr class="cursor-pointer" (click)="viewPatient(patient.id)">
                 <td>
-                  <div class="flex items-center gap-3">
-                    <div class="h-10 w-10 rounded-full bg-sky-50 border border-sky-100 text-sky-700 font-bold text-sm flex items-center justify-center shrink-0">
+                  <div class="flex items-center gap-2.5">
+                    <div class="h-8 w-8 rounded-full bg-sky-50 border border-sky-100 text-sky-700 font-bold text-xs flex items-center justify-center shrink-0">
                       {{ getInitials(patient.nombre_completo) }}
                     </div>
-                    <span class="font-semibold text-gray-800">{{ patient.nombre_completo }}</span>
+                    <span class="font-medium text-gray-800 text-sm">{{ patient.nombre_completo }}</span>
                   </div>
                 </td>
-                <td class="text-gray-600 text-sm">
+                <td class="text-gray-600 text-xs">
                   {{ patient.tipo_documento }} {{ patient.numero_documento }}
                 </td>
-                <td class="text-gray-600 text-sm">
+                <td class="text-gray-600 text-xs">
                   {{ patient.telefono || 'Sin teléfono' }}
                 </td>
                 <td class="text-right">
                   @if (patient.ultima_cita) {
-                    <span class="inline-flex items-center gap-1.5 text-sky-700 font-semibold bg-sky-50 border border-sky-100 px-2.5 py-1 rounded-full text-xs">
-                      <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span class="inline-flex items-center gap-1 text-sky-700 font-semibold bg-sky-50 border border-sky-100 px-2 py-0.5 rounded-full text-xxs">
+                      <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
                       {{ patient.ultima_cita | date: 'dd/MM/yyyy' }}
                     </span>
                   } @else {
-                    <span class="text-gray-400 italic text-xs">Ninguna registrada</span>
+                    <span class="text-gray-400 italic text-xxs">Ninguna registrada</span>
                   }
                 </td>
                 <td>
-                  <div class="flex items-center justify-center gap-1.5">
+                  <div class="flex items-center justify-center gap-1">
                     <!-- WhatsApp -->
                     @if (patient.telefono) {
                       <button
                         type="button"
                         (click)="sendWhatsApp(patient, $event)"
-                        class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        class="inline-flex items-center justify-center h-7 w-7 rounded-md text-emerald-600 hover:bg-emerald-50 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500"
                         title="Enviar bienvenida por WhatsApp"
                         aria-label="Enviar bienvenida por WhatsApp"
                       >
-                        <svg class="h-[18px] w-[18px]" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                           <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.407.001 12.017.001c3.209 0 6.222 1.25 8.487 3.516 2.266 2.266 3.515 5.28 3.514 8.489 0 6.61-5.347 11.957-11.957 11.957-2.005 0-3.975-.503-5.729-1.457L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
                         </svg>
                       </button>
@@ -157,11 +157,11 @@
                     <button
                       type="button"
                       (click)="editPatient(patient.id, $event)"
-                      class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-sky-600 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      class="inline-flex items-center justify-center h-7 w-7 rounded-md text-gray-500 hover:bg-gray-100 hover:text-sky-600 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500"
                       title="Editar paciente"
                       aria-label="Editar paciente"
                     >
-                      <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
@@ -169,11 +169,11 @@
                     <button
                       type="button"
                       (click)="requestDelete(patient, $event)"
-                      class="inline-flex items-center justify-center h-9 w-9 rounded-lg text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                      class="inline-flex items-center justify-center h-7 w-7 rounded-md text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
                       title="Eliminar paciente"
                       aria-label="Eliminar paciente"
                     >
-                      <svg class="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -255,7 +255,7 @@
           >
             <a
               routerLink="/pacientes/nuevo"
-              class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:bg-sky-700 transition-colors shadow-sm"
+              class="inline-flex items-center gap-1.5 bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors shadow-sm"
             >
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />

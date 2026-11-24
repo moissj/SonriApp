@@ -79,25 +79,24 @@ export class PatientAutocompleteComponent implements OnInit {
     this.isSaving.set(true);
     this.errorMessage.set(null);
 
-    let phone = this.quickForm.value.telefono;
-    if (phone && phone.length === 10) {
-      phone = `+57${phone}`;
-    }
+    // El teléfono se almacena como 10 dígitos (sin +57), acorde al CHECK de la BD
+    const rawPhone = (this.quickForm.value.telefono || '').replace(/\D/g, '');
+    const phone = rawPhone.length === 12 && rawPhone.startsWith('57') ? rawPhone.slice(2) : rawPhone;
 
-    const newPatient: Omit<Patient, 'id' | 'odontologo_id' | 'created_at' | 'ultima_cita'> = {
-      nombre_completo: this.quickForm.value.nombre_completo!,
-      tipo_documento: this.quickForm.value.tipo_documento as 'CC' | 'TI' | 'CE' | 'PA',
+    // Separar el nombre rápido en nombres / apellidos (nombre_completo es columna generada)
+    const partes = (this.quickForm.value.nombre_completo || '').trim().split(/\s+/);
+    const nombres = partes.length >= 3 ? partes.slice(0, partes.length - 2).join(' ') : partes[0] || '';
+    const primer_apellido =
+      partes.length >= 3 ? partes[partes.length - 2] : partes.length === 2 ? partes[1] : '';
+    const segundo_apellido = partes.length >= 3 ? partes[partes.length - 1] : null;
+
+    const newPatient: Partial<Patient> = {
+      nombres,
+      primer_apellido,
+      segundo_apellido,
+      tipo_documento: this.quickForm.value.tipo_documento as Patient['tipo_documento'],
       numero_documento: this.quickForm.value.numero_documento!,
       telefono: phone || null,
-      email: null,
-      fecha_nacimiento: null,
-      ciudad: null,
-      departamento: null,
-      direccion: null,
-      antecedentes_medicos: null,
-      alergias: null,
-      afiliacion_salud: null,
-      notas_generales: null,
     };
 
     try {

@@ -6,6 +6,7 @@
 /* ===================== Tabla de pacientes (PrimeNG) ===================== */
 :host ::ng-deep .patients-table {
   --table-border: #eef2f6;
+  font-size: 0.875rem;
 
   .p-datatable-table {
     border-collapse: separate;
@@ -16,11 +17,11 @@
   .p-datatable-thead > tr > th {
     background: #f8fafc;
     color: #64748b;
-    font-size: 0.72rem;
+    font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 0.85rem 1.25rem;
+    padding: 0.55rem 1rem;
     border: none;
     border-bottom: 1px solid var(--table-border);
     white-space: nowrap;
@@ -28,7 +29,7 @@
 
   /* Celdas del cuerpo */
   .p-datatable-tbody > tr > td {
-    padding: 0.9rem 1.25rem;
+    padding: 0.5rem 1rem;
     border: none;
     border-bottom: 1px solid var(--table-border);
     background: transparent;
@@ -65,14 +66,25 @@
     background: #f8fafc;
     border: none;
     border-top: 1px solid var(--table-border);
-    padding: 0.6rem 1rem;
+    padding: 0.4rem 0.75rem;
     color: #64748b;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    min-height: 2.25rem;
+  }
+
+  .p-paginator .p-paginator-page,
+  .p-paginator .p-paginator-next,
+  .p-paginator .p-paginator-prev,
+  .p-paginator .p-paginator-first,
+  .p-paginator .p-paginator-last {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
   }
 
   .p-paginator .p-paginator-page.p-paginator-page-selected {
     background: #0284c7;
     color: #fff;
-    border-radius: 0.5rem;
+    border-radius: 0.4rem;
   }
 }

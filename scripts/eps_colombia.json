@@ -1,0 +1,226 @@
+[
+  {
+    "id": 1,
+    "codigo_eps": "EPS012",
+    "nit": "800088702-2",
+    "nombre": "EPS SURAMERICANA S.A.",
+    "sigla": "SURA",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 2,
+    "codigo_eps": "EPS008",
+    "nit": "800251440-6",
+    "nombre": "ENTIDAD PROMOTORA DE SALUD SANITAS S.A.S.",
+    "sigla": "SANITAS",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 3,
+    "codigo_eps": "EPS010",
+    "nit": "860066942-7",
+    "nombre": "CAJA DE COMPENSACIÓN FAMILIAR COMPENSAR",
+    "sigla": "COMPENSAR",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 4,
+    "codigo_eps": "EPS040",
+    "nit": "900156264-2",
+    "nombre": "NUEVA EPS S.A.",
+    "sigla": "NUEVA EPS",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 5,
+    "codigo_eps": "EPS005",
+    "nit": "800130907-4",
+    "nombre": "SALUD TOTAL ENTIDAD PROMOTORA DE SALUD S.A.",
+    "sigla": "SALUD TOTAL",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 6,
+    "codigo_eps": "EPS018",
+    "nit": "830003564-7",
+    "nombre": "EPS FAMISANAR S.A.S.",
+    "sigla": "FAMISANAR",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 7,
+    "codigo_eps": "ESS024",
+    "nit": "900226715-2",
+    "nombre": "COOSALUD EPS S.A.",
+    "sigla": "COOSALUD",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 8,
+    "codigo_eps": "ESS014",
+    "nit": "806008394-7",
+    "nombre": "ASOCIACION MUTUAL SER EMPRESA SOLIDARIA DE SALUD EPS",
+    "sigla": "MUTUAL SER",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 9,
+    "codigo_eps": "ESSC62",
+    "nit": "817001773-0",
+    "nombre": "ASMET SALUD EPS S.A.S.",
+    "sigla": "ASMET SALUD",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 10,
+    "codigo_eps": "ESSC76",
+    "nit": "814000337-1",
+    "nombre": "EMSSANAR E.S.S.",
+    "sigla": "EMSSANAR",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 11,
+    "codigo_eps": "EPSS34",
+    "nit": "900383135-4",
+    "nombre": "CAPITAL SALUD ENTIDAD PROMOTORA DE SALUD SAS",
+    "sigla": "CAPITAL SALUD",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 12,
+    "codigo_eps": "EPSS41",
+    "nit": "900604350-1",
+    "nombre": "ALIANZA MEDELLIN ANTIOQUIA EPS S.A.S. SAVIA SALUD",
+    "sigla": "SAVIA SALUD",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 13,
+    "codigo_eps": "EPS001",
+    "nit": "830113831-0",
+    "nombre": "ALIANSALUD ENTIDAD PROMOTORA DE SALUD S.A.",
+    "sigla": "ALIANSALUD",
+    "regimen": "Contributivo"
+  },
+  {
+    "id": 14,
+    "codigo_eps": "EPS034",
+    "nit": "805001157-2",
+    "nombre": "ENTIDAD PROMOTORA DE SALUD SERVICIO OCCIDENTAL DE SALUD S.A.",
+    "sigla": "S.O.S.",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 15,
+    "codigo_eps": "EPS017",
+    "nit": "890303093-5",
+    "nombre": "CAJA DE COMPENSACION FAMILIAR DEL VALLE DEL CAUCA COMFENALCO VALLE",
+    "sigla": "COMFENALCO VALLE",
+    "regimen": "Contributivo"
+  },
+  {
+    "id": 16,
+    "codigo_eps": "EPSS48",
+    "nit": "890102044-1",
+    "nombre": "CAJACOPI ATLÁNTICO - CCF DEL ATLÁNTICO",
+    "sigla": "CAJACOPI",
+    "regimen": "Ambos"
+  },
+  {
+    "id": 17,
+    "codigo_eps": "EPSC34",
+    "nit": "844002256-5",
+    "nombre": "CAPRESOCA E.P.S.",
+    "sigla": "CAPRESOCA",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 18,
+    "codigo_eps": "CCF011",
+    "nit": "891600092-4",
+    "nombre": "CAJA DE COMPENSACION FAMILIAR DEL CHOCO COMFACHOCO",
+    "sigla": "COMFACHOCO",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 19,
+    "codigo_eps": "EPS048",
+    "nit": "901518041-8",
+    "nombre": "SALUD BOLÍVAR EPS SAS",
+    "sigla": "SALUD BOLÍVAR",
+    "regimen": "Contributivo"
+  },
+  {
+    "id": 20,
+    "codigo_eps": "EPS049",
+    "nit": "901543160-5",
+    "nombre": "EPS FAMILIAR DE COLOMBIA SAS",
+    "sigla": "FAMILIAR DE COLOMBIA",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 21,
+    "codigo_eps": "EPSI05",
+    "nit": "839000495-2",
+    "nombre": "EMPRESA PROMOTORA DE SALUD INDÍGENA ANAS WAYUU EPSI",
+    "sigla": "ANAS WAYUU",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 22,
+    "codigo_eps": "EPSI06",
+    "nit": "840000305-6",
+    "nombre": "ENTIDAD PROMOTORA DE SALUD MALLAMAS EPSI",
+    "sigla": "MALLAMAS",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 23,
+    "codigo_eps": "EPSI04",
+    "nit": "809008362-0",
+    "nombre": "PIJAOS SALUD EPSI",
+    "sigla": "PIJAOS SALUD",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 24,
+    "codigo_eps": "EPSI01",
+    "nit": "824001398-3",
+    "nombre": "ASOCIACIÓN DE CABILDOS INDÍGENAS DEL CESAR Y GUAJIRA DUSAKAWI",
+    "sigla": "DUSAKAWI",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 25,
+    "codigo_eps": "EPSI03",
+    "nit": "817002451-8",
+    "nombre": "AIC - ASOCIACIÓN INDÍGENA DEL CAUCA EPSI",
+    "sigla": "AIC",
+    "regimen": "Subsidiado"
+  },
+  {
+    "id": 26,
+    "codigo_eps": "EPM001",
+    "nit": "890904996-1",
+    "nombre": "EMPRESAS PÚBLICAS DE MEDELLÍN EPM (PROGRAMA DE SALUD)",
+    "sigla": "EPM SALUD",
+    "regimen": "Especial"
+  },
+  {
+    "id": 27,
+    "codigo_eps": "FPS001",
+    "nit": "800112806-3",
+    "nombre": "FONDO DE PASIVO SOCIAL DE FERROCARRILES NACIONALES DE COLOMBIA",
+    "sigla": "FERROCARRILES NACIONALES",
+    "regimen": "Especial"
+  },
+  {
+    "id": 28,
+    "codigo_eps": "EPSS46",
+    "nit": "900932230-1",
+    "nombre": "FUNDACIÓN SALUD MÍA EPS",
+    "sigla": "SALUD MÍA",
+    "regimen": "Contributivo"
+  }
+]

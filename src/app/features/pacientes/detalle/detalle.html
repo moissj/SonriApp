@@ -96,6 +96,27 @@
         }
       </div>
 
+      <!-- Acceso a la Historia Clínica completa (módulo independiente) -->
+      <a
+        [routerLink]="['/historia-clinica', patientId]"
+        class="group flex items-center justify-between gap-3 bg-gradient-to-r from-sky-600 to-teal-600 text-white rounded-2xl px-5 py-4 mb-6 shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+      >
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="h-11 w-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
+            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="font-bold text-sm sm:text-base leading-tight">Ver historia clínica</p>
+            <p class="text-xs text-white/80 mt-0.5 truncate">Historia clínica completa, evoluciones y odontograma.</p>
+          </div>
+        </div>
+        <svg class="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+
       <!-- Selector de Pestañas (Tabs) -->
       <div class="tab-bar flex border-b border-gray-100 mb-6 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1">
         <button
@@ -118,22 +139,6 @@
               {{ citas().length }}
             </span>
           }
-        </button>
-        <button
-          (click)="changeTab('historias')"
-          [class.bg-sky-50]="activeTab() === 'historias'"
-          [class.text-sky-700]="activeTab() === 'historias'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
-        >
-          Historia
-        </button>
-        <button
-          (click)="changeTab('odontograma')"
-          [class.bg-sky-50]="activeTab() === 'odontograma'"
-          [class.text-sky-700]="activeTab() === 'odontograma'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
-        >
-          Odontograma
         </button>
         <button
           (click)="changeTab('presupuestos')"
@@ -315,16 +320,6 @@
             </app-card>
           }
         </div>
-      }
-
-      <!-- 3. Historia Clínica -->
-      @if (activeTab() === 'historias') {
-        <app-historia-clinica [pacienteId]="patientId" />
-      }
-
-      <!-- 4. Odontograma -->
-      @if (activeTab() === 'odontograma') {
-        <app-odontograma [pacienteId]="patientId" />
       }
 
       <!-- 5. Presupuestos -->

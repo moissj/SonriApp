@@ -1,0 +1,25 @@
+.btn-primario,
+.btn-sec {
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+  padding: 0 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+.btn-primario {
+  background: #0284c7;
+  color: #fff;
+}
+.btn-primario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn-sec {
+  color: #0369a1;
+}
+.btn-primario:focus-visible,
+.btn-sec:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 2px;
+}

@@ -18,3 +18,20 @@ html, body {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #C5E9EC; border-radius: 9999px; }
+
+/* Impresión de consentimientos: solo se muestra .zona-imprimir */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .zona-imprimir,
+  .zona-imprimir * {
+    visibility: visible;
+  }
+  .zona-imprimir {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}

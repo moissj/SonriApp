@@ -75,6 +75,15 @@ export const routes: Routes = [
       import('./features/configuracion-eps/configuracion-eps').then((m) => m.ConfiguracionEpsComponent),
   },
   {
+    path: 'configuracion/consentimientos',
+    canActivate: [authGuard, adminGuard],
+    data: { title: 'Catálogo de consentimientos' },
+    loadComponent: () =>
+      import('./features/consentimientos/pages/catalogo-admin/catalogo-admin').then(
+        (m) => m.CatalogoAdminComponent
+      ),
+  },
+  {
     path: 'plantillas',
     canActivate: [authGuard, onboardingGuard],
     data: { title: 'Plantillas de mensajes' },

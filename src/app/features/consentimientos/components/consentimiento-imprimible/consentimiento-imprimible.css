@@ -1,0 +1,7 @@
+/* Al imprimir solo se muestra el consentimiento (ver consentimientos-paciente.css). */
+@media print {
+  .imprimible {
+    border: none;
+    padding: 0;
+  }
+}

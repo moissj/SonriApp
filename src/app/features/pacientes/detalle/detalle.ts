@@ -9,8 +9,9 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal';
 import { PresupuestosComponent } from './presupuestos/presupuestos';
 import { PagosComponent } from './pagos/pagos';
+import { ConsentimientosPacienteComponent } from '../../consentimientos/components/consentimientos-paciente/consentimientos-paciente';
 
-type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'comunicacion';
+type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'consentimientos' | 'comunicacion';
 
 @Component({
   selector: 'app-paciente-detalle',
@@ -24,6 +25,7 @@ type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'comunicacion';
     ConfirmModalComponent,
     PresupuestosComponent,
     PagosComponent,
+    ConsentimientosPacienteComponent,
   ],
   templateUrl: './detalle.html',
   styleUrl: './detalle.scss',

@@ -1,0 +1,101 @@
+<section class="space-y-4">
+  <div class="flex items-center justify-between no-print">
+    <h2 class="text-lg font-bold text-neutral-900">Consentimientos informados</h2>
+    @if (!nuevo()) {
+      <app-button (click)="nuevo.set(true)">Nuevo consentimiento</app-button>
+    }
+  </div>
+
+  @if (errorAccion()) {
+    <app-alert [message]="errorAccion()!" type="error" [dismissible]="true" (dismissed)="errorAccion.set(null)" />
+  }
+
+  @if (nuevo()) {
+    <div class="rounded-xl border border-neutral-200 bg-white p-4 space-y-4 no-print">
+      <div>
+        <label for="cons-catalogo" class="block text-sm font-medium text-neutral-700">Formato</label>
+        <select id="cons-catalogo" class="mt-1 min-h-10 w-full rounded-lg border border-neutral-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          [(ngModel)]="catalogoId" (ngModelChange)="elegirCatalogo($event)">
+          <option value="">Selecciona un formato</option>
+          @for (c of catalogo(); track c.id) {
+            <option [value]="c.id">{{ c.titulo }}</option>
+          }
+        </select>
+      </div>
+
+      @if (seleccionado(); as sel) {
+        <app-button variant="secondary" (click)="imprimir()">Imprimir para firma</app-button>
+
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label for="cons-archivo" class="block text-sm font-medium text-neutral-700">Documento firmado (PDF, JPG o PNG)</label>
+            <input id="cons-archivo" type="file" accept="application/pdf,image/jpeg,image/png" (change)="elegirArchivo($event)"
+              class="mt-1 min-h-10 w-full text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          </div>
+          <div>
+            <label for="cons-fecha" class="block text-sm font-medium text-neutral-700">Fecha de firma</label>
+            <input id="cons-fecha" type="date" [(ngModel)]="fechaFirma"
+              class="mt-1 min-h-10 w-full rounded-lg border border-neutral-300 px-3 focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <app-button [loading]="subiendo()" [disabled]="subiendo()" (click)="subir()">Subir</app-button>
+          <app-button variant="ghost" [disabled]="subiendo()" (click)="nuevo.set(false)">Cancelar</app-button>
+        </div>
+
+        <div class="zona-imprimir">
+          <app-consentimiento-imprimible [titulo]="sel.titulo" [cuerpo]="sel.cuerpo" [pacienteHeader]="paciente()" />
+        </div>
+      }
+    </div>
+  }
+
+  @if (cargando()) {
+    <p class="text-sm text-neutral-500" role="status">Cargando consentimientos...</p>
+  } @else if (error()) {
+    <app-alert [message]="error()!" type="error" />
+    <app-button variant="secondary" (click)="cargar()">Reintentar</app-button>
+  } @else if (lista().length === 0) {
+    <app-empty-state title="Sin consentimientos" subtitle="Aún no hay consentimientos firmados para este paciente." />
+  } @else {
+    <ul class="space-y-2 no-print">
+      @for (c of lista(); track c.id) {
+        <li class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-3">
+          <div>
+            <p class="font-semibold text-neutral-900">{{ c.titulo }}</p>
+            <p class="text-xs text-neutral-500">Firmado: {{ fecha(c.fechaFirma) }} · v{{ c.plantillaVersion }}</p>
+            @if (c.motivoAnulacion) {
+              <p class="text-xs text-red-600">Motivo: {{ c.motivoAnulacion }}</p>
+            }
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="rounded-full px-2 py-0.5 text-xs font-bold"
+              [class]="c.estado === 'vigente' ? 'bg-emerald-100 text-emerald-800' : 'bg-neutral-200 text-neutral-700'">
+              {{ c.estado === 'vigente' ? 'Vigente' : 'Anulado' }}
+            </span>
+            <button type="button" (click)="ver(c)" class="min-h-10 min-w-10 rounded-lg px-3 text-sm font-semibold text-sky-700 hover:bg-sky-50 focus:outline-none focus:ring-2 focus:ring-sky-500">Ver</button>
+            @if (c.estado === 'vigente') {
+              <button type="button" (click)="pedirAnular(c)" class="min-h-10 min-w-10 rounded-lg px-3 text-sm font-semibold text-red-700 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500">Anular</button>
+            }
+          </div>
+        </li>
+      }
+    </ul>
+  }
+
+  @if (anulando()) {
+    <div class="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3 no-print">
+      <label for="cons-motivo" class="block text-sm font-medium text-neutral-800">Motivo de anulación (obligatorio)</label>
+      <input id="cons-motivo" type="text" [(ngModel)]="motivo"
+        class="min-h-10 w-full rounded-lg border border-neutral-300 px-3 focus:outline-none focus:ring-2 focus:ring-red-500" />
+      <div class="flex gap-2">
+        <app-button (click)="confirmarAnular()" [disabled]="!motivo.trim()">Anular consentimiento</app-button>
+        <app-button variant="ghost" (click)="anulando.set(null)">Cancelar</app-button>
+      </div>
+    </div>
+  }
+
+  <app-confirm-modal title="Anular consentimiento" message="Esta acción marcará el consentimiento como anulado. ¿Continuar?"
+    confirmText="Anular" (confirm)="anular()" />
+</section>

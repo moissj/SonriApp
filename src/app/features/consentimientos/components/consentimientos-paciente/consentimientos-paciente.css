@@ -1,0 +1,4 @@
+/* Reglas de impresión globales (.no-print / .zona-imprimir) en src/styles.scss */
+:host {
+  display: block;
+}

@@ -1,0 +1,84 @@
+<section class="p-4 max-w-4xl mx-auto">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="text-xl font-bold text-neutral-900">Catálogo de consentimientos</h1>
+    <button type="button" class="btn-primario" (click)="abrir(null)">Nuevo</button>
+  </div>
+
+  @if (cargando()) {
+    <p role="status">Cargando…</p>
+  } @else if (errorCarga()) {
+    <p role="alert" class="text-red-700">
+      {{ errorCarga() }}
+      <button type="button" class="btn-sec ml-2" (click)="cargar()">Reintentar</button>
+    </p>
+  } @else if (items().length === 0) {
+    <p>No hay plantillas en el catálogo.</p>
+  } @else {
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="text-left border-b">
+          <th class="py-2">Tipo</th>
+          <th>Título</th>
+          <th>Versión</th>
+          <th>Estado</th>
+          <th><span class="sr-only">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (it of items(); track it.id) {
+          <tr class="border-b">
+            <td class="py-2">{{ it.tipo }}</td>
+            <td>{{ it.titulo }}</td>
+            <td>v{{ it.version }}</td>
+            <td>
+              <span
+                class="px-2 py-0.5 rounded-full text-xs"
+                [class]="it.activo ? 'bg-green-100 text-green-800' : 'bg-neutral-200 text-neutral-700'"
+                >{{ it.activo ? 'Activo' : 'Inactivo' }}</span
+              >
+            </td>
+            <td class="text-right whitespace-nowrap">
+              <button type="button" class="btn-sec" (click)="abrir(it)">Editar</button>
+              <button type="button" class="btn-sec" (click)="pedirCambioEstado(it)">
+                {{ it.activo ? 'Desactivar' : 'Activar' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</section>
+
+<app-modal #modalForm [title]="editando() ? 'Editar plantilla (sube versión)' : 'Nueva plantilla'">
+  <form [formGroup]="form" (ngSubmit)="guardar()" class="flex flex-col gap-3">
+    <app-input id="cc-tipo" label="Tipo (slug, ej. extraccion)" formControlName="tipo" />
+    <app-input id="cc-titulo" label="Título" formControlName="titulo" />
+    <div>
+      <label for="cc-cuerpo" class="block text-sm font-medium mb-1">Cuerpo</label>
+      <textarea
+        id="cc-cuerpo"
+        rows="8"
+        formControlName="cuerpo"
+        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-200"
+      ></textarea>
+    </div>
+    @if (errorGuardar()) {
+      <p role="alert" class="text-red-700 text-sm">{{ errorGuardar() }}</p>
+    }
+    <button type="submit" class="btn-primario" [disabled]="guardando()">
+      {{ guardando() ? 'Guardando…' : 'Guardar' }}
+    </button>
+  </form>
+</app-modal>
+
+<app-confirm-modal
+  #confirmarEstado
+  [title]="objetivo()?.activo ? 'Desactivar plantilla' : 'Activar plantilla'"
+  [message]="
+    objetivo()?.activo
+      ? 'La plantilla dejará de ofrecerse para nuevos consentimientos. ¿Continuar?'
+      : '¿Activar esta plantilla?'
+  "
+  (confirm)="confirmarCambioEstado()"
+/>

@@ -1,42 +1,100 @@
 <section class="mx-auto max-w-3xl space-y-4 p-4">
-  <h1 class="text-xl font-semibold text-dark">Recordatorios de mañana</h1>
+  <h1 class="text-xl font-semibold text-dark">Recordatorios de los próximos 7 días</h1>
 
   @if (error()) {
     <app-alert [message]="error()!" />
   }
+  @if (avisoPopup()) {
+    <app-alert
+      type="info"
+      [dismissible]="true"
+      message="Se abrirán varias pestañas de WhatsApp. Si el navegador las bloquea, permite las ventanas emergentes para este sitio."
+    />
+  }
 
   @if (cargando()) {
     <p class="text-sm text-gray-500" role="status">Cargando…</p>
-  } @else if (pendientes().length === 0) {
-    <app-empty-state icon="🔔" title="No hay recordatorios pendientes para mañana." />
+  } @else if (!error() && dias().length === 0) {
+    <app-empty-state icon="🔔" title="No hay citas para recordar en los próximos 7 días." />
   } @else {
-    <app-card padding="none">
-      <ul class="divide-y divide-gray-100">
-        @for (cita of pendientes(); track cita.id) {
-          <li class="flex flex-wrap items-center justify-between gap-3 p-4">
-            <div class="min-w-0">
-              <p class="truncate font-medium text-dark">{{ cita.paciente?.nombre_completo }}</p>
-              <p class="text-sm text-gray-500">
-                {{ horaDe(cita) }}
-                @if (sinTelefono(cita)) {
-                  · <span class="text-amber-700">Sin teléfono</span>
-                } @else {
-                  · {{ cita.paciente?.telefono }}
-                }
-              </p>
+    @for (dia of dias(); track dia.fecha) {
+      <section [attr.aria-label]="fechaLarga(dia.fecha)" class="space-y-2">
+        <h2 class="text-lg font-semibold capitalize text-dark">{{ fechaLarga(dia.fecha) }}</h2>
+        <app-card padding="none">
+          @if (dia.pendientes.length > 0) {
+            <div class="flex flex-wrap items-center justify-between gap-3 p-4 pb-0">
+              <h3 class="text-sm font-semibold text-gray-700">Pendientes</h3>
+              @if (cantidadEnviables(dia) > 0) {
+                <app-button
+                  variant="secondary"
+                  [disabled]="enviandoId() !== null"
+                  (click)="pedirConfirmacionLote(dia)"
+                >
+                  Enviar todos ({{ cantidadEnviables(dia) }})
+                </app-button>
+              }
             </div>
-            <app-button
-              size="lg"
-              [disabled]="sinTelefono(cita) || enviandoId() === cita.id"
-              [loading]="enviandoId() === cita.id"
-              (click)="enviar(cita)"
-            >
-              Enviar recordatorio
-              <span class="sr-only"> a {{ cita.paciente?.nombre_completo }}</span>
-            </app-button>
-          </li>
-        }
-      </ul>
-    </app-card>
+            <ul class="divide-y divide-gray-100">
+              @for (item of dia.pendientes; track item.cita.id) {
+                <li class="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div class="min-w-0">
+                    <p class="truncate font-medium text-dark">{{ item.cita.paciente?.nombre_completo }}</p>
+                    <p class="text-sm text-gray-500">
+                      {{ horaDe(item.cita.fecha_hora) }}
+                      @if (sinTelefono(item.cita)) {
+                        · <span class="text-amber-700">Sin teléfono</span>
+                      } @else {
+                        · {{ item.cita.paciente?.telefono }}
+                      }
+                    </p>
+                  </div>
+                  <app-button
+                    size="lg"
+                    [disabled]="sinTelefono(item.cita) || enviandoId() === item.cita.id"
+                    [loading]="enviandoId() === item.cita.id"
+                    (click)="enviar(item.cita)"
+                  >
+                    Enviar recordatorio
+                    <span class="sr-only"> a {{ item.cita.paciente?.nombre_completo }}</span>
+                  </app-button>
+                </li>
+              }
+            </ul>
+          }
+          @if (dia.enviados.length > 0) {
+            <h3 class="p-4 pb-0 text-sm font-semibold text-gray-700">Enviados</h3>
+            <ul class="divide-y divide-gray-100">
+              @for (item of dia.enviados; track item.cita.id) {
+                <li class="flex flex-wrap items-center justify-between gap-3 p-4">
+                  <div class="min-w-0">
+                    <p class="truncate font-medium text-dark">{{ item.cita.paciente?.nombre_completo }}</p>
+                    <p class="text-sm text-gray-500">
+                      Cita {{ horaDe(item.cita.fecha_hora) }} · Enviado {{ horaDe(item.ultimoEnvio!) }}
+                      <span class="ml-1 rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">Enviado</span>
+                    </p>
+                  </div>
+                  <app-button
+                    variant="secondary"
+                    [disabled]="sinTelefono(item.cita) || enviandoId() === item.cita.id"
+                    [loading]="enviandoId() === item.cita.id"
+                    (click)="enviar(item.cita)"
+                  >
+                    Volver a enviar
+                    <span class="sr-only"> a {{ item.cita.paciente?.nombre_completo }}</span>
+                  </app-button>
+                </li>
+              }
+            </ul>
+          }
+        </app-card>
+      </section>
+    }
   }
 </section>
+
+<app-confirm-modal
+  title="Enviar todos"
+  [message]="'Se abrirán ' + cantidadEnviables(diaLote()) + ' pestañas de WhatsApp. ¿Continuar?'"
+  confirmText="Enviar"
+  (confirm)="enviarTodos()"
+/>

@@ -1,0 +1,121 @@
+{
+  "plan": "18_consentimientos-informados",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "diseno_aprobado": "docs/superpowers/specs/2026-11-24-consentimientos-informados-design.md",
+  "roadmap": "Dentalink #3 (consentimientos + firma)",
+  "decisiones_usuario": {
+    "firma": "subir consentimiento firmado en papel (sin canvas ni e-firma)",
+    "catalogo": "global, administrado por super_admin",
+    "plantilla_blanco": "texto en BD + vista imprimible"
+  },
+  "reglas_criticas": [
+    "RLS fail-closed: consentimientos_paciente filtra odontologo_id = auth.uid() en toda operacion; SELECT ademas is_cuenta_activa().",
+    "Integridad: sin DELETE de consentimientos_paciente ni de objetos de Storage; correccion = estado='anulado' + motivo_anulacion.",
+    "plantilla_version se congela al subir (snapshot de catalogo_consentimientos.version).",
+    "created_at servidor (now()); jamas reloj de navegador.",
+    "Storage: bucket privado; acceso solo por URL firmada de vida corta (TTL 60s).",
+    "Cero PII/datos clinicos en logs, errores, seeds, tests o chat; datos sinteticos en pruebas.",
+    "Legal CO (Ley 527, habeas data, retencion, menores): validar con profesional; catalogo se siembra con cuerpo vacio/placeholder, no texto legal autoritativo.",
+    "Migracion idempotente y reversible; NO aplicar a produccion sin OK explicito del usuario.",
+    "super_admin administra catalogo pero NO lee datos clinicos (no accede a consentimientos_paciente)."
+  ],
+
+  "fase_1_datos": {
+    "owner": "capa-datos",
+    "archivo_migracion": "supabase/migrations/20261124130000_consentimientos_informados.sql",
+    "nota_timestamp": "Debe ser > 20261124000000 (mayor actual). Verificar no colision antes de crear.",
+    "sql": "-- Plan 18: consentimientos informados (subir firmado en papel).\n-- Crea catalogo_consentimientos (global, admin super_admin), consentimientos_paciente (por paciente),\n-- y bucket privado 'consentimientos' con policies por carpeta {odontologo_id}/{paciente_id}/.\n-- RLS: catalogo = SELECT authenticated + escritura solo is_super_admin();\n--      paciente = fail-closed odontologo_id=auth.uid() (+ is_cuenta_activa() en SELECT).\n-- Integridad: sin DELETE (registro ni objeto); correccion = estado='anulado' + motivo. plantilla_version congelada.\n-- Reversibilidad:\n--   drop table if exists public.consentimientos_paciente;\n--   drop table if exists public.catalogo_consentimientos;\n--   drop function if exists public.tg_consent_touch_updated_at();\n--   delete from storage.buckets where id='consentimientos';\n--   drop policy if exists \"consent_obj_select_own\" on storage.objects;\n--   drop policy if exists \"consent_obj_insert_own\" on storage.objects;\n\n-- 1. Catalogo global de consentimientos\ncreate table if not exists public.catalogo_consentimientos (\n  id uuid primary key default gen_random_uuid(),\n  tipo text not null unique,\n  titulo text not null,\n  cuerpo text not null default '',\n  version int not null default 1,\n  activo boolean not null default true,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now()\n);\nalter table public.catalogo_consentimientos enable row level security;\ndo $$ begin create policy \"cat_consent_select_auth\" on public.catalogo_consentimientos for select to authenticated using (true); exception when duplicate_object then null; end $$;\ndo $$ begin create policy \"cat_consent_insert_admin\" on public.catalogo_consentimientos for insert to authenticated with check (public.is_super_admin()); exception when duplicate_object then null; end $$;\ndo $$ begin create policy \"cat_consent_update_admin\" on public.catalogo_consentimientos for update to authenticated using (public.is_super_admin()) with check (public.is_super_admin()); exception when duplicate_object then null; end $$;\ndo $$ begin create policy \"cat_consent_delete_admin\" on public.catalogo_consentimientos for delete to authenticated using (public.is_super_admin()); exception when duplicate_object then null; end $$;\n\n-- 2. Consentimientos por paciente\ncreate table if not exists public.consentimientos_paciente (\n  id uuid primary key default gen_random_uuid(),\n  paciente_id uuid not null references public.pacientes(id) on delete cascade,\n  odontologo_id uuid not null references public.profiles(id) on delete cascade,\n  catalogo_id uuid not null references public.catalogo_consentimientos(id),\n  plantilla_version int not null,\n  archivo_path text not null,\n  nombre_archivo text not null,\n  fecha_firma date not null,\n  estado text not null default 'vigente' check (estado in ('vigente','anulado')),\n  motivo_anulacion text,\n  created_at timestamptz not null default now(),\n  updated_at timestamptz not null default now(),\n  constraint consent_motivo_si_anulado check (estado <> 'anulado' or motivo_anulacion is not null)\n);\ncreate index if not exists idx_consent_paciente on public.consentimientos_paciente(paciente_id);\ncreate index if not exists idx_consent_odontologo on public.consentimientos_paciente(odontologo_id);\nalter table public.consentimientos_paciente enable row level security;\ndo $$ begin create policy \"consent_select_own\" on public.consentimientos_paciente for select to authenticated using (odontologo_id = auth.uid() and public.is_cuenta_activa()); exception when duplicate_object then null; end $$;\ndo $$ begin create policy \"consent_insert_own\" on public.consentimientos_paciente for insert to authenticated with check (odontologo_id = auth.uid() and public.is_cuenta_activa()); exception when duplicate_object then null; end $$;\ndo $$ begin create policy \"consent_update_own\" on public.consentimientos_paciente for update to authenticated using (odontologo_id = auth.uid() and public.is_cuenta_activa()) with check (odontologo_id = auth.uid()); exception when duplicate_object then null; end $$;\n-- Sin policy DELETE: integridad clinica (borrado fisico prohibido).\n\n-- 3. Trigger updated_at\ncreate or replace function public.tg_consent_touch_updated_at() returns trigger language plpgsql as $$ begin new.updated_at = now(); return new; end $$;\ndo $$ begin create trigger trg_cat_consent_updated before update on public.catalogo_consentimientos for each row execute function public.tg_consent_touch_updated_at(); exception when duplicate_object then null; end $$;\ndo $$ begin create trigger trg_consent_paciente_updated before update on public.consentimientos_paciente for each row execute function public.tg_consent_touch_updated_at(); exception when duplicate_object then null; end $$;\n\n-- 4. Bucket privado + policies de Storage (carpeta: {odontologo_id}/{paciente_id}/archivo)\ninsert into storage.buckets (id, name, public) values ('consentimientos','consentimientos', false) on conflict (id) do nothing;\ndo $$ begin create policy \"consent_obj_select_own\" on storage.objects for select to authenticated using (bucket_id = 'consentimientos' and (storage.foldername(name))[1] = auth.uid()::text and public.is_cuenta_activa()); exception when duplicate_object then null; end $$;\ndo $$ begin create policy \"consent_obj_insert_own\" on storage.objects for insert to authenticated with check (bucket_id = 'consentimientos' and (storage.foldername(name))[1] = auth.uid()::text and public.is_cuenta_activa()); exception when duplicate_object then null; end $$;\n-- Sin policy update/delete sobre objetos: inmutabilidad.\n\n-- 5. Seed de tipos base (cuerpo vacio; el texto legal lo completa super_admin/profesional)\ninsert into public.catalogo_consentimientos (tipo, titulo, cuerpo, version, activo)\nselect v.tipo, v.titulo, '', 1, true\nfrom (values\n  ('tratamiento','Consentimiento informado de tratamiento odontologico'),\n  ('habeas_data','Autorizacion de tratamiento de datos personales (habeas data)'),\n  ('imagenes','Consentimiento para uso de imagenes clinicas'),\n  ('anestesia','Consentimiento informado para anestesia local'),\n  ('menores','Consentimiento informado para pacientes menores de edad')\n) as v(tipo, titulo)\nwhere not exists (select 1 from public.catalogo_consentimientos c where c.tipo = v.tipo);\n",
+    "referencias_patron": [
+      "supabase/migrations/20260705040701_create_catalogo_eps.sql:1-14 (catalogo global + SELECT authenticated)",
+      "supabase/migrations/20260702010429_profiles_control_acceso.sql:18 (is_super_admin())",
+      "supabase/migrations/20260702015419_enforce_cuenta_activa_rls.sql:3,15 (is_cuenta_activa() + policy own)",
+      "supabase/migrations/20260702015353_storage_logos_policies.sql:4-15 (policies storage.objects por carpeta auth.uid())"
+    ],
+    "tipos_ts": "Sin archivo de tipos generado compartido en el repo (services tipan a mano). NO regenerar tipos Supabase en este plan; cliente-web define interfaces a mano (ver fase_2).",
+    "aplicacion_prod": "capa-datos SOLO escribe el archivo. Aplicar a prod es paso aparte, requiere OK explicito del usuario; luego registrar en supabase_migrations.schema_migrations.",
+    "criterio_terminado": "Archivo creado; SQL idempotente (re-ejecutable sin error); reversibilidad documentada en cabecera. Sin aplicar a prod."
+  },
+
+  "fase_2_cliente_odontologo": {
+    "owner": "cliente-web",
+    "modulo": "src/app/features/consentimientos/",
+    "cliente_supabase": "import { supabase } from 'src/app/core/supabase.client'; patron: const { data, error } = await supabase...; if (error) throw error;",
+    "crear": [
+      "src/app/features/consentimientos/models/consentimiento.model.ts",
+      "src/app/features/consentimientos/funciones/validar-archivo.funcion.ts",
+      "src/app/features/consentimientos/funciones/validar-archivo.funcion.spec.ts",
+      "src/app/features/consentimientos/funciones/ruta-storage.funcion.ts",
+      "src/app/features/consentimientos/funciones/ruta-storage.funcion.spec.ts",
+      "src/app/features/consentimientos/services/consentimiento.service.ts",
+      "src/app/features/consentimientos/services/catalogo-consentimiento.service.ts",
+      "src/app/features/consentimientos/components/consentimientos-paciente/consentimientos-paciente.{ts,html,css}",
+      "src/app/features/consentimientos/components/consentimiento-imprimible/consentimiento-imprimible.{ts,html,css}"
+    ],
+    "modificar": [
+      "src/app/features/pacientes/detalle/detalle.ts:39 (anadir 'consentimientos' al union TabId) y plantilla",
+      "src/app/features/pacientes/detalle/detalle.html:121-165 (boton de tab nuevo) y ~326-336 (@if (activeTab()==='consentimientos') <app-consentimientos-paciente [pacienteId]=\"patientId\" />)"
+    ],
+    "interfaces": {
+      "consentimiento.model.ts": "export interface CatalogoConsentimiento { id: string; tipo: string; titulo: string; cuerpo: string; version: number; activo: boolean; }\nexport type EstadoConsentimiento = 'vigente' | 'anulado';\nexport interface ConsentimientoPaciente { id: string; pacienteId: string; catalogoId: string; plantillaVersion: number; archivoPath: string; nombreArchivo: string; fechaFirma: string; estado: EstadoConsentimiento; motivoAnulacion: string | null; createdAt: string; tipo?: string; titulo?: string; }",
+      "consentimiento.service.ts": "listarPorPaciente(pacienteId: string): Promise<ConsentimientoPaciente[]>  // join catalogo tipo/titulo; mapea snake->camel; propaga error (nunca [] silencioso)\nsubir(a: { pacienteId: string; catalogo: CatalogoConsentimiento; archivo: File; fechaFirma: string }): Promise<ConsentimientoPaciente>  // 1) valida archivo 2) odontologoId = (await supabase.auth.getUser()).data.user.id 3) path = construirRutaStorage(odontologoId, pacienteId, archivo.name) 4) supabase.storage.from('consentimientos').upload(path, archivo) 5) insert row con plantilla_version = catalogo.version, archivo_path=path, nombre_archivo=archivo.name, fecha_firma, estado 'vigente'. Si falla insert, intenta remove del objeto subido.\nurlFirmada(archivoPath: string): Promise<string>  // supabase.storage.from('consentimientos').createSignedUrl(archivoPath, 60)\nanular(id: string, motivo: string): Promise<void>  // update estado='anulado', motivo_anulacion=motivo (motivo no vacio)",
+      "catalogo-consentimiento.service.ts": "listarActivos(): Promise<CatalogoConsentimiento[]>  // where activo=true, order titulo"
+    },
+    "funciones_puras": {
+      "validar-archivo.funcion.ts": "export const TIPOS_CONSENT = ['application/pdf','image/jpeg','image/png'] as const; export const MAX_BYTES_CONSENT = 10 * 1024 * 1024; export function validarArchivoConsentimiento(f: { type: string; size: number }): { ok: boolean; error?: string }  // tipo no permitido -> {ok:false,error:'Formato no permitido (PDF, JPG o PNG).'}; size>max -> {ok:false,error:'Archivo supera 10 MB.'}; else {ok:true}",
+      "ruta-storage.funcion.ts": "export function construirRutaStorage(odontologoId: string, pacienteId: string, nombreArchivo: string, uuid = crypto.randomUUID()): string  // sanitiza nombre (minuscula, espacios->'-', solo [a-z0-9._-]); retorna `${odontologoId}/${pacienteId}/${uuid}-${sanitizado}`"
+    },
+    "componentes": {
+      "consentimientos-paciente": "input.required<string>() pacienteId. Signals: lista, cargando, error, catalogo (activos), subiendo. Al init carga listarPorPaciente + listarActivos. UI: estado error (nunca 'sin registros' en error), lista (titulo/tipo, fecha_firma, badge estado, acciones Ver=urlFirmada+window.open, Anular). 'Nuevo': selector de catalogo -> boton Imprimir (muestra app-consentimiento-imprimible + window.print) -> input file (accept application/pdf,image/jpeg,image/png) + fecha_firma -> Subir (deshabilita boton mientras sube). Anular via ConfirmModalComponent + input motivo (obligatorio). Reusa app-button, app-input, app-empty-state, app-alert, app-confirm-modal.",
+      "consentimiento-imprimible": "inputs: cuerpo (string), titulo (string), pacienteHeader ({ nombre, documento } minimo). Renderiza titulo + cuerpo + cabecera + espacio de firma. Estilos @media print (oculta el resto). Sin logica de negocio."
+    },
+    "accesibilidad": "Objetivos tactiles >=40x40 (min-h-10 min-w-10); <label for> o aria-label en cada control; foco visible; confirmacion antes de anular; fechas America/Bogota.",
+    "criterio_terminado": "Odontologo lista/sube/ve(URL firmada)/anula consentimientos de SUS pacientes; vista imprimible funciona; specs de funciones verdes; gates verdes."
+  },
+
+  "fase_3_admin_catalogo": {
+    "owner": "cliente-web",
+    "crear": [
+      "src/app/features/consentimientos/pages/catalogo-admin/catalogo-admin.{ts,html,css}"
+    ],
+    "modificar": [
+      "src/app/app.routes.ts (anadir ruta 'configuracion/consentimientos' con canActivate [authGuard, adminGuard], lazy loadComponent)",
+      "src/app/features/consentimientos/services/catalogo-consentimiento.service.ts (anadir metodos admin)"
+    ],
+    "interfaces_admin": "catalogo-consentimiento.service.ts += listarTodos(): Promise<CatalogoConsentimiento[]>; crear(d: { tipo: string; titulo: string; cuerpo: string }): Promise<void>; editar(id: string, d: { titulo: string; cuerpo: string }): Promise<void>  // version = version + 1; activar(id: string, activo: boolean): Promise<void>",
+    "componente": "catalogo-admin: tabla de catalogo (tipo, titulo, version, activo), editar texto en app-modal con app-input/textarea, crear nuevo, toggle activo. Guard adminGuard a nivel de ruta (RLS ya bloquea escritura a no-admin). Reusa app-modal, app-button, app-input, app-confirm-modal.",
+    "referencias_patron": [
+      "src/app/app.routes.ts:12-15 (ruta admin con [authGuard, adminGuard], lazy)",
+      "src/app/app.routes.ts:71-76 (ruta configuracion/eps)",
+      "src/app/features/configuracion-eps/ (patron pantalla CRUD de catalogo via servicio)"
+    ],
+    "criterio_terminado": "super_admin crea/edita (sube version)/activa-desactiva plantillas; odontologo no accede a la ruta (adminGuard) y RLS bloquea su escritura; gates verdes."
+  },
+
+  "verificacion": {
+    "owner": "verificador",
+    "focos": [
+      "Contrato: tablas/columnas/estados coinciden con este expediente.",
+      "RLS fail-closed: intentar refutar aislamiento entre consultorios (odontologo A no ve/descarga consentimientos de B); catalogo escribible solo por super_admin; cuenta inactiva -> 0 filas.",
+      "Integridad: no existe ruta de borrado fisico (sin policy DELETE en tabla ni objetos); anular exige motivo.",
+      "Storage: bucket privado; cliente usa SOLO createSignedUrl (sin getPublicUrl).",
+      "Datos sensibles: sin PII en logs/errores/seeds/tests.",
+      "Gates reales: tsc, build, test, sincronizar --check."
+    ]
+  },
+
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check"
+  ],
+
+  "pendientes_fuera_de_plan": [
+    "Validacion legal con profesional (Ley 527, habeas data, retencion, menores) antes de uso real.",
+    "Relleno del cuerpo real de cada plantilla (super_admin).",
+    "Aplicacion de la migracion a produccion (requiere OK explicito).",
+    "Manual de usuario de la pantalla de consentimientos (si se libera).",
+    "Revocar/rotar el PAT de Supabase expuesto en sesiones previas."
+  ]
+}

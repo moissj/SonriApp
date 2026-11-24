@@ -14,7 +14,9 @@
 - [ ] Gates locales verde (`tsc --noEmit`, `npm run build`, `npm test -- --watch=false`, `sincronizar.mjs --check`)
 - [x] Revisión adversarial (`verificador`): **APROBADO_CON_RESERVAS**, 0 bloqueantes, 4 gates verde; todas las refutaciones de RLS/integridad/storage/PII fallaron
 - [x] Endurecimiento de reservas (contrato v2, `capa-datos`): insert valida pertenencia del paciente; trigger de inmutabilidad + no-des-anular. Migración v2 (sin aplicar)
-- [x] Commits locales (F1, F2+F3, endurecimiento). **Pendiente OK explícito:** push / aplicar migración a prod
+- [x] Commits locales (F1, F2+F3, endurecimiento)
+- [x] Migración aplicada a **producción** (Management API, 2026-11-24): verificado 2 tablas+RLS, 9 policies (sin DELETE en consentimientos_paciente), bucket privado, 3 triggers, seed 5 tipos; registrada en `supabase_migrations.schema_migrations` (sin drift)
+- [x] Push a `origin/main` (OK explícito del usuario)
 
 ## Pendientes / deuda
 - **Sin verificación e2e contra BD real** (migración no aplicada; sin Supabase CLI local): bucket, policies y join `catalogo:catalogo_consentimientos` sin probar de punta a punta.

@@ -1,6 +1,6 @@
-<div class="px-4 py-6 max-w-screen-lg mx-auto pb-24 md:pb-6">
+<div class="px-4 py-5 max-w-screen-lg mx-auto pb-24 md:pb-6">
   <!-- Cabecera de control -->
-  <div class="flex items-center justify-between mb-6">
+  <div class="flex items-center justify-between mb-5">
     <button
       (click)="goBack()"
       class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
@@ -37,14 +37,14 @@
   </div>
 
   @if (errorMessage()) {
-    <app-alert [message]="errorMessage()!" type="error" [dismissible]="true" (dismissed)="errorMessage.set(null)" class="mb-6" />
+    <app-alert [message]="errorMessage()!" type="error" [dismissible]="true" (dismissed)="errorMessage.set(null)" class="mb-5" />
   }
 
   @if (isLoading()) {
     <!-- Skeletons carga de detalles -->
-    <div class="space-y-6 animate-pulse">
-      <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col items-center">
-        <div class="h-20 w-20 rounded-full bg-gray-100 mb-4"></div>
+    <div class="space-y-5 animate-pulse">
+      <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col items-center">
+        <div class="h-14 w-14 rounded-full bg-gray-100 mb-4"></div>
         <div class="h-6 bg-gray-100 rounded w-1/3 mb-2"></div>
         <div class="h-4 bg-gray-100 rounded w-1/4"></div>
       </div>
@@ -54,12 +54,12 @@
   } @else {
     @if (patient()) {
       <!-- Tarjeta del Perfil del Paciente -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6 text-center">
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5 text-center">
         <div class="flex flex-col items-center">
-          <div class="h-20 w-20 rounded-full bg-sky-50 border-2 border-sky-100 text-sky-700 font-bold text-2xl flex items-center justify-center mb-4">
+          <div class="h-14 w-14 rounded-full bg-sky-50 border-2 border-sky-100 text-sky-700 font-bold text-xl flex items-center justify-center mb-4">
             {{ getInitials(patient()!.nombre_completo) }}
           </div>
-          <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-snug">
+          <h1 class="text-xl font-bold text-gray-900 leading-snug">
             {{ patient()!.nombre_completo }}
           </h1>
           <span class="inline-flex items-center gap-1.5 mt-2 bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
@@ -69,7 +69,7 @@
 
         <!-- Acciones rápidas de comunicación -->
         @if (patient()!.telefono) {
-          <div class="flex justify-center gap-4 mt-6 border-t border-gray-50 pt-5">
+          <div class="flex justify-center gap-4 mt-5 border-t border-gray-50 pt-5">
             <!-- Botón Llamar -->
             <a
               [href]="'tel:' + patient()!.telefono"
@@ -99,7 +99,7 @@
       <!-- Acceso a la Historia Clínica completa (módulo independiente) -->
       <a
         [routerLink]="['/historia-clinica', patientId]"
-        class="group flex items-center justify-between gap-3 bg-gradient-to-r from-sky-600 to-teal-600 text-white rounded-2xl px-5 py-4 mb-6 shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+        class="group flex items-center justify-between gap-3 bg-gradient-to-r from-sky-600 to-teal-600 text-white rounded-2xl px-5 py-4 mb-5 shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
       >
         <div class="flex items-center gap-3 min-w-0">
           <div class="h-11 w-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -118,7 +118,7 @@
       </a>
 
       <!-- Selector de Pestañas (Tabs) -->
-      <div class="tab-bar flex border-b border-gray-100 mb-6 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1">
+      <div class="tab-bar flex border-b border-gray-100 mb-5 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1">
         <button
           (click)="changeTab('info')"
           [class.bg-sky-50]="activeTab() === 'info'"
@@ -183,7 +183,7 @@
 
       <!-- 1. Información Personal -->
       @if (activeTab() === 'info') {
-        <div class="space-y-6">
+        <div class="space-y-5">
           <!-- Alerta Crítica de Alergias -->
           @if (patient()!.alergias) {
             <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3 text-red-950">
@@ -197,7 +197,7 @@
             </div>
           }
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Columna Datos Personales -->
             <app-card [bordered]="true" shadow="sm">
               <div class="border-b border-gray-100 pb-2.5 mb-4">

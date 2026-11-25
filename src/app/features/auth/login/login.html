@@ -1,7 +1,7 @@
 <div class="min-h-screen lg:flex">
 
   <!-- Panel izquierdo profesional (solo desktop) -->
-  <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-sky-700 via-sky-600 to-teal-600 text-white p-12 flex-col justify-between">
+  <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-sky-700 via-sky-600 to-teal-600 text-white p-6 sm:p-8 flex-col justify-between">
     <!-- Formas decorativas -->
     <div class="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-2xl"></div>
     <div class="absolute -bottom-32 -left-16 w-96 h-96 rounded-full bg-teal-400/20 blur-3xl"></div>
@@ -10,17 +10,17 @@
     <!-- Marca -->
     <div class="relative flex items-center gap-3">
       <img src="icons/icon-64.png" alt="SonriApp" class="h-11 w-11 rounded-xl object-contain bg-white/95 p-1 shadow-md" />
-      <span class="text-2xl font-bold tracking-tight">SonriApp</span>
+      <span class="text-xl font-bold tracking-tight">SonriApp</span>
     </div>
 
     <!-- Mensaje principal -->
     <div class="relative max-w-md">
-      <h2 class="text-4xl font-bold leading-tight">Tu consultorio odontológico, digital y en orden.</h2>
+      <h2 class="text-2xl sm:text-3xl font-bold leading-tight">Tu consultorio odontológico, digital y en orden.</h2>
       <p class="text-sky-100 mt-4 leading-relaxed">
         Gestiona citas, pacientes, historia clínica y pagos desde un solo lugar, con seguridad y en tiempo real.
       </p>
 
-      <ul class="mt-8 space-y-3.5">
+      <ul class="mt-6 space-y-3.5">
         <li class="flex items-center gap-3">
           <span class="flex items-center justify-center h-7 w-7 rounded-full bg-white/15 shrink-0">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
@@ -46,18 +46,18 @@
   </div>
 
   <!-- Panel derecho: formulario de login -->
-  <div class="flex-1 lg:w-1/2 bg-gradient-to-br from-sky-50 to-white flex items-center justify-center px-4 py-12">
+  <div class="flex-1 lg:w-1/2 bg-gradient-to-br from-sky-50 to-white flex items-center justify-center px-4 py-6 sm:py-8">
     <div class="w-full max-w-sm">
 
       <!-- Brand -->
-      <div class="text-center mb-8">
-        <img src="icons/icon-128.png" alt="SonriApp" class="w-16 h-16 mx-auto mb-4 rounded-2xl shadow-md object-contain" />
-        <h1 class="text-2xl font-bold text-gray-800">SonriApp</h1>
+      <div class="text-center mb-6">
+        <img src="icons/icon-128.png" alt="SonriApp" class="w-14 h-14 mx-auto mb-4 rounded-2xl shadow-md object-contain" />
+        <h1 class="text-xl font-bold text-gray-800">SonriApp</h1>
         <p class="text-sm text-gray-500 mt-1">Ingresa a tu consultorio digital</p>
       </div>
 
       <!-- Card -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 space-y-5">
 
         @if (serverError()) {
           <app-alert

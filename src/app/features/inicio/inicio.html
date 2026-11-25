@@ -1,9 +1,9 @@
-<div class="px-4 py-6 max-w-screen-lg mx-auto space-y-6">
+<div class="px-4 py-5 max-w-screen-lg mx-auto space-y-5">
 
   <!-- Saludo -->
   <section>
     <p class="text-sm text-gray-500 capitalize">{{ todayLabel() }}</p>
-    <h2 class="text-2xl font-bold text-gray-800 mt-0.5">¡Hola, {{ firstName() || 'doctor' }}! 👋</h2>
+    <h2 class="text-xl font-bold text-gray-800 mt-0.5">¡Hola, {{ firstName() || 'doctor' }}! 👋</h2>
     @if (profile()?.nombre_consultorio) {
       <p class="text-sm text-sky-700 font-medium mt-0.5">{{ profile()!.nombre_consultorio }}</p>
     }
@@ -20,7 +20,7 @@
           </svg>
           Citas hoy
         </div>
-        <p class="text-3xl font-bold text-gray-800 mt-2">{{ loading() ? '—' : citasHoy().length }}</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ loading() ? '—' : citasHoy().length }}</p>
       </app-card>
     </a>
 
@@ -33,7 +33,7 @@
           </svg>
           Próximos 7 días
         </div>
-        <p class="text-3xl font-bold text-gray-800 mt-2">{{ loading() ? '—' : proximas7() }}</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ loading() ? '—' : proximas7() }}</p>
       </app-card>
     </a>
 
@@ -46,7 +46,7 @@
           </svg>
           Pacientes nuevos (mes)
         </div>
-        <p class="text-3xl font-bold text-gray-800 mt-2">{{ loading() ? '—' : pacientesNuevosMes() }}</p>
+        <p class="text-2xl font-bold text-gray-800 mt-2">{{ loading() ? '—' : pacientesNuevosMes() }}</p>
       </app-card>
     </a>
 
@@ -59,7 +59,7 @@
           </svg>
           Saldo pendiente
         </div>
-        <p class="text-2xl font-bold mt-2 break-words" [class.text-red-600]="saldoPendiente() > 0" [class.text-gray-800]="saldoPendiente() === 0">
+        <p class="text-xl font-bold mt-2 break-words" [class.text-red-600]="saldoPendiente() > 0" [class.text-gray-800]="saldoPendiente() === 0">
           {{ loading() ? '—' : (saldoPendiente() | copCurrency) }}
         </p>
       </app-card>
@@ -96,7 +96,7 @@
         }
       </div>
     } @else {
-      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-center">
+      <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 text-center">
         <p class="text-sm text-gray-500">No tienes citas para hoy.</p>
         <a routerLink="/citas" class="inline-block mt-3 text-sm font-semibold text-sky-600 hover:text-sky-700">Ir a la agenda</a>
       </div>

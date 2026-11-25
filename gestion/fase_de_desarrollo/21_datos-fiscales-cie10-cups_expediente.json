@@ -1,0 +1,92 @@
+{
+  "plan": "21_datos-fiscales-cie10-cups",
+  "version": 1,
+  "fecha": "2026-11-24",
+  "alcance": "Sub-proyecto A del roadmap #1 (Cumplimiento CO): datos fiscales del prestador + catalogos oficiales CIE-10/CUPS. Sin emision DIAN ni registro de atencion.",
+  "bd": {
+    "profiles_columnas_nuevas": [
+      { "nombre": "nit", "tipo": "text", "nullable": true },
+      { "nombre": "razon_social", "tipo": "text", "nullable": true },
+      { "nombre": "codigo_habilitacion_reps", "tipo": "text", "nullable": true }
+    ],
+    "tablas": [
+      {
+        "nombre": "catalogo_cie10",
+        "tipo": "catalogo_global",
+        "columnas": [
+          { "nombre": "codigo", "tipo": "text", "pk": true },
+          { "nombre": "descripcion", "tipo": "text", "nullable": false },
+          { "nombre": "capitulo", "tipo": "text", "nullable": true },
+          { "nombre": "activo", "tipo": "boolean", "default": true, "nullable": false },
+          { "nombre": "version", "tipo": "text", "nullable": false },
+          { "nombre": "created_at", "tipo": "timestamptz", "default": "now()" },
+          { "nombre": "updated_at", "tipo": "timestamptz", "default": "now()" }
+        ],
+        "indices": ["pk(codigo)", "gin(descripcion gin_trgm_ops)"],
+        "rls": {
+          "select": "authenticated using(true)",
+          "insert_update_delete": "is_super_admin()"
+        }
+      },
+      {
+        "nombre": "catalogo_cups",
+        "tipo": "catalogo_global",
+        "columnas": [
+          { "nombre": "codigo", "tipo": "text", "pk": true },
+          { "nombre": "descripcion", "tipo": "text", "nullable": false },
+          { "nombre": "sexo", "tipo": "char(1)", "nullable": true, "dominio": "M|F|Z" },
+          { "nombre": "ambito", "tipo": "text", "nullable": true },
+          { "nombre": "quirurgico", "tipo": "boolean", "nullable": true },
+          { "nombre": "activo", "tipo": "boolean", "default": true, "nullable": false },
+          { "nombre": "version", "tipo": "text", "nullable": false },
+          { "nombre": "created_at", "tipo": "timestamptz", "default": "now()" },
+          { "nombre": "updated_at", "tipo": "timestamptz", "default": "now()" }
+        ],
+        "indices": ["pk(codigo)", "gin(descripcion gin_trgm_ops)"],
+        "rls": {
+          "select": "authenticated using(true)",
+          "insert_update_delete": "is_super_admin()"
+        }
+      }
+    ],
+    "extensiones": ["pg_trgm"],
+    "triggers": ["updated_at BEFORE UPDATE en ambos catalogos"],
+    "idempotencia": "IF NOT EXISTS / CREATE OR REPLACE; nunca reescribir migraciones aplicadas"
+  },
+  "procedencia_datos": {
+    "responsable": "Claude (N0), no el usuario",
+    "fuente": "SISPRO tablas de referencia",
+    "cups": { "tabla_sispro": "CUPSRips", "vigencia": "Res. 2706/2025", "version_sembrada": "CUPS-2706-2025" },
+    "cie10": { "tabla_sispro": "CIE-10 referencia morbilidad", "version_sembrada": "CIE10-SISPRO-2026-11-24" },
+    "regla": "raw files en directorio propio (scratchpad), no confiables, no se commitean; validar conteo vs resolucion; no mirrors de terceros como fuente de verdad"
+  },
+  "loader": {
+    "ruta": "tools/catalogos/cargar-catalogos.mjs",
+    "funcion_pura": "tools/catalogos/funciones/parsear-catalogo.mjs (+ .test.mjs)",
+    "credenciales": "SUPABASE_URL + SERVICE_ROLE_KEY solo de entorno; jamas en src/**, repo o chat",
+    "comportamiento": "upsert por codigo en lotes ~500; idempotente; reporta insertado/actualizado/descartado + version"
+  },
+  "cliente": {
+    "servicios": [
+      "Cie10Service.buscar(q, limit=20): Promise<Cie10[]>",
+      "CupsService.buscar(q, limit=20): Promise<Cups[]>"
+    ],
+    "modelos": ["Cie10 {codigo, descripcion}", "Cups {codigo, descripcion}"],
+    "perfil": "Profile + {nit, razon_social, codigo_habilitacion_reps}; form perfil con 3 campos editables, validacion cliente, submit deshabilitado al guardar",
+    "regla_errores": "error de Supabase propagado; nunca [] silencioso"
+  },
+  "fuera_de_alcance": [
+    "registro de atencion fiscal (diagnostico+CUPS+valores por procedimiento) = Plan 22",
+    "emision factura DIAN y FEV-RIPS",
+    "CIE-11 (Res. 1442/2024)",
+    "copago/cuota moderadora",
+    "UI de busqueda clinica (consumo de servicios) = Plan 22"
+  ],
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check",
+    "node --test tools/catalogos/**/*.test.mjs"
+  ]
+}

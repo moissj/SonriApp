@@ -117,7 +117,7 @@ export class HistoriaClinicaCompletaComponent implements OnInit {
         const visible = entradas.find((e) => e.isIntersecting);
         if (visible) this.seccionActiva.set(visible.target.id);
       },
-      { rootMargin: '-110px 0px -60% 0px' },
+      { rootMargin: '-150px 0px -60% 0px' },
     );
     for (const s of this.secciones) {
       const el = document.getElementById(s.id);

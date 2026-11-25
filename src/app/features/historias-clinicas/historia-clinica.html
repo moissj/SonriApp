@@ -46,8 +46,8 @@
   </div>
 
   @if (!loading() && paciente()) {
-    <!-- Stepper horizontal unico (estatico; el header sticky mide ~73px, de ahi scroll-mt-28) -->
-    <nav aria-label="Secciones de la historia clinica" class="mt-5 bg-white border-y border-gray-100">
+    <!-- Stepper horizontal unico sticky bajo el header (~72px); de ahi scroll-mt-36 -->
+    <nav aria-label="Secciones de la historia clinica" class="sticky top-[72px] z-10 mt-5 bg-white border-y border-gray-100">
       <ol class="flex gap-1 overflow-x-auto px-4 py-3 max-w-screen-lg mx-auto sm:justify-between">
         @for (s of secciones; track s.id; let i = $index) {
           <li class="shrink-0">
@@ -83,7 +83,7 @@
       }
 
       @if (!loading() && paciente(); as p) {
-        <section id="examen-ingreso" class="scroll-mt-28">
+        <section id="examen-ingreso" class="scroll-mt-36">
           <div class="flex items-center gap-2 mb-3">
             <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">1</span>
             <lucide-icon name="clipboard-list" class="w-5 h-5 text-primary" aria-hidden="true" />
@@ -91,7 +91,7 @@
           </div>
           <app-examen-ingreso [pacienteId]="pacienteId" />
         </section>
-        <section id="evoluciones" class="scroll-mt-28 pt-8 border-t border-gray-100">
+        <section id="evoluciones" class="scroll-mt-36 pt-8 border-t border-gray-100">
           <div class="flex items-center gap-2 mb-3">
             <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">2</span>
             <lucide-icon name="calendar" class="w-5 h-5 text-primary" aria-hidden="true" />
@@ -99,7 +99,7 @@
           </div>
           <app-evoluciones [pacienteId]="pacienteId" />
         </section>
-        <section id="ayudas-diagnosticas" class="scroll-mt-28 pt-8 border-t border-gray-100">
+        <section id="ayudas-diagnosticas" class="scroll-mt-36 pt-8 border-t border-gray-100">
           <div class="flex items-center gap-2 mb-3">
             <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">3</span>
             <lucide-icon name="image" class="w-5 h-5 text-primary" aria-hidden="true" />
@@ -114,7 +114,7 @@
             />
           </app-card>
         </section>
-        <section id="odontograma" class="scroll-mt-28 pt-8 border-t border-gray-100">
+        <section id="odontograma" class="scroll-mt-36 pt-8 border-t border-gray-100">
           <div class="flex items-center gap-2 mb-3">
             <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">4</span>
             <lucide-icon name="stethoscope" class="w-5 h-5 text-primary" aria-hidden="true" />
@@ -122,7 +122,7 @@
           </div>
           <app-odontograma [pacienteId]="pacienteId" />
         </section>
-        <section id="consentimiento" class="scroll-mt-28 pt-8 border-t border-gray-100">
+        <section id="consentimiento" class="scroll-mt-36 pt-8 border-t border-gray-100">
           <div class="flex items-center gap-2 mb-3">
             <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">5</span>
             <lucide-icon name="pen-line" class="w-5 h-5 text-primary" aria-hidden="true" />

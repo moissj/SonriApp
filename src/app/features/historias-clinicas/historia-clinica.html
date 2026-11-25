@@ -46,9 +46,9 @@
   </div>
 
   @if (!loading() && paciente()) {
-    <!-- Stepper horizontal (movil/tablet) -->
-    <nav aria-label="Secciones de la historia clinica" class="lg:hidden mt-4 mb-2 bg-white border-y border-gray-100">
-      <ol class="flex gap-1 overflow-x-auto px-4 py-3 max-w-screen-lg mx-auto">
+    <!-- Stepper horizontal unico (estatico; el header sticky mide ~73px, de ahi scroll-mt-28) -->
+    <nav aria-label="Secciones de la historia clinica" class="mt-5 bg-white border-y border-gray-100">
+      <ol class="flex gap-1 overflow-x-auto px-4 py-3 max-w-screen-lg mx-auto sm:justify-between">
         @for (s of secciones; track s.id; let i = $index) {
           <li class="shrink-0">
             <a
@@ -67,7 +67,8 @@
                 [class.border-primary]="seccionActiva() === s.id"
                 [class.border-gray-300]="seccionActiva() !== s.id"
               >{{ i + 1 }}</span>
-              {{ s.etiquetaCorta }}
+              <span class="hidden sm:inline">{{ s.etiqueta }}</span>
+              <span class="sm:hidden">{{ s.etiquetaCorta }}</span>
             </a>
           </li>
         }
@@ -75,37 +76,7 @@
     </nav>
   }
 
-  <div class="max-w-screen-lg mx-auto px-4 py-5 lg:grid lg:grid-cols-[13rem_1fr] lg:gap-8">
-    @if (!loading() && paciente()) {
-      <!-- Stepper vertical (desktop) -->
-      <nav aria-label="Secciones de la historia clinica" class="hidden lg:block">
-        <ol class="sticky top-28 pt-2">
-          @for (s of secciones; track s.id; let i = $index) {
-            <li class="relative pb-6 last:pb-0 after:absolute after:left-4 after:top-9 after:bottom-1 after:w-px after:bg-gray-200 last:after:hidden">
-              <a
-                [href]="'#' + s.id"
-                (click)="irASeccion($event, s.id)"
-                [attr.aria-current]="seccionActiva() === s.id ? 'step' : null"
-                class="flex items-center gap-3 text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                [class.font-semibold]="seccionActiva() === s.id"
-              [class.text-primary]="seccionActiva() === s.id"
-              [class.text-gray-500]="seccionActiva() !== s.id"
-              >
-                <span
-                  class="h-8 w-8 shrink-0 rounded-full border-2 flex items-center justify-center text-xs font-bold bg-white"
-                  [class.bg-primary]="seccionActiva() === s.id"
-                [class.text-white]="seccionActiva() === s.id"
-                [class.border-primary]="seccionActiva() === s.id"
-                [class.border-gray-300]="seccionActiva() !== s.id"
-                >{{ i + 1 }}</span>
-                {{ s.etiqueta }}
-              </a>
-            </li>
-          }
-        </ol>
-      </nav>
-    }
-
+  <div class="max-w-screen-lg mx-auto px-4 py-6">
     <div class="min-w-0 space-y-10">
       @if (error()) {
         <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>

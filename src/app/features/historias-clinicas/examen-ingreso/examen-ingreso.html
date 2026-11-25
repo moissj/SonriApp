@@ -13,8 +13,6 @@
       <span class="section-num">3</span>
       <h3 class="section-title">Antecedentes de salud</h3>
       <div class="bulk-actions">
-        <button type="button" class="bulk-btn" aria-label="Marcar todos los antecedentes como Sí"
-          (click)="setAllAntecedentes('si')">Todos Sí</button>
         <button type="button" class="bulk-btn" aria-label="Marcar todos los antecedentes como No"
           (click)="setAllAntecedentes('no')">Todos No</button>
       </div>
@@ -24,7 +22,7 @@
       @for (nombre of antecedentesNombres; track nombre; let i = $index) {
         <app-checklist-item
           [nombre]="nombre"
-          mode="si-no"
+          mode="si-no-nosabe"
           [valor]="antecedentes()[i].valor"
           (valorChange)="patchEntry(antecedentes, i, {valor: $event})"
           [observacion]="antecedentes()[i].observacion"

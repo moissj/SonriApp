@@ -2,9 +2,10 @@
   <span class="checklist-item__label">{{ nombre() }}</span>
 
   <div class="checklist-item__btns" role="group" [attr.aria-label]="nombre()">
-    @for (op of opciones; track op.value) {
+    @for (op of opciones(); track op.value) {
       <button
         type="button"
+        [attr.aria-label]="op.aria"
         class="checklist-item__btn"
         [class.checklist-item__btn--active]="valor() === op.value"
         [attr.aria-pressed]="valor() === op.value"

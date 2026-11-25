@@ -10,6 +10,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 import { PresupuestosComponent } from './presupuestos/presupuestos';
 import { PagosComponent } from './pagos/pagos';
 import { ConsentimientosPacienteComponent } from '../../consentimientos/components/consentimientos-paciente/consentimientos-paciente';
+import { tieneAlergiaReal } from './funciones/alergia.funcion';
 
 type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'consentimientos' | 'comunicacion';
 
@@ -32,6 +33,7 @@ type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'consentimientos' | '
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PacienteDetailComponent implements OnInit {
+  protected readonly tieneAlergiaReal = tieneAlergiaReal;
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly location = inject(Location);

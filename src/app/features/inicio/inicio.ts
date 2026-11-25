@@ -4,6 +4,7 @@ import { DatePipe } from '@angular/common';
 import { ProfileService } from '../../core/services/profile.service';
 import { DashboardService } from '../../core/services/dashboard.service';
 import { Cita } from '../../core/services/cita.service';
+import { fechaLargaBogota } from '../../core/funciones/fecha-bogota.funcion';
 import { CopCurrencyPipe } from '../../shared/pipes/cop-currency.pipe';
 import { CardComponent } from '../../shared/components/card/card';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
@@ -32,7 +33,7 @@ export class InicioComponent {
   readonly firstName = computed(() => this.profile()?.nombre_completo?.trim().split(/\s+/)[0] ?? '');
 
   readonly todayLabel = computed(() =>
-    new Date().toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    fechaLargaBogota(new Date())
   );
 
   constructor() {

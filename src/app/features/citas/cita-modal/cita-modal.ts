@@ -83,7 +83,7 @@ export class CitaModalComponent implements OnInit {
       debounceTime(400),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe(async (val) => {
-      if (val.fecha_hora && val.duracion_minutos) {
+      if (this.selectedPatient() && val.fecha_hora && val.duracion_minutos) {
         try {
           const conflicts = await this.citaService.checkOverlap(
             val.fecha_hora,
@@ -156,6 +156,7 @@ export class CitaModalComponent implements OnInit {
 
   onPacienteSeleccionado(patient: Patient): void {
     this.selectedPatient.set(patient);
+    this.form.updateValueAndValidity(); // re-evalúa solapamiento ya con paciente
     this.cdr.markForCheck();
   }
 

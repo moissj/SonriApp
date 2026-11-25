@@ -11,6 +11,7 @@ import { supabase } from '../../core/supabase.client';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal';
 import { CitaModalComponent } from './cita-modal/cita-modal';
+import { aFechaBogota, hoyBogota } from '../../core/funciones/fecha-bogota.funcion';
 
 @Component({
   selector: 'app-citas',
@@ -34,7 +35,7 @@ export class CitasComponent implements OnInit, OnDestroy {
     });
   }
 
-  readonly selectedDate = signal<string>(new Date().toISOString().split('T')[0]);
+  readonly selectedDate = signal<string>(hoyBogota());
   readonly currentView = signal<'dia' | 'semana' | 'mes'>('dia');
   readonly refreshTrigger = signal<number>(0);
   readonly activeMenuCita = signal<Cita | null>(null);
@@ -84,7 +85,7 @@ export class CitasComponent implements OnInit, OnDestroy {
     return dates.map((date) => {
       const dayName = daysSpanish[date.getDay()];
       const dayNum = date.getDate();
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = aFechaBogota(date);
       return {
         label: `${dayName} ${dayNum}`,
         dateStr,
@@ -120,10 +121,10 @@ export class CitasComponent implements OnInit, OnDestroy {
     const dates = this.monthDates();
     const activeDate = new Date(this.selectedDate() + 'T00:00:00');
     const currentMonth = activeDate.getMonth();
-    const todayStr = new Date().toISOString().split('T')[0];
-    
+    const todayStr = hoyBogota();
+
     return dates.map((date) => {
-      const dateStr = date.toISOString().split('T')[0];
+      const dateStr = aFechaBogota(date);
       const isCurrentMonth = date.getMonth() === currentMonth;
       const isToday = dateStr === todayStr;
       return {
@@ -299,7 +300,7 @@ export class CitasComponent implements OnInit, OnDestroy {
   }
 
   goToday(): void {
-    this.selectedDate.set(new Date().toISOString().split('T')[0]);
+    this.selectedDate.set(hoyBogota());
   }
 
   selectMonthDay(dateStr: string): void {

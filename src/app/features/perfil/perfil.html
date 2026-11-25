@@ -98,6 +98,36 @@
     </app-card>
 
     <app-card [bordered]="true" shadow="sm">
+      <h3 class="text-sm font-semibold text-gray-700 mb-4">Datos del prestador (facturación)</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label for="perfil-nit" class="block text-xs font-semibold text-gray-600 mb-1">NIT</label>
+          <input id="perfil-nit" type="text" inputmode="numeric" formControlName="nit" placeholder="900123456-7"
+            class="w-full min-h-10 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+          @if (form.controls.nit.touched && form.controls.nit.invalid) {
+            <p class="text-xs text-red-600 mt-1">NIT numérico de 6 a 10 dígitos, con dígito de verificación opcional.</p>
+          }
+        </div>
+        <div>
+          <label for="perfil-reps" class="block text-xs font-semibold text-gray-600 mb-1">Código de habilitación REPS</label>
+          <input id="perfil-reps" type="text" inputmode="numeric" formControlName="codigo_habilitacion_reps"
+            class="w-full min-h-10 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+          @if (form.controls.codigo_habilitacion_reps.touched && form.controls.codigo_habilitacion_reps.invalid) {
+            <p class="text-xs text-red-600 mt-1">Solo dígitos (8 a 12).</p>
+          }
+        </div>
+        <div class="md:col-span-2">
+          <label for="perfil-razon" class="block text-xs font-semibold text-gray-600 mb-1">Razón social</label>
+          <input id="perfil-razon" type="text" formControlName="razon_social"
+            class="w-full min-h-10 px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500" />
+          @if (form.controls.razon_social.touched && form.controls.razon_social.invalid) {
+            <p class="text-xs text-red-600 mt-1">Máximo 200 caracteres.</p>
+          }
+        </div>
+      </div>
+    </app-card>
+
+    <app-card [bordered]="true" shadow="sm">
       <h3 class="text-sm font-semibold text-gray-700 mb-4">Horarios y citas</h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>

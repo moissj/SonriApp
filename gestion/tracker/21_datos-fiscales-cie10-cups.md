@@ -8,13 +8,15 @@
 ## Checklist
 - [x] Diseño aprobado (brainstorming) + spec commiteado (`e812397`)
 - [x] Contrato `expediente.json` v1 + plan + tracker
-- [ ] Tarea 1 (`capa-datos`): migración `profiles` cols + `catalogo_cie10`/`catalogo_cups` + RLS fail-closed + pg_trgm + índices + triggers; aplicada local
-- [ ] Tarea 2 (`capa-datos` + N0): loader + parseo (+test); hidratación desde SISPRO (CUPS Res. 2706/2025, CIE-10) con `version` y conteo validado
-- [ ] Tarea 3 (`cliente-web`): `Cie10Service`/`CupsService` + `Profile` 3 cols + edición prestador en perfil
-- [ ] Gates verde (`tsc` / `build` / `test` / `sincronizar --check` / `node --test tools/catalogos`)
-- [ ] Revisión adversarial (`verificador`): RLS global, SERVICE_ROLE fuera de src, idempotencia
+- [x] Tarea 1 (`capa-datos`): migración `20261124140000_datos_fiscales_cie10_cups.sql` escrita + revisada N0 (idempotente, aditiva en profiles, RLS fail-closed, funciones `is_super_admin`/`set_updated_at` confirmadas). `db reset` local no disponible (CLI fuera de PATH); aplicación a prod = Tarea 5 con OK
+- [x] Tarea 2 (`capa-datos`): loader `tools/catalogos/cargar-catalogos.mjs` + parseo puro (+test 5/5). **Hidratación SISPRO pendiente** (requiere migración en cloud = paso prod con OK)
+- [x] Tarea 3 (`cliente-web`): `Cie10Service`/`CupsService` + `Profile` 3 cols + edición prestador en perfil + validadores puros (`perfil-prestador.funcion` +spec)
+- [x] Gates verde (tsc 0 / build 0 / test 43 / sincronizar OK / parser 5/5)
+- [x] Revisión adversarial (`verificador`): **APROBADO**, 0 bloqueantes (RLS fail-closed, SERVICE_ROLE solo env/fuera de src, idempotencia, labels accesibilidad)
+- [x] Commit local del código (migración + loader + servicios + perfil)
 - [ ] Manual: actualizar página de perfil (nuevos campos del prestador)
-- [ ] Aplicar migración a **prod (OK explícito)** + commit local. **Pendiente OK:** push
+- [ ] **PASO PROD (OK explícito):** aplicar migración a cloud + hidratar catálogos SISPRO + validar conteos
+- [ ] **Pendiente OK:** push
 
 ## Pendientes / deuda
 - Registro de atención fiscal (diagnóstico+CUPS+valores por procedimiento) → **Plan 22**.

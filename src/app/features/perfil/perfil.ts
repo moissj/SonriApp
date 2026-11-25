@@ -1,14 +1,14 @@
-import { Component, ChangeDetectionStrategy, inject, signal, computed, effect } from '@angular/core';
+import { Component, ChangeDetectionStrategy, DestroyRef, inject, signal, computed, effect } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { DestroyRef } from '@angular/core';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
 import { UbicacionService, Departamento, Municipio } from '../../core/services/ubicacion.service';
 import { CardComponent } from '../../shared/components/card/card';
 import { AlertComponent } from '../../shared/components/alert/alert';
 import { DURACIONES_CITA } from '../../shared/constants/colombia';
+import { nitValido, repsValido, opcionalValido, prestadorAUpdate } from './funciones/perfil-prestador.funcion';
 
 @Component({
   selector: 'app-perfil',
@@ -30,7 +30,6 @@ export class PerfilComponent {
 
   readonly departamentos = signal<Departamento[]>([]);
   readonly municipios = signal<Municipio[]>([]);
-
   readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   readonly success = signal<string | null>(null);
@@ -39,7 +38,6 @@ export class PerfilComponent {
   readonly logoPreview = signal<string | null>(null);
   private selectedLogoFile: File | null = null;
   private patched = false;
-
   readonly email = computed(() => this.auth.user()?.email ?? '');
 
   readonly initials = computed(() => {
@@ -61,11 +59,13 @@ export class PerfilComponent {
     horario_apertura: [''],
     horario_cierre: [''],
     duracion_cita_defecto: [30],
+    nit: ['', [opcionalValido(nitValido)]],
+    razon_social: ['', [Validators.maxLength(200)]],
+    codigo_habilitacion_reps: ['', [opcionalValido(repsValido)]],
   });
 
   constructor() {
     void this.loadDepartamentos();
-
     // Cargar municipios cuando cambia el departamento
     this.form.controls.departamento.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -84,6 +84,9 @@ export class PerfilComponent {
           horario_apertura: p.horario_apertura ?? '',
           horario_cierre: p.horario_cierre ?? '',
           duracion_cita_defecto: p.duracion_cita_defecto ?? 30,
+          nit: p.nit ?? '',
+          razon_social: p.razon_social ?? '',
+          codigo_habilitacion_reps: p.codigo_habilitacion_reps ?? '',
         });
         this.patched = true;
       }
@@ -160,6 +163,7 @@ export class PerfilComponent {
         horario_apertura: v.horario_apertura || null,
         horario_cierre: v.horario_cierre || null,
         duracion_cita_defecto: Number(v.duracion_cita_defecto),
+        ...prestadorAUpdate(v),
         ...(logoUrl ? { logo_url: logoUrl } : {}),
       });
       this.selectedLogoFile = null;

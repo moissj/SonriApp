@@ -14,6 +14,9 @@ export interface Profile {
   horario_cierre: string | null;
   duracion_cita_defecto: number | null;
   logo_url: string | null;
+  nit: string | null;
+  razon_social: string | null;
+  codigo_habilitacion_reps: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

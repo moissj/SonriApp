@@ -40,7 +40,7 @@ export class InputComponent implements ControlValueAccessor {
       'w-full rounded-lg border px-2.5 py-1.5 min-h-9 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2';
     const stateClass = this.error
       ? 'border-red-400 focus:border-red-500 focus:ring-red-200 bg-red-50'
-      : 'border-gray-300 focus:border-sky-500 focus:ring-sky-200 bg-white';
+      : 'border-gray-300 focus:border-primary-500 focus:ring-primary-200 bg-white';
     const disabledClass = this.isDisabled() ? 'opacity-50 cursor-not-allowed' : '';
     const paddingRight = this.type === 'password' ? 'pr-11' : '';
     return [base, stateClass, disabledClass, paddingRight].filter(Boolean).join(' ');

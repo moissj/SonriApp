@@ -16,8 +16,8 @@
 - [x] Commit local del código (migración + loader + servicios + perfil)
 - [x] Manual: `docs/manual/perfil.md` creado (incluye datos del prestador)
 - [x] PROD — migración aplicada a cloud (HTTP 201) + verificada (prof_cols=3, tablas=2, policies=8, indices=2) + registrada en `schema_migrations`
-- [ ] PROD — **hidratación catálogos SISPRO**: bloqueada por (a) `SERVICE_ROLE_KEY` ausente, (b) SISPRO sin descarga directa → requiere scraper de postbacks ViewState (CUPS 13.640 filas) o export por email
-- [ ] **Pendiente OK:** push
+- [x] PROD — **hidratación catálogos SISPRO** vía scraper (`scrape-sispro.mjs`) + loader. Prod validado: `catalogo_cie10` 12.634 (12.634 activos, v CIE10-SISPRO-2026-11-24); `catalogo_cups` 13.640 (10.024 activos / 3.616 inactivos por `habilitado`, v CUPS-2706-2025). 0 descartadas.
+- [ ] **Pendiente OK:** push (planes 20 + 21) y rotar PAT + service_role key
 
 ## Pendientes / deuda
 - Registro de atención fiscal (diagnóstico+CUPS+valores por procedimiento) → **Plan 22**.

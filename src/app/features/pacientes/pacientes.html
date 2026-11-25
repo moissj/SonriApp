@@ -1,29 +1,24 @@
 <div class="px-4 py-5 max-w-screen-lg mx-auto pb-24 md:pb-6">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-5">
-    <div>
-      <div class="flex items-center gap-2">
-        <h2 class="text-lg md:text-xl font-bold text-dark mb-0">Mis pacientes</h2>
-        @if (patients().length > 0 && !patientService.loading()) {
-          <span class="inline-flex items-center justify-center bg-sky-100 text-sky-700 text-xs font-semibold px-2 py-0.5 rounded-full">
-            {{ patients().length }}
-          </span>
-        }
-      </div>
-      <p class="text-xs text-gray-500 mt-0.5">Gestiona el historial y datos de tus pacientes.</p>
+  <app-page-header titulo="Mis pacientes" subtitulo="Gestiona el historial y datos de tus pacientes.">
+    <div acciones class="flex items-center gap-2">
+      @if (patients().length > 0 && !patientService.loading()) {
+        <span class="inline-flex items-center justify-center bg-primary-100 text-primary-700 text-xs font-semibold px-2 py-0.5 rounded-full">
+          {{ patients().length }}
+        </span>
+      }
+      <!-- Botón visible en Desktop (md y superior) -->
+      <a
+        routerLink="/pacientes/nuevo"
+        class="hidden md:inline-flex items-center gap-1.5 bg-primary-600 text-white text-sm font-semibold px-3.5 py-2 rounded-lg hover:bg-primary-700 transition-colors shadow-sm"
+      >
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nuevo paciente
+      </a>
     </div>
-
-    <!-- Botón visible en Desktop (md y superior) -->
-    <a
-      routerLink="/pacientes/nuevo"
-      class="hidden md:inline-flex items-center gap-1.5 bg-sky-600 text-white text-sm font-semibold px-3.5 py-2 rounded-lg hover:bg-sky-700 transition-colors shadow-sm"
-    >
-      <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-      </svg>
-      Nuevo paciente
-    </a>
-  </div>
+  </app-page-header>
 
   <!-- Alerta de error de acciones -->
   @if (errorMessage()) {

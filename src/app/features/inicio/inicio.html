@@ -1,13 +1,10 @@
 <div class="px-4 py-5 max-w-screen-lg mx-auto space-y-5">
 
   <!-- Saludo -->
-  <section>
-    <p class="text-sm text-gray-500 capitalize">{{ todayLabel() }}</p>
-    <h2 class="text-xl font-bold text-gray-800 mt-0.5">¡Hola, {{ firstName() || 'doctor' }}!</h2>
-    @if (profile()?.nombre_consultorio) {
-      <p class="text-sm text-sky-700 font-medium mt-0.5">{{ profile()!.nombre_consultorio }}</p>
-    }
-  </section>
+  <app-page-header
+    [titulo]="'¡Hola, ' + (firstName() || 'doctor') + '!'"
+    [subtitulo]="todayLabel() + (profile()?.nombre_consultorio ? ' · ' + profile()!.nombre_consultorio : '')"
+  />
 
   <!-- Tarjetas de métricas: apiladas en móvil, grid en desktop -->
   <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

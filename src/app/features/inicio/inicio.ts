@@ -9,11 +9,12 @@ import { fechaLargaBogota } from '../../core/funciones/fecha-bogota.funcion';
 import { CopCurrencyPipe } from '../../shared/pipes/cop-currency.pipe';
 import { CardComponent } from '../../shared/components/card/card';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
 
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [LucideAngularModule, RouterLink, DatePipe, CopCurrencyPipe, CardComponent, StatusBadgeComponent],
+  imports: [LucideAngularModule, RouterLink, DatePipe, CopCurrencyPipe, CardComponent, StatusBadgeComponent, PageHeaderComponent],
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

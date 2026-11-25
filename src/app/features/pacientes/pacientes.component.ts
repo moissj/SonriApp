@@ -14,6 +14,7 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { ButtonComponent } from '../../shared/components/button/button';
 import { AlertComponent } from '../../shared/components/alert/alert';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
 
 @Component({
   selector: 'app-pacientes',
@@ -28,6 +29,7 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal/con
     ButtonComponent,
     AlertComponent,
     ConfirmModalComponent,
+    PageHeaderComponent,
   ],
   templateUrl: './pacientes.html',
   styleUrl: './pacientes.scss',

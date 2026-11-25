@@ -6,22 +6,19 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import {
-  ActivatedRoute,
-  NavigationEnd,
-  Router,
-  RouterLink,
-} from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
+import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 import { ProfileService } from '../../core/services/profile.service';
 import { LayoutService } from '../../core/services/layout.service';
+import { ButtonComponent } from '../../shared/components/button/button';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, LucideAngularModule, ButtonComponent],
   templateUrl: './header.html',
   styleUrl: './header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,18 +31,15 @@ export class HeaderComponent {
   private readonly layout = inject(LayoutService);
 
   /** Estado del menú desplegable del avatar */
-  readonly menuOpen = signal(false);
+  readonly menuAbierto = signal(false);
 
   /** Estado colapsado del menú lateral (modo rail) */
   readonly sidenavCollapsed = this.layout.sidenavCollapsed;
 
-  /** Perfil del odontólogo autenticado */
   readonly profile = this.profileService.profile;
-
-  /** Correo del usuario autenticado */
   readonly email = computed(() => this.auth.user()?.email ?? '');
 
-  /** Título de la página según la ruta activa */
+  /** Título de la ruta activa para el breadcrumb ('' en la raíz) */
   readonly pageTitle = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
@@ -54,12 +48,16 @@ export class HeaderComponent {
     { initialValue: this.resolveTitle() },
   );
 
-  /** Nombre a mostrar (nombre completo o el correo como respaldo) */
+  /** Segmento final del breadcrumb: vacío en la raíz. */
+  readonly esRaiz = computed(() => !this.pageTitle() || this.router.url.split('?')[0] === '/');
+
+  // TODO: fuente de notificaciones no leídas (Fase 2)
+  readonly hayNoLeidas = signal(false);
+
   readonly displayName = computed(
     () => this.profile()?.nombre_completo?.trim() || this.email() || 'Mi cuenta',
   );
 
-  /** Iniciales calculadas a partir del nombre del usuario */
   readonly initials = computed(() => {
     const name = this.profile()?.nombre_completo?.trim();
     if (name) {
@@ -74,7 +72,7 @@ export class HeaderComponent {
 
   toggleMenu(event: Event): void {
     event.stopPropagation();
-    this.menuOpen.update((open) => !open);
+    this.menuAbierto.update((open) => !open);
   }
 
   toggleSidenav(): void {
@@ -82,7 +80,7 @@ export class HeaderComponent {
   }
 
   closeMenu(): void {
-    this.menuOpen.set(false);
+    this.menuAbierto.set(false);
   }
 
   async logout(): Promise<void> {
@@ -90,16 +88,14 @@ export class HeaderComponent {
     await this.auth.logout();
   }
 
-  /** Cerrar el menú al hacer clic fuera de él */
   @HostListener('document:click')
   onDocumentClick(): void {
-    if (this.menuOpen()) this.closeMenu();
+    if (this.menuAbierto()) this.closeMenu();
   }
 
-  /** Cerrar el menú con la tecla Escape */
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.menuOpen()) this.closeMenu();
+    if (this.menuAbierto()) this.closeMenu();
   }
 
   private resolveTitle(): string {
@@ -107,6 +103,6 @@ export class HeaderComponent {
     while (route.firstChild) {
       route = route.firstChild;
     }
-    return route.snapshot.data['title'] ?? 'Panel de inicio';
+    return route.snapshot.data['title'] ?? '';
   }
 }

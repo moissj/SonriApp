@@ -29,7 +29,7 @@ export const routes: Routes = [
   {
     path: 'citas',
     canActivate: [authGuard, onboardingGuard],
-    data: { title: 'Mis citas' },
+    data: { title: 'Agenda' },
     loadComponent: () => import('./features/citas/citas').then((m) => m.CitasComponent),
   },
   {
@@ -70,7 +70,7 @@ export const routes: Routes = [
   {
     path: 'configuracion/eps',
     canActivate: [authGuard, onboardingGuard],
-    data: { title: 'Gestionar EPS' },
+    data: { title: 'Configuración EPS' },
     loadComponent: () =>
       import('./features/configuracion-eps/configuracion-eps').then((m) => m.ConfiguracionEpsComponent),
   },
@@ -86,14 +86,14 @@ export const routes: Routes = [
   {
     path: 'plantillas',
     canActivate: [authGuard, onboardingGuard],
-    data: { title: 'Plantillas de mensajes' },
+    data: { title: 'Plantillas' },
     loadComponent: () =>
       import('./features/plantillas/plantillas').then((m) => m.PlantillasComponent),
   },
   {
     path: 'tratamientos',
     canActivate: [authGuard, onboardingGuard],
-    data: { title: 'Catálogo de tratamientos' },
+    data: { title: 'Tratamientos' },
     loadComponent: () =>
       import('./features/tratamientos/tratamientos').then((m) => m.TratamientosComponent),
   },

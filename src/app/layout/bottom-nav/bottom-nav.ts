@@ -1,5 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
+import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 
 interface MasItem {
@@ -11,7 +12,7 @@ interface MasItem {
 @Component({
   selector: 'app-bottom-nav',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, LucideAngularModule],
   templateUrl: './bottom-nav.html',
   styleUrl: './bottom-nav.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,16 +23,14 @@ export class BottomNavComponent {
   readonly isSuperAdmin = this.auth.isSuperAdmin;
   readonly sheetOpen = signal(false);
 
-  /** Secciones adicionales accesibles desde el botón "Más" */
+  /** Secciones adicionales accesibles desde el botón "Más" (iconos Lucide) */
   readonly masItems: MasItem[] = [
-    { label: 'Recordatorios', route: '/recordatorios', icon: 'M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9' },
-    { label: 'Reportes', route: '/reportes', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-    { label: 'Tratamientos', route: '/tratamientos', icon: 'M9 7h6m-6 4h6m-6 4h4M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z' },
-    { label: 'Plantillas', route: '/plantillas', icon: 'M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z' },
-    { label: 'Mi perfil', route: '/perfil', icon: 'M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z' },
+    { label: 'Recordatorios', route: '/recordatorios', icon: 'bell' },
+    { label: 'Reportes', route: '/reportes', icon: 'bar-chart-3' },
+    { label: 'Tratamientos', route: '/tratamientos', icon: 'clipboard-list' },
+    { label: 'Plantillas', route: '/plantillas', icon: 'message-circle' },
+    { label: 'Mi perfil', route: '/perfil', icon: 'circle-user' },
   ];
-
-  readonly adminIcon = 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z';
 
   toggleSheet(): void {
     this.sheetOpen.update((v) => !v);

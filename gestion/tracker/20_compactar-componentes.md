@@ -12,7 +12,7 @@
 - [x] Gates verde (`tsc` limpio / `build` OK / `test` 39 / `sincronizar --check`)
 - [x] Revisión adversarial (`verificador`): **APROBADO**, 0 bloqueantes (diff = 17 html, cero exclusiones, cero clínico <40, sin cambio estructural)
 - [x] Manual: sin cambio de campos/acciones/flujo → contenido del manual inalterado (solo densidad); no requiere reescritura ni `revisado`
-- [ ] Commit local (rutas explícitas, sin atribución IA). **Pendiente OK explícito:** push
+- [x] Commit local `bba4588` (17 html + plan + tracker; spec `c2a25aa`). **Pendiente OK explícito:** push
 
 ## Pendientes / deuda
 - Glifos clínicos <40px (24/28px, 0.9rem en examen/checklist/odontograma): deuda de accesibilidad (agrandar), fuera de este plan.

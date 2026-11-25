@@ -1,0 +1,47 @@
+{
+  "plan": "25_odontograma-marcas",
+  "version": 1,
+  "fecha": "2026-11-25",
+  "alcance": "Plan DEDICADO del odontograma (regla clinica/odontograma.md). Agrega una 'cajita' a nivel-diente (no por cara) debajo de cada diente del SVG para registrar VARIAS marcas por diente (p.ej. corona + nucleo). Aditivo: tabla y enum NUEVOS; NO se toca la tabla odontogramas, su estado_diente_enum, superficie_diente_enum, ni cx/cy/COL_STEP/ROW del SVG (coordenadas tactiles intactas). Incluye navegacion por secciones en la historia clinica (UI-only, sin migracion).",
+  "fuente": "Observacion del usuario + foto de leyenda del formato en papel.",
+  "decisiones_usuario": {
+    "nucleo_color": "azul (#2563eb)",
+    "incluido_semi": "una marca combinada (incluido_semi)",
+    "corona_acero": "una sola marca (corona_acero)"
+  },
+  "catalogo_marcas": [
+    { "marca": "obt_temporal",        "letra": "OT", "color": "#ef4444", "label": "Obturacion temporal" },
+    { "marca": "incluido_semi",       "letra": "X",  "color": "#16a34a", "label": "Incluido / Semiincluido" },
+    { "marca": "superficie_sellada",  "letra": "S",  "color": "#14b8a6", "label": "Superficie sellada" },
+    { "marca": "corona_acero",        "letra": "C",  "color": "#f59e0b", "label": "Corona adaptada / Acero" },
+    { "marca": "nucleo",              "letra": "N",  "color": "#2563eb", "label": "Nucleo" }
+  ],
+  "nota_caries": "Caries y obturado siguen como mancha de SUPERFICIE en odontogramas (sin cambios). La cajita es solo para las 5 marcas nivel-diente de arriba.",
+  "waves": {
+    "1_datos": {
+      "estado": "pendiente",
+      "owner": "capa-datos",
+      "objetivo": "Migracion idempotente NUEVA (no reescribir existentes): CREATE TYPE marca_diente_enum (5 valores); CREATE TABLE odontograma_marcas (id uuid pk, odontologo_id uuid not null -> profiles, paciente_id uuid not null -> pacientes on delete cascade, pieza text not null, marca marca_diente_enum not null, notas text, fecha date not null default current_date, created_at, updated_at, UNIQUE(paciente_id,pieza,marca)); indice por paciente_id; RLS fail-closed (odontologo_id = auth.uid(), select tambien is_cuenta_activa()) replicando el patron de odontogramas. Extender odontograma.service.ts (aditivo): tipos MarcaDiente + MarcaOdontograma; metodos getMarcas(pacienteId): Promise<MarcaOdontograma[]> y setMarca(pacienteId, pieza, marca, activa: boolean) (insert si activa, delete si no). Funcion pura de mapeo row<->tipo + spec. NO aplicar a prod (local/typegen manual).",
+      "diferido": "Aplicar migracion a prod -> requiere OK explicito del usuario."
+    },
+    "2_odontograma_ui": {
+      "estado": "pendiente",
+      "owner": "cliente-web",
+      "objetivo": "SVG: <g class=tooth-box> por diente con rect debajo (offset fijo, sin mover cx/cy/COL_STEP/ROW; ajustar SOLO viewHeight si hiciera falta para la fila inferior). Catalogo TS marca->{letra,color,label} (fuente unica). Render de letras de color en la cajita segun marcas activas. Click en la cajita -> modal de seleccion (toggle on/off de las 5 marcas via setMarca, optimista). Reusa el patron del modal de superficie. Leyenda: agregar las 5 marcas. Tests de mapeo (unit) de marca->simbolo/color y de estado<->render. Conservar intactas las 6 superficies, numeracion FDI y piezaAusente.",
+      "reglas": "No tocar paths concentricos, numero del diente, ni constantes de geometria salvo viewHeight. OnPush/signals; tokens; tactil compacto; aria."
+    },
+    "3_hc_navegacion": {
+      "estado": "pendiente",
+      "owner": "cliente-web",
+      "objetivo": "historia-clinica.html: agregar id a cada <section> (examen-ingreso, evoluciones, ayudas-diagnosticas, odontograma, consentimiento) + indice de navegacion sticky (chips o lista) que salta por ancla; scroll-margin-top por el header sticky. UI-only, sin migracion. Marca seccion activa al hacer scroll (opcional, IntersectionObserver).",
+      "reglas": "Aditivo; no reordenar secciones; accesible (nav aria-label, foco)."
+    }
+  },
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check"
+  ],
+  "protecciones": "clinica/odontograma.md (plan propio + tests de mapeo), multi-consultorio-alcance.md (RLS fail-closed), supabase/migraciones idempotentes, datos clinicos sin PII en logs/tests (datos sinteticos)."
+}

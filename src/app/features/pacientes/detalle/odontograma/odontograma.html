@@ -68,6 +68,29 @@
                 (click)="onSurfaceClick(t.fdi, 'oclusal_incisal')"
               />
             }
+
+            <!-- Cajita de marcas a nivel diente -->
+            <g
+              class="tooth-box"
+              transform="translate(0,32)"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="'Marcas de la pieza ' + t.fdi"
+              (click)="onBoxClick(t.fdi)"
+              (keydown.enter)="onBoxClick(t.fdi)"
+            >
+              <rect x="-22" y="0" width="44" height="16" rx="2" fill="#fff" stroke="#9ca3af" stroke-width="1" />
+              @for (l of letrasPorPieza().get(t.fdi) ?? []; track l.letra) {
+                <text
+                  [attr.x]="($index - ($count - 1) / 2) * (40 / $count)"
+                  y="12"
+                  text-anchor="middle"
+                  font-size="10"
+                  font-weight="700"
+                  [attr.fill]="l.color"
+                >{{ l.letra }}</text>
+              }
+            </g>
           </g>
         }
       </svg>
@@ -81,12 +104,34 @@
           <span class="text-xs text-gray-600">{{ e.label }}</span>
         </div>
       }
+      @for (c of catalogoMarcas; track c.marca) {
+        <div class="flex items-center gap-1.5">
+          <span class="text-xs font-bold" [style.color]="c.color">{{ c.letra }}</span>
+          <span class="text-xs text-gray-600">{{ c.label }}</span>
+        </div>
+      }
     </div>
   }
 </div>
 
+<!-- Modal de marcas por diente -->
+<app-modal #modalMarcas [title]="'Pieza ' + (marcaPieza() ?? '') + ' · Marcas'" (closed)="onMarcasClosed()">
+  <div class="space-y-3">
+    @for (c of catalogoMarcas; track c.marca) {
+      <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
+        <input type="checkbox" [checked]="marcasSel().includes(c.marca)" (change)="toggleMarca(c.marca)" />
+        <span class="w-6 font-bold" [style.color]="c.color">{{ c.letra }}</span>
+        {{ c.label }}
+      </label>
+    }
+    <div class="flex justify-end pt-1">
+      <button type="button" (click)="closeMarcas()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 px-3 py-2">Cerrar</button>
+    </div>
+  </div>
+</app-modal>
+
 <!-- Modal de registro por superficie -->
-<app-modal [title]="tituloModal()" (closed)="onModalClosed()">
+<app-modal #modalSuperficie [title]="tituloModal()" (closed)="onModalClosed()">
   <div class="space-y-4">
     <div>
       <label class="block text-xs font-semibold text-gray-600 mb-2">Estado</label>

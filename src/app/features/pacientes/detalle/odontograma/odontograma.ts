@@ -14,8 +14,11 @@ import {
   PiezaOdontograma,
   EstadoDiente,
   SuperficieDiente,
+  MarcaDiente,
 } from '../../../../core/services/odontograma.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
+import { agruparMarcasPorPieza } from '../../../../core/funciones/marcas-odontograma.funcion';
+import { CATALOGO_MARCAS, letrasDeMarcas } from './funciones/catalogo-marcas';
 
 interface DienteSVG {
   fdi: string;
@@ -81,7 +84,20 @@ export class OdontogramaComponent implements OnInit {
   /** Zoom: 1 = ajustado al ancho; >1 = ampliado con scroll (mejor toque en móvil) */
   readonly zoom = signal(1);
 
-  private readonly modal = viewChild(ModalComponent);
+  private readonly modal = viewChild<ModalComponent>('modalSuperficie');
+  private readonly modalMarcas = viewChild<ModalComponent>('modalMarcas');
+
+  /** Marcas nivel-diente: pieza -> marcas activas */
+  readonly marcasPorPieza = signal<Map<string, MarcaDiente[]>>(new Map());
+  readonly catalogoMarcas = CATALOGO_MARCAS;
+  readonly marcaPieza = signal<string | null>(null);
+  readonly marcasSel = computed(() => this.marcasPorPieza().get(this.marcaPieza() ?? '') ?? []);
+  /** Letras por pieza ya resueltas para el render (evita crear arrays en el template) */
+  readonly letrasPorPieza = computed(() => {
+    const out = new Map<string, { letra: string; color: string }[]>();
+    for (const [p, ms] of this.marcasPorPieza()) out.set(p, letrasDeMarcas(ms));
+    return out;
+  });
 
   readonly estados: EstadoMeta[] = [
     { value: 'sano', label: 'Sano' },
@@ -136,7 +152,7 @@ export class OdontogramaComponent implements OnInit {
   ];
 
   readonly viewWidth = RIGHT_START + 7 * COL_STEP + R_OUTER + 20;
-  readonly viewHeight = ROW.infPerm + 50;
+  readonly viewHeight = ROW.infPerm + 72; // +22 para la cajita de marcas de la fila inferior
   readonly dividerX = (LEFT_START + 7 * COL_STEP + RIGHT_START) / 2;
   readonly dividerY = (ROW.supTemp + ROW.infTemp) / 2;
 
@@ -220,10 +236,14 @@ export class OdontogramaComponent implements OnInit {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
-      const registros = await this.odontogramaService.getOdontograma(this.pacienteId());
+      const [registros, marcas] = await Promise.all([
+        this.odontogramaService.getOdontograma(this.pacienteId()),
+        this.odontogramaService.getMarcas(this.pacienteId()),
+      ]);
       const map: Record<string, PiezaOdontograma> = {};
       for (const r of registros) map[`${r.pieza}:${r.superficie}`] = r;
       this.superficiesMap.set(map);
+      this.marcasPorPieza.set(agruparMarcasPorPieza(marcas));
     } catch (err) {
       console.error('Error cargando odontograma:', err);
       this.error.set('No se pudo cargar el odontograma.');
@@ -263,6 +283,39 @@ export class OdontogramaComponent implements OnInit {
       this.error.set('No se pudo guardar el estado de la superficie.');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  onBoxClick(fdi: string): void {
+    this.marcaPieza.set(fdi);
+    this.modalMarcas()?.open();
+  }
+
+  onMarcasClosed(): void {
+    this.marcaPieza.set(null);
+  }
+
+  closeMarcas(): void {
+    this.modalMarcas()?.close();
+  }
+
+  /** Toggle optimista: actualiza el signal y revierte si setMarca falla */
+  async toggleMarca(marca: MarcaDiente): Promise<void> {
+    const pieza = this.marcaPieza();
+    if (!pieza) return;
+    const previo = this.marcasPorPieza();
+    const actuales = previo.get(pieza) ?? [];
+    const activa = !actuales.includes(marca);
+    const nuevo = new Map(previo);
+    nuevo.set(pieza, activa ? [...actuales, marca] : actuales.filter((m) => m !== marca));
+    this.marcasPorPieza.set(nuevo);
+    this.error.set(null);
+    try {
+      await this.odontogramaService.setMarca(this.pacienteId(), pieza, marca, activa);
+    } catch (err) {
+      console.error('Error guardando marca:', err);
+      this.marcasPorPieza.set(previo);
+      this.error.set('No se pudo guardar la marca.');
     }
   }
 

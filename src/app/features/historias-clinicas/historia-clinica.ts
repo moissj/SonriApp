@@ -5,6 +5,10 @@ import {
   inject,
   signal,
   OnInit,
+  DestroyRef,
+  Injector,
+  afterNextRender,
+  effect,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Location } from '@angular/common';
@@ -35,7 +39,27 @@ export class HistoriaClinicaCompletaComponent implements OnInit {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
 
+  readonly secciones = [
+    { id: 'examen-ingreso', etiqueta: 'Examen de ingreso' },
+    { id: 'evoluciones', etiqueta: 'Evoluciones' },
+    { id: 'ayudas-diagnosticas', etiqueta: 'Ayudas diagnósticas' },
+    { id: 'odontograma', etiqueta: 'Odontograma' },
+    { id: 'consentimiento', etiqueta: 'Consentimiento' },
+  ] as const;
+  readonly seccionActiva = signal<string>('examen-ingreso');
+
+  private readonly injector = inject(Injector);
+  private observer?: IntersectionObserver;
+
   pacienteId!: string;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => this.observer?.disconnect());
+    effect(() => {
+      if (!this.paciente()) return;
+      afterNextRender(() => this.observarSecciones(), { injector: this.injector });
+    });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('pacienteId');
@@ -75,6 +99,29 @@ export class HistoriaClinicaCompletaComponent implements OnInit {
     const m = today.getMonth() - birth.getMonth();
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     return age;
+  }
+
+  irASeccion(event: Event, id: string): void {
+    event.preventDefault();
+    const reducido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    document.getElementById(id)?.scrollIntoView({ behavior: reducido ? 'auto' : 'smooth', block: 'start' });
+    this.seccionActiva.set(id);
+  }
+
+  private observarSecciones(): void {
+    this.observer?.disconnect();
+    // Franja superior (bajo cabecera+índice) como zona de "sección actual".
+    this.observer = new IntersectionObserver(
+      (entradas) => {
+        const visible = entradas.find((e) => e.isIntersecting);
+        if (visible) this.seccionActiva.set(visible.target.id);
+      },
+      { rootMargin: '-140px 0px -60% 0px' },
+    );
+    for (const s of this.secciones) {
+      const el = document.getElementById(s.id);
+      if (el) this.observer.observe(el);
+    }
   }
 
   goBack(): void {

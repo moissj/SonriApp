@@ -42,6 +42,29 @@
           </span>
         }
       </div>
+      @if (!loading() && paciente()) {
+        <nav aria-label="Secciones de la historia clinica" class="-mx-4 px-4 mt-2 overflow-x-auto">
+          <ul class="flex gap-1.5 w-max sm:w-auto sm:flex-wrap">
+            @for (s of secciones; track s.id) {
+              <li>
+                <a
+                  [href]="'#' + s.id"
+                  (click)="irASeccion($event, s.id)"
+                  [attr.aria-current]="seccionActiva() === s.id ? 'true' : null"
+                  class="inline-flex items-center h-8 px-3 rounded-full border text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  [class.bg-primary]="seccionActiva() === s.id"
+                  [class.text-white]="seccionActiva() === s.id"
+                  [class.border-primary]="seccionActiva() === s.id"
+                  [class.bg-white]="seccionActiva() !== s.id"
+                  [class.text-gray-600]="seccionActiva() !== s.id"
+                  [class.border-gray-200]="seccionActiva() !== s.id"
+                  [class.hover:bg-gray-50]="seccionActiva() !== s.id"
+                >{{ s.etiqueta }}</a>
+              </li>
+            }
+          </ul>
+        </nav>
+      }
     </div>
   </div>
 
@@ -52,7 +75,7 @@
 
     @if (!loading() && paciente()) {
       <!-- Sección: Historia clínica inicial -->
-      <section>
+      <section id="examen-ingreso" class="scroll-mt-36">
         <div class="flex items-center gap-2 mb-3">
           <lucide-icon name="clipboard-list" class="w-5 h-5 text-sky-700" aria-hidden="true" />
           <h2 class="text-base font-semibold text-gray-800">Historia clínica inicial — Examen de ingreso</h2>
@@ -61,7 +84,7 @@
       </section>
 
       <!-- Sección: Historial de evoluciones -->
-      <section>
+      <section id="evoluciones" class="scroll-mt-36">
         <div class="flex items-center gap-2 mb-3">
           <lucide-icon name="calendar" class="w-5 h-5 text-sky-700" aria-hidden="true" />
           <h2 class="text-base font-semibold text-gray-800">Historial de evoluciones</h2>
@@ -70,7 +93,7 @@
       </section>
 
       <!-- Sección: Ayudas diagnósticas -->
-      <section>
+      <section id="ayudas-diagnosticas" class="scroll-mt-36">
         <div class="flex items-center gap-2 mb-3">
           <lucide-icon name="image" class="w-5 h-5 text-sky-700" aria-hidden="true" />
           <h2 class="text-base font-semibold text-gray-800">Ayudas diagnósticas</h2>
@@ -86,7 +109,7 @@
       </section>
 
       <!-- Sección: Odontograma -->
-      <section>
+      <section id="odontograma" class="scroll-mt-36">
         <div class="flex items-center gap-2 mb-3">
           <lucide-icon name="stethoscope" class="w-5 h-5 text-sky-700" aria-hidden="true" />
           <h2 class="text-base font-semibold text-gray-800">Odontograma</h2>
@@ -95,7 +118,7 @@
       </section>
 
       <!-- Sección: Consentimiento informado -->
-      <section>
+      <section id="consentimiento" class="scroll-mt-36">
         <div class="flex items-center gap-2 mb-3">
           <lucide-icon name="pen-line" class="w-5 h-5 text-sky-700" aria-hidden="true" />
           <h2 class="text-base font-semibold text-gray-800">Consentimiento informado</h2>

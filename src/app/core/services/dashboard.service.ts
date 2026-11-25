@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { supabase } from '../supabase.client';
 import { AuthService } from './auth.service';
 import { Cita } from './cita.service';
+import { hoyBogota } from '../funciones/fecha-bogota.funcion';
 
 export interface DashboardData {
   citasHoy: Cita[];
@@ -19,14 +20,12 @@ export class DashboardService {
     const user = this.auth.user();
     if (!user) return { citasHoy: [], proximas7: 0, pacientesNuevosMes: 0, saldoPendiente: 0 };
 
-    const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(now);
-    todayEnd.setHours(23, 59, 59, 999);
-    const in7 = new Date(todayEnd);
-    in7.setDate(in7.getDate() + 7);
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    // Límites del día en America/Bogota (UTC-5 fijo, sin DST).
+    const dia = hoyBogota();
+    const todayStart = new Date(`${dia}T00:00:00-05:00`);
+    const todayEnd = new Date(`${dia}T23:59:59.999-05:00`);
+    const in7 = new Date(todayEnd.getTime() + 7 * 24 * 3600 * 1000);
+    const monthStart = new Date(`${dia.slice(0, 7)}-01T00:00:00-05:00`);
 
     const [citasHoy, proximas7, pacientesNuevosMes, presupuestos, pagos] = await Promise.all([
       supabase

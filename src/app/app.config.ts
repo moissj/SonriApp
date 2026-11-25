@@ -4,14 +4,14 @@ import { provideServiceWorker } from '@angular/service-worker';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
 import { importProvidersFrom } from '@angular/core';
-import { LucideAngularModule, Plus, CircleUser, ChevronDown, ChevronRight, Settings, LogOut, Menu, MoreHorizontal, Lock, BarChart3, Bell, Building2, Calendar, CalendarDays, LayoutDashboard,Camera, Check, CheckCircle, ClipboardList, FilePen, FileText, Image, MessageCircle, PenLine, Receipt, Search, Stethoscope, User, Users, Wallet, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Plus, CircleUser, ChevronDown, ChevronRight, Settings, LogOut, Menu, MoreHorizontal, Lock, BarChart3, Bell, Building2, Calendar, CalendarDays, LayoutDashboard,Camera, Check, CheckCircle, ClipboardList, FilePen, FileText, Image, MessageCircle, PenLine, Receipt, Search, Stethoscope, User, Users, Wallet, AlertTriangle, Clock } from 'lucide-angular';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     importProvidersFrom(
-      LucideAngularModule.pick({ Plus, CircleUser, ChevronDown, ChevronRight, Settings, LogOut, Menu, MoreHorizontal, Lock, BarChart3, Bell, Building2, Calendar, CalendarDays, LayoutDashboard,Camera, Check, CheckCircle, ClipboardList, FilePen, FileText, Image, MessageCircle, PenLine, Receipt, Search, Stethoscope, User, Users, Wallet, AlertTriangle }),
+      LucideAngularModule.pick({ Plus, CircleUser, ChevronDown, ChevronRight, Settings, LogOut, Menu, MoreHorizontal, Lock, BarChart3, Bell, Building2, Calendar, CalendarDays, LayoutDashboard,Camera, Check, CheckCircle, ClipboardList, FilePen, FileText, Image, MessageCircle, PenLine, Receipt, Search, Stethoscope, User, Users, Wallet, AlertTriangle, Clock }),
     ),
     provideRouter(routes, withComponentInputBinding()),
     provideServiceWorker('ngsw-worker.js', {

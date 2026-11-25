@@ -23,7 +23,7 @@ export class CardComponent {
       lg:   'shadow-card-lg',
     };
     const parts = [
-      'bg-white rounded-2xl overflow-hidden',
+      'bg-white rounded-xl overflow-hidden',
       shadow[this.shadow],
       this.bordered ? 'border border-gray-100' : '',
     ];
@@ -33,9 +33,9 @@ export class CardComponent {
   get bodyClass(): string {
     const map: Record<string, string> = {
       none: '',
-      sm:   'p-3 sm:p-4',
-      md:   'p-4 sm:p-5',
-      lg:   'p-5 sm:p-6',
+      sm:   'p-2 sm:p-3',
+      md:   'p-3 sm:p-4',
+      lg:   'p-4 sm:p-5',
     };
     return map[this.padding];
   }

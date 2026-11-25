@@ -21,7 +21,7 @@
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 0.55rem 1rem;
+    padding: 0.3rem 0.75rem;
     border: none;
     border-bottom: 1px solid var(--table-border);
     white-space: nowrap;
@@ -29,7 +29,7 @@
 
   /* Celdas del cuerpo */
   .p-datatable-tbody > tr > td {
-    padding: 0.5rem 1rem;
+    padding: 0.25rem 0.75rem;
     border: none;
     border-bottom: 1px solid var(--table-border);
     background: transparent;

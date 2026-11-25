@@ -37,7 +37,7 @@ export class InputComponent implements ControlValueAccessor {
 
   get inputClass(): string {
     const base =
-      'w-full rounded-lg border px-3 py-2 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2';
+      'w-full rounded-lg border px-2.5 py-1.5 min-h-9 text-sm text-gray-800 placeholder-gray-400 transition-colors focus:outline-none focus:ring-2';
     const stateClass = this.error
       ? 'border-red-400 focus:border-red-500 focus:ring-red-200 bg-red-50'
       : 'border-gray-300 focus:border-sky-500 focus:ring-sky-200 bg-white';

@@ -52,25 +52,25 @@
 >
   <div class="flex items-center justify-around h-16">
     <a routerLink="/" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="text-primary-600"
-       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-2 min-w-[56px] min-h-10">
+       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-1 min-w-[56px] min-h-8">
       <lucide-icon name="layout-dashboard" [size]="24" />
       <span class="text-xs font-medium">Inicio</span>
     </a>
 
     <a routerLink="/citas" routerLinkActive="text-primary-600"
-       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-2 min-w-[56px] min-h-10">
+       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-1 min-w-[56px] min-h-8">
       <lucide-icon name="calendar-days" [size]="24" />
       <span class="text-xs font-medium">Agenda</span>
     </a>
 
     <a routerLink="/pacientes" routerLinkActive="text-primary-600"
-       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-2 min-w-[56px] min-h-10">
+       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-1 min-w-[56px] min-h-8">
       <lucide-icon name="users" [size]="24" />
       <span class="text-xs font-medium">Pacientes</span>
     </a>
 
     <a routerLink="/historial" routerLinkActive="text-primary-600"
-       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-2 min-w-[56px] min-h-10">
+       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-1 min-w-[56px] min-h-8">
       <lucide-icon name="file-text" [size]="24" />
       <span class="text-xs font-medium">Historial</span>
     </a>
@@ -79,7 +79,7 @@
     <button type="button" (click)="toggleSheet()"
        [class.text-primary-600]="sheetOpen()"
        [attr.aria-expanded]="sheetOpen()"
-       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-2 min-w-[56px] min-h-10">
+       class="flex flex-col items-center gap-0.5 text-slate-500 hover:text-primary-600 transition-colors px-2 py-1 min-w-[56px] min-h-8">
       <lucide-icon name="more-horizontal" [size]="24" />
       <span class="text-xs font-medium">Más</span>
     </button>

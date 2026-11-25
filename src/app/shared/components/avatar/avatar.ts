@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
 import { iniciales } from './avatar.funcion';
 
 const TAMANOS = {
-  sm: 'w-8 h-8 text-xs',
-  md: 'w-10 h-10 text-sm',
-  lg: 'w-14 h-14 text-lg',
+  sm: 'w-6 h-6 text-[10px]',
+  md: 'w-8 h-8 text-xs',
+  lg: 'w-11 h-11 text-base',
 } as const;
 
 /** Avatar decorativo (foto o iniciales). El nombre accesible va en el texto contiguo. */

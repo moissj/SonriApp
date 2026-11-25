@@ -5,9 +5,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'app-page-header',
   standalone: true,
   template: `
-    <div class="flex items-start justify-between gap-4 mb-6">
+    <div class="flex items-start justify-between gap-3 mb-3">
       <div class="min-w-0">
-        <h1 class="text-2xl font-semibold text-slate-900">{{ titulo() }}</h1>
+        <h1 class="text-xl font-semibold text-slate-900">{{ titulo() }}</h1>
         @if (subtitulo()) {
           <p class="text-sm text-slate-500 mt-0.5">{{ subtitulo() }}</p>
         }

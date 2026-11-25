@@ -41,13 +41,13 @@ const CLASES_VALOR: Record<KpiTono, string> = {
     <ng-template #cuerpo>
       <div class="flex items-center gap-2 text-xs font-medium text-slate-600">
         @if (icono()) {
-          <span [class]="'inline-flex h-8 w-8 items-center justify-center rounded-lg ' + claseIcono()">
+          <span [class]="'inline-flex h-7 w-7 items-center justify-center rounded-lg ' + claseIcono()">
             <lucide-icon [name]="icono()!" class="h-4 w-4" aria-hidden="true" />
           </span>
         }
         <span class="truncate">{{ titulo() }}</span>
       </div>
-      <p [class]="'mt-2 text-2xl font-bold break-words ' + claseValor()">{{ valor() }}</p>
+      <p [class]="'mt-1 text-xl font-bold break-words ' + claseValor()">{{ valor() }}</p>
       @if (delta() !== null || sparkline().length > 1) {
         <div class="mt-1 flex items-center justify-between gap-2 text-xs text-slate-600">
           @if (delta() !== null) {
@@ -86,5 +86,5 @@ export class KpiCard {
   });
 
   protected readonly envoltura =
-    'block rounded-2xl border border-gray-100 bg-white p-4 shadow-card min-h-10 transition-shadow hover:shadow-card-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600';
+    'block rounded-xl border border-gray-100 bg-white p-3 shadow-card min-h-8 transition-shadow hover:shadow-card-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600';
 }

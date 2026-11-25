@@ -1,9 +1,9 @@
-<div class="px-4 py-5 max-w-7xl mx-auto pb-24 md:pb-6">
+<div class="px-3 py-3 max-w-7xl mx-auto pb-24 md:pb-6">
   <app-page-header titulo="Pacientes" subtitulo="Gestiona el historial y datos de tus pacientes.">
     <a
       acciones
       routerLink="/pacientes/nuevo"
-      class="hidden md:inline-flex items-center gap-1.5 min-h-10 bg-primary-600 text-white text-sm font-semibold px-4 rounded-lg hover:bg-primary-700 transition-colors shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
+      class="hidden md:inline-flex items-center gap-1.5 min-h-8 bg-primary-600 text-white text-xs font-semibold px-3 rounded-lg hover:bg-primary-700 transition-colors shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
     >
       <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -39,13 +39,13 @@
         type="text"
         [formControl]="searchControl"
         placeholder="Buscar por nombre, documento o teléfono..."
-        class="w-full min-h-11 pl-10 pr-11 bg-white border border-slate-200 rounded-xl text-sm placeholder-slate-400 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500"
+        class="w-full min-h-9 pl-9 pr-9 bg-white border border-slate-200 rounded-xl text-sm placeholder-slate-400 text-slate-800 shadow-sm focus:outline-none focus:ring-2 focus:ring-primary-100 focus:border-primary-500"
       />
       @if (searchControl.value) {
         <button
           type="button"
           (click)="searchControl.setValue('')"
-          class="absolute inset-y-0 right-0 min-w-10 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600 rounded-xl"
+          class="absolute inset-y-0 right-0 min-w-8 flex items-center justify-center text-slate-400 hover:text-slate-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600 rounded-xl"
           aria-label="Limpiar búsqueda"
         >
           <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -58,9 +58,9 @@
   </div>
 
   @if (patientService.loading() && patients().length === 0) {
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       @for (item of [1, 2, 3, 4, 5, 6]; track item) {
-        <div class="bg-white border border-gray-100 rounded-2xl p-4 sm:p-5 shadow-card animate-pulse flex items-center gap-4">
+        <div class="bg-white border border-gray-100 rounded-xl p-3 shadow-card animate-pulse flex items-center gap-3">
           <div class="h-12 w-12 rounded-full bg-gray-100 shrink-0"></div>
           <div class="flex-1 space-y-2">
             <div class="h-4 bg-gray-100 rounded w-3/4"></div>
@@ -98,7 +98,7 @@
             <ng-template pTemplate="body" let-patient>
               <tr class="cursor-pointer" (click)="viewPatient(patient.id)">
                 <td>
-                  <div class="flex items-center gap-3">
+                  <div class="flex items-center gap-2">
                     <app-avatar [nombre]="patient.nombre_completo" tamano="sm" />
                     <span class="font-medium text-slate-800 text-sm">{{ patient.nombre_completo }}</span>
                   </div>
@@ -118,7 +118,7 @@
                       <button
                         type="button"
                         (click)="sendWhatsApp(patient, $event)"
-                        class="inline-flex items-center justify-center min-h-10 min-w-10 rounded-lg text-emerald-700 hover:bg-emerald-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
+                        class="inline-flex items-center justify-center min-h-8 min-w-8 rounded-lg text-emerald-700 hover:bg-emerald-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
                         title="Enviar bienvenida por WhatsApp"
                         aria-label="Enviar bienvenida por WhatsApp"
                       >
@@ -130,7 +130,7 @@
                     <button
                       type="button"
                       (click)="editPatient(patient.id, $event)"
-                      class="inline-flex items-center justify-center min-h-10 min-w-10 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-primary-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
+                      class="inline-flex items-center justify-center min-h-8 min-w-8 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-primary-700 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
                       title="Editar paciente"
                       aria-label="Editar paciente"
                     >
@@ -141,7 +141,7 @@
                     <button
                       type="button"
                       (click)="requestDelete(patient, $event)"
-                      class="inline-flex items-center justify-center min-h-10 min-w-10 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-600"
+                      class="inline-flex items-center justify-center min-h-8 min-w-8 rounded-lg text-slate-500 hover:bg-red-50 hover:text-red-600 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-600"
                       title="Eliminar paciente"
                       aria-label="Eliminar paciente"
                     >
@@ -156,7 +156,7 @@
           </p-table>
         </div>
       } @else {
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           @for (patient of pacientesFiltrados(); track patient.id) {
             <app-card [bordered]="true" shadow="sm" padding="sm" class="block transition-transform hover:-translate-y-0.5 cursor-pointer" (click)="viewPatient(patient.id)">
               <div class="flex items-center gap-4 p-1">
@@ -196,7 +196,7 @@
             subtitle="Registra a tus pacientes para poder agendar citas y realizar el seguimiento de su historia clínica."
             size="md"
           >
-            <a routerLink="/pacientes/nuevo" class="inline-flex items-center gap-1.5 min-h-10 bg-primary-600 text-white text-sm font-semibold px-4 rounded-lg hover:bg-primary-700 transition-colors shadow-sm">
+            <a routerLink="/pacientes/nuevo" class="inline-flex items-center gap-1.5 min-h-8 bg-primary-600 text-white text-xs font-semibold px-3 rounded-lg hover:bg-primary-700 transition-colors shadow-sm">
               Registrar primer paciente
             </a>
           </app-empty-state>

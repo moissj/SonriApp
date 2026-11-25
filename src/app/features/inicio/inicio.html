@@ -1,4 +1,4 @@
-<div class="px-4 py-5 max-w-7xl mx-auto space-y-5">
+<div class="px-3 py-3 max-w-7xl mx-auto space-y-3">
 
   <app-page-header
     [titulo]="'¡Hola, ' + (firstName() || 'doctor') + '!'"
@@ -11,7 +11,7 @@
     </p>
   }
 
-  <section aria-label="Indicadores" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+  <section aria-label="Indicadores" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
     <app-kpi-card titulo="Citas hoy" icono="calendar-days" tono="primary" enlace="/citas"
       [valor]="loading() ? '—' : citasHoy().length" />
     <app-kpi-card titulo="Nuevos pacientes (mes)" icono="users" tono="primary" enlace="/pacientes"
@@ -26,7 +26,7 @@
   </section>
 
   <!-- Héroe: siguiente paciente -->
-  <section aria-labelledby="h-siguiente" class="rounded-2xl border border-primary-200 bg-primary-50 p-4 sm:p-5">
+  <section aria-labelledby="h-siguiente" class="rounded-xl border border-primary-200 bg-primary-50 p-3">
     <h2 id="h-siguiente" class="text-sm font-semibold text-primary-700">Siguiente paciente</h2>
     @if (loading()) {
       <div class="mt-3 h-16 animate-pulse rounded-xl bg-white/70"></div>
@@ -42,9 +42,9 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <a [routerLink]="['/historia-clinica', c.paciente_id]"
-            class="inline-flex min-h-10 items-center rounded-lg bg-primary-600 px-4 text-sm font-semibold text-white hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Ver historia</a>
+            class="inline-flex min-h-8 items-center rounded-lg bg-primary-600 px-3 text-xs font-semibold text-white hover:bg-primary-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Ver historia</a>
           <a routerLink="/citas"
-            class="inline-flex min-h-10 items-center rounded-lg border border-primary-300 bg-white px-4 text-sm font-semibold text-primary-700 hover:bg-primary-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Ir a la agenda</a>
+            class="inline-flex min-h-8 items-center rounded-lg border border-primary-300 bg-white px-3 text-xs font-semibold text-primary-700 hover:bg-primary-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600">Ir a la agenda</a>
         </div>
       </div>
     } @else {
@@ -52,12 +52,12 @@
     }
   </section>
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
     <!-- Timeline -->
     <section aria-labelledby="h-agenda" class="lg:col-span-2">
       <div class="mb-3 flex items-center justify-between">
-        <h2 id="h-agenda" class="text-base font-semibold text-slate-800">Agenda de hoy</h2>
-        <a routerLink="/citas" class="inline-flex min-h-10 items-center text-sm font-semibold text-primary-700 hover:text-primary-800">Ver agenda</a>
+        <h2 id="h-agenda" class="text-sm font-semibold text-slate-800">Agenda de hoy</h2>
+        <a routerLink="/citas" class="inline-flex min-h-8 items-center text-xs font-semibold text-primary-700 hover:text-primary-800">Ver agenda</a>
       </div>
 
       @if (loading()) {
@@ -71,7 +71,7 @@
                 <span class="block text-[10px] font-semibold uppercase text-slate-600">{{ cita.fecha_hora | date: 'a' : '-0500' }}</span>
               </div>
               <a routerLink="/citas"
-                [class]="'flex min-h-10 flex-1 items-center gap-3 rounded-xl border border-gray-100 border-l-4 bg-white p-3 shadow-sm hover:shadow-md ' + bordeTono[estadoCita[cita.estado].tono]">
+                [class]="'flex min-h-8 flex-1 items-center gap-3 rounded-xl border border-gray-100 border-l-4 bg-white p-3 shadow-sm hover:shadow-md ' + bordeTono[estadoCita[cita.estado].tono]">
                 <div class="min-w-0 flex-1">
                   <p class="truncate font-semibold text-slate-900">{{ cita.paciente?.nombre_completo }}</p>
                   <p class="mt-0.5 truncate text-sm text-slate-600">{{ cita.tipo_tratamiento }}</p>
@@ -82,9 +82,9 @@
           }
         </ol>
       } @else {
-        <div class="rounded-xl border border-gray-100 bg-white p-5 text-center shadow-sm">
+        <div class="rounded-xl border border-gray-100 bg-white p-3 text-center shadow-sm">
           <p class="text-sm text-slate-600">No tienes citas para hoy.</p>
-          <a routerLink="/citas" class="mt-3 inline-flex min-h-10 items-center text-sm font-semibold text-primary-700 hover:text-primary-800">Ir a la agenda</a>
+          <a routerLink="/citas" class="mt-3 inline-flex min-h-8 items-center text-xs font-semibold text-primary-700 hover:text-primary-800">Ir a la agenda</a>
         </div>
       }
     </section>
@@ -92,15 +92,15 @@
     <!-- Doughnut -->
     <section aria-labelledby="h-dona">
       <app-card [bordered]="true" shadow="sm">
-        <h2 id="h-dona" class="text-base font-semibold text-slate-800">Citas por estado del mes</h2>
+        <h2 id="h-dona" class="text-sm font-semibold text-slate-800">Citas por estado del mes</h2>
         @if (citasPorEstado() === null) {
-          <p class="py-10 text-center text-2xl font-bold text-slate-600" role="status">—</p>
+          <p class="py-6 text-center text-2xl font-bold text-slate-600" role="status">—</p>
         } @else if (!hayDatosGrafico()) {
-          <p class="py-10 text-center text-sm text-slate-600">Sin citas este mes.</p>
+          <p class="py-6 text-center text-sm text-slate-600">Sin citas este mes.</p>
         } @else {
           <div class="mt-3 h-64"><app-chart [config]="donaConfig()" /></div>
         }
-        <a routerLink="/reportes" class="mt-3 inline-flex min-h-10 items-center text-sm font-semibold text-primary-700 hover:text-primary-800">Ver reportes</a>
+        <a routerLink="/reportes" class="mt-3 inline-flex min-h-8 items-center text-xs font-semibold text-primary-700 hover:text-primary-800">Ver reportes</a>
       </app-card>
     </section>
   </div>

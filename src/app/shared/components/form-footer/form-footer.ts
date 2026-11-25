@@ -7,7 +7,7 @@ import { ButtonComponent } from '../button/button';
   imports: [ButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+    <div class="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:justify-end">
       <app-button
         variant="secondary"
         type="button"

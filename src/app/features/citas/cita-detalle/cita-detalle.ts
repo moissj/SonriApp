@@ -6,7 +6,7 @@ import { fechaHoraBogota } from '../funciones/agenda.funcion';
 
 type EstadoAccion = 'confirmada' | 'atendida' | 'no_asistio';
 
-const BTN = 'min-h-10 px-3 rounded-lg text-sm font-semibold border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ';
+const BTN = 'min-h-8 px-3 rounded-lg text-xs font-semibold border focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 ';
 
 /** Detalle de una cita en Drawer con acciones; la lógica vive en el padre (Agenda). */
 @Component({
@@ -17,7 +17,7 @@ const BTN = 'min-h-10 px-3 rounded-lg text-sm font-semibold border focus:outline
   template: `
     <app-drawer [(abierto)]="abierto" titulo="Detalle de la cita">
       @if (cita(); as c) {
-        <dl class="space-y-4 text-sm">
+        <dl class="space-y-2 text-sm">
           <div><dt class="text-xs font-semibold uppercase text-slate-500">Paciente</dt>
             <dd class="text-base font-semibold text-slate-900">{{ c.paciente?.nombre_completo }}</dd></div>
           <div><dt class="text-xs font-semibold uppercase text-slate-500">Fecha y hora</dt>

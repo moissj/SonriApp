@@ -2,8 +2,8 @@
   #dialogRef
   class="backdrop:bg-black/50 p-0 rounded-2xl border border-neutral-200 shadow-2xl max-w-sm w-[calc(100%-2rem)] bg-white overflow-hidden focus:outline-none"
 >
-  <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-100">
-    <h3 class="text-base font-bold text-neutral-900">{{ title() }}</h3>
+  <div class="flex items-center justify-between px-4 py-2.5 border-b border-neutral-100">
+    <h3 class="text-sm font-bold text-neutral-900">{{ title() }}</h3>
     <button
       type="button"
       (click)="close()"
@@ -15,7 +15,7 @@
       </svg>
     </button>
   </div>
-  <div class="p-5">
+  <div class="p-4">
     <ng-content></ng-content>
   </div>
 </dialog>

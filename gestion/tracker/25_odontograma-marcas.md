@@ -24,7 +24,8 @@
 - [x] tsc 0 / 100 tests / build / sincronizar + verificador APROBADO-CON-OBSERVACIONES
 - [x] Fix defensivo `getMarcas` `.eq(odontologo_id)` (consistencia getOdontograma)
 - [x] Commit local
-- [ ] Push y aplicar migracion a prod: SOLO con OK explicito del usuario
+- [x] Migracion aplicada a BD viva por el usuario (SQL Editor, 2026-11-25); odontograma carga y marcas guardan
+- [ ] `git push`: SOLO con OK explicito del usuario
 
 ## Observaciones no bloqueantes (verificador)
 - `odontograma.ts` 338 líneas (>200, preexistente agravado): extraer catalogo/estado a `funciones/` en plan de refactor.

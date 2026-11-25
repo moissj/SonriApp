@@ -42,96 +42,124 @@
           </span>
         }
       </div>
-      @if (!loading() && paciente()) {
-        <nav aria-label="Secciones de la historia clinica" class="-mx-4 px-4 mt-2 overflow-x-auto">
-          <ul class="flex gap-1.5 w-max sm:w-auto sm:flex-wrap">
-            @for (s of secciones; track s.id) {
-              <li>
-                <a
-                  [href]="'#' + s.id"
-                  (click)="irASeccion($event, s.id)"
-                  [attr.aria-current]="seccionActiva() === s.id ? 'true' : null"
-                  class="inline-flex items-center h-8 px-3 rounded-full border text-xs font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  [class.bg-primary]="seccionActiva() === s.id"
-                  [class.text-white]="seccionActiva() === s.id"
-                  [class.border-primary]="seccionActiva() === s.id"
-                  [class.bg-white]="seccionActiva() !== s.id"
-                  [class.text-gray-600]="seccionActiva() !== s.id"
-                  [class.border-gray-200]="seccionActiva() !== s.id"
-                  [class.hover:bg-gray-50]="seccionActiva() !== s.id"
-                >{{ s.etiqueta }}</a>
-              </li>
-            }
-          </ul>
-        </nav>
-      }
     </div>
   </div>
 
-  <div class="max-w-screen-lg mx-auto px-4 py-5 space-y-6">
-    @if (error()) {
-      <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
-    }
+  @if (!loading() && paciente()) {
+    <!-- Stepper horizontal (movil/tablet) -->
+    <nav aria-label="Secciones de la historia clinica" class="lg:hidden mt-4 mb-2 bg-white border-y border-gray-100">
+      <ol class="flex gap-1 overflow-x-auto px-4 py-3 max-w-screen-lg mx-auto">
+        @for (s of secciones; track s.id; let i = $index) {
+          <li class="shrink-0">
+            <a
+              [href]="'#' + s.id"
+              (click)="irASeccion($event, s.id)"
+              [attr.aria-current]="seccionActiva() === s.id ? 'step' : null"
+              class="flex items-center gap-2 h-9 pl-1 pr-3 rounded-full text-xs whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              [class.font-semibold]="seccionActiva() === s.id"
+              [class.text-primary]="seccionActiva() === s.id"
+              [class.text-gray-500]="seccionActiva() !== s.id"
+            >
+              <span
+                class="h-7 w-7 rounded-full border-2 flex items-center justify-center text-xs font-bold"
+                [class.bg-primary]="seccionActiva() === s.id"
+                [class.text-white]="seccionActiva() === s.id"
+                [class.border-primary]="seccionActiva() === s.id"
+                [class.border-gray-300]="seccionActiva() !== s.id"
+              >{{ i + 1 }}</span>
+              {{ s.etiquetaCorta }}
+            </a>
+          </li>
+        }
+      </ol>
+    </nav>
+  }
 
+  <div class="max-w-screen-lg mx-auto px-4 py-5 lg:grid lg:grid-cols-[13rem_1fr] lg:gap-8">
     @if (!loading() && paciente()) {
-      <!-- Sección: Historia clínica inicial -->
-      <section id="examen-ingreso" class="scroll-mt-36">
-        <div class="flex items-center gap-2 mb-3">
-          <lucide-icon name="clipboard-list" class="w-5 h-5 text-sky-700" aria-hidden="true" />
-          <h2 class="text-base font-semibold text-gray-800">Historia clínica inicial — Examen de ingreso</h2>
-        </div>
-        <app-examen-ingreso [pacienteId]="pacienteId" />
-      </section>
-
-      <!-- Sección: Historial de evoluciones -->
-      <section id="evoluciones" class="scroll-mt-36">
-        <div class="flex items-center gap-2 mb-3">
-          <lucide-icon name="calendar" class="w-5 h-5 text-sky-700" aria-hidden="true" />
-          <h2 class="text-base font-semibold text-gray-800">Historial de evoluciones</h2>
-        </div>
-        <app-evoluciones [pacienteId]="pacienteId" />
-      </section>
-
-      <!-- Sección: Ayudas diagnósticas -->
-      <section id="ayudas-diagnosticas" class="scroll-mt-36">
-        <div class="flex items-center gap-2 mb-3">
-          <lucide-icon name="image" class="w-5 h-5 text-sky-700" aria-hidden="true" />
-          <h2 class="text-base font-semibold text-gray-800">Ayudas diagnósticas</h2>
-        </div>
-        <app-card [bordered]="true" shadow="sm">
-          <app-empty-state
-            icon="camera"
-            title="Radiografías e imágenes"
-            subtitle="La carga de ayudas diagnósticas estará disponible próximamente."
-            size="sm"
-          />
-        </app-card>
-      </section>
-
-      <!-- Sección: Odontograma -->
-      <section id="odontograma" class="scroll-mt-36">
-        <div class="flex items-center gap-2 mb-3">
-          <lucide-icon name="stethoscope" class="w-5 h-5 text-sky-700" aria-hidden="true" />
-          <h2 class="text-base font-semibold text-gray-800">Odontograma</h2>
-        </div>
-        <app-odontograma [pacienteId]="pacienteId" />
-      </section>
-
-      <!-- Sección: Consentimiento informado -->
-      <section id="consentimiento" class="scroll-mt-36">
-        <div class="flex items-center gap-2 mb-3">
-          <lucide-icon name="pen-line" class="w-5 h-5 text-sky-700" aria-hidden="true" />
-          <h2 class="text-base font-semibold text-gray-800">Consentimiento informado</h2>
-        </div>
-        <app-card [bordered]="true" shadow="sm">
-          <app-empty-state
-            icon="file-text"
-            title="Consentimientos"
-            subtitle="La gestión de consentimientos informados estará disponible próximamente."
-            size="sm"
-          />
-        </app-card>
-      </section>
+      <!-- Stepper vertical (desktop) -->
+      <nav aria-label="Secciones de la historia clinica" class="hidden lg:block">
+        <ol class="sticky top-28 pt-2">
+          @for (s of secciones; track s.id; let i = $index) {
+            <li class="relative pb-6 last:pb-0 after:absolute after:left-4 after:top-9 after:bottom-1 after:w-px after:bg-gray-200 last:after:hidden">
+              <a
+                [href]="'#' + s.id"
+                (click)="irASeccion($event, s.id)"
+                [attr.aria-current]="seccionActiva() === s.id ? 'step' : null"
+                class="flex items-center gap-3 text-sm rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                [class.font-semibold]="seccionActiva() === s.id"
+              [class.text-primary]="seccionActiva() === s.id"
+              [class.text-gray-500]="seccionActiva() !== s.id"
+              >
+                <span
+                  class="h-8 w-8 shrink-0 rounded-full border-2 flex items-center justify-center text-xs font-bold bg-white"
+                  [class.bg-primary]="seccionActiva() === s.id"
+                [class.text-white]="seccionActiva() === s.id"
+                [class.border-primary]="seccionActiva() === s.id"
+                [class.border-gray-300]="seccionActiva() !== s.id"
+                >{{ i + 1 }}</span>
+                {{ s.etiqueta }}
+              </a>
+            </li>
+          }
+        </ol>
+      </nav>
     }
+
+    <div class="min-w-0 space-y-10">
+      @if (error()) {
+        <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
+      }
+
+      @if (!loading() && paciente(); as p) {
+        <section id="examen-ingreso" class="scroll-mt-28">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">1</span>
+            <lucide-icon name="clipboard-list" class="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-base font-semibold text-gray-800">Historia clínica inicial — Examen de ingreso</h2>
+          </div>
+          <app-examen-ingreso [pacienteId]="pacienteId" />
+        </section>
+        <section id="evoluciones" class="scroll-mt-28 pt-8 border-t border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">2</span>
+            <lucide-icon name="calendar" class="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-base font-semibold text-gray-800">Historial de evoluciones</h2>
+          </div>
+          <app-evoluciones [pacienteId]="pacienteId" />
+        </section>
+        <section id="ayudas-diagnosticas" class="scroll-mt-28 pt-8 border-t border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">3</span>
+            <lucide-icon name="image" class="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-base font-semibold text-gray-800">Ayudas diagnósticas</h2>
+          </div>
+          <app-card [bordered]="true" shadow="sm">
+            <app-empty-state
+              icon="camera"
+              title="Radiografías e imágenes"
+              subtitle="La carga de ayudas diagnósticas estará disponible próximamente."
+              size="sm"
+            />
+          </app-card>
+        </section>
+        <section id="odontograma" class="scroll-mt-28 pt-8 border-t border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">4</span>
+            <lucide-icon name="stethoscope" class="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-base font-semibold text-gray-800">Odontograma</h2>
+          </div>
+          <app-odontograma [pacienteId]="pacienteId" />
+        </section>
+        <section id="consentimiento" class="scroll-mt-28 pt-8 border-t border-gray-100">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="h-6 w-6 rounded-full bg-primary text-white text-xs font-bold flex items-center justify-center" aria-hidden="true">5</span>
+            <lucide-icon name="pen-line" class="w-5 h-5 text-primary" aria-hidden="true" />
+            <h2 class="text-base font-semibold text-gray-800">Consentimiento informado</h2>
+          </div>
+          <app-consentimientos-paciente [pacienteId]="pacienteId" [paciente]="{ nombre: p.nombre_completo, documento: p.numero_documento }" />
+        </section>
+      }
+    </div>
   </div>
 </div>

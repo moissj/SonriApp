@@ -21,11 +21,12 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
 import { EvolucionesComponent } from './evoluciones/evoluciones';
 import { OdontogramaComponent } from '../pacientes/detalle/odontograma/odontograma';
 import { ExamenIngresoComponent } from './examen-ingreso/examen-ingreso';
+import { ConsentimientosPacienteComponent } from '../../features/consentimientos/components/consentimientos-paciente/consentimientos-paciente';
 
 @Component({
   selector: 'app-historia-clinica-completa',
   standalone: true,
-  imports: [LucideAngularModule, CardComponent, EmptyStateComponent, EvolucionesComponent, OdontogramaComponent, ExamenIngresoComponent],
+  imports: [LucideAngularModule, CardComponent, EmptyStateComponent, EvolucionesComponent, OdontogramaComponent, ExamenIngresoComponent, ConsentimientosPacienteComponent],
   templateUrl: './historia-clinica.html',
   styleUrl: './historia-clinica.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -40,11 +41,11 @@ export class HistoriaClinicaCompletaComponent implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly secciones = [
-    { id: 'examen-ingreso', etiqueta: 'Examen de ingreso' },
-    { id: 'evoluciones', etiqueta: 'Evoluciones' },
-    { id: 'ayudas-diagnosticas', etiqueta: 'Ayudas diagnósticas' },
-    { id: 'odontograma', etiqueta: 'Odontograma' },
-    { id: 'consentimiento', etiqueta: 'Consentimiento' },
+    { id: 'examen-ingreso', etiqueta: 'Examen de ingreso', etiquetaCorta: 'Ingreso' },
+    { id: 'evoluciones', etiqueta: 'Evoluciones', etiquetaCorta: 'Evoluciones' },
+    { id: 'ayudas-diagnosticas', etiqueta: 'Ayudas diagnósticas', etiquetaCorta: 'Ayudas' },
+    { id: 'odontograma', etiqueta: 'Odontograma', etiquetaCorta: 'Odontograma' },
+    { id: 'consentimiento', etiqueta: 'Consentimiento', etiquetaCorta: 'Consent.' },
   ] as const;
   readonly seccionActiva = signal<string>('examen-ingreso');
 
@@ -116,7 +117,7 @@ export class HistoriaClinicaCompletaComponent implements OnInit {
         const visible = entradas.find((e) => e.isIntersecting);
         if (visible) this.seccionActiva.set(visible.target.id);
       },
-      { rootMargin: '-140px 0px -60% 0px' },
+      { rootMargin: '-110px 0px -60% 0px' },
     );
     for (const s of this.secciones) {
       const el = document.getElementById(s.id);

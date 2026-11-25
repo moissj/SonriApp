@@ -67,7 +67,7 @@ export function normalizarCie10(filasRaw, mapa, version) {
     codigo: normalizarCodigoCie10(f[mapa.codigo]),
     descripcion: texto(f[mapa.descripcion]),
     capitulo: aNull(f[mapa.capitulo]),
-    activo: true,
+    activo: aBool(f[mapa.habilitado]) !== false,
     version,
   }));
 }
@@ -79,7 +79,7 @@ export function normalizarCups(filasRaw, mapa, version) {
     sexo: normalizarSexo(f[mapa.sexo]),
     ambito: aNull(f[mapa.ambito]),
     quirurgico: aBool(f[mapa.quirurgico]),
-    activo: true,
+    activo: aBool(f[mapa.habilitado]) !== false,
     version,
   }));
 }

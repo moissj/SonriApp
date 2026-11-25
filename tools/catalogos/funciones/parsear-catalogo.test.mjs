@@ -33,6 +33,19 @@ test('normalizarCie10 descarta filas sin codigo o descripcion y cuenta', () => {
   ]);
 });
 
+test('habilitado mapea a activo (NO->false, SI->true, ausente->true)', () => {
+  const mapa = { ...mapaCie, habilitado: 'hab' };
+  const raw = [
+    { cod: 'X001', desc: 'a', hab: 'NO' },
+    { cod: 'X002', desc: 'b', hab: 'SI' },
+    { cod: 'X003', desc: 'c' },
+  ];
+  const activos = normalizarCie10(raw, mapa, 'v1').rows.map((r) => r.activo);
+  assert.deepEqual(activos, [false, true, true]);
+  const cups = normalizarCups([{ cod: 'Y001', desc: 'p', hab: 'N' }], { ...mapaCups, habilitado: 'hab' }, 'v1');
+  assert.equal(cups.rows[0].activo, false);
+});
+
 test('normalizarSexo y aBool', () => {
   assert.equal(normalizarSexo('f'), 'F');
   assert.equal(normalizarSexo('Z'), 'Z');

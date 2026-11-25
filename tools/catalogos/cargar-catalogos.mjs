@@ -11,9 +11,12 @@ import { createClient } from '@supabase/supabase-js';
 import { parsearCsv, normalizarCie10, normalizarCups } from './funciones/parsear-catalogo.mjs';
 
 const LOTE = 500;
-const MAPA_CIE10 = { codigo: 'codigo', descripcion: 'descripcion', capitulo: 'capitulo' };
+const MAPA_CIE10 = {
+  codigo: 'codigo', descripcion: 'descripcion', capitulo: 'capitulo', habilitado: 'habilitado',
+};
 const MAPA_CUPS = {
-  codigo: 'codigo', descripcion: 'descripcion', sexo: 'sexo', ambito: 'ambito', quirurgico: 'quirurgico',
+  codigo: 'codigo', descripcion: 'descripcion', sexo: 'sexo', ambito: 'ambito',
+  quirurgico: 'quirurgico', habilitado: 'habilitado',
 };
 
 function fallar(msg) {

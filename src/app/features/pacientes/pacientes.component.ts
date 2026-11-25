@@ -15,6 +15,10 @@ import { ButtonComponent } from '../../shared/components/button/button';
 import { AlertComponent } from '../../shared/components/alert/alert';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal';
 import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
+import { AvatarComponent } from '../../shared/components/avatar/avatar';
+import { KpiCard } from '../../shared/components/kpi-card/kpi-card';
+import { SegmentedControlComponent, OpcionSegmento } from '../../shared/components/segmented-control/segmented-control';
+import { SegmentoPaciente, enSegmento, esDelMesActual } from './funciones/segmentos.funcion';
 
 @Component({
   selector: 'app-pacientes',
@@ -30,6 +34,9 @@ import { PageHeaderComponent } from '../../shared/components/page-header/page-he
     AlertComponent,
     ConfirmModalComponent,
     PageHeaderComponent,
+    AvatarComponent,
+    KpiCard,
+    SegmentedControlComponent,
   ],
   templateUrl: './pacientes.html',
   styleUrl: './pacientes.scss',
@@ -83,15 +90,21 @@ export class PacientesComponent {
     })
   );
 
-  /** Obtener iniciales de un paciente para el avatar */
-  getInitials(name: string): string {
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return parts[0][0].toUpperCase();
-  }
+  readonly segmento = signal<SegmentoPaciente | null>('todos');
+  readonly segmentos: OpcionSegmento<SegmentoPaciente>[] = [
+    { label: 'Todos', value: 'todos' },
+    { label: 'Activos', value: 'activos' },
+    { label: 'Inactivos', value: 'inactivos' },
+  ];
+
+  /** Lista cargada (ya filtrada por búsqueda) acotada por el segmento activo/inactivo. */
+  readonly pacientesFiltrados = computed(() =>
+    enSegmento(this.patientsByLastVisit(), this.segmento() ?? 'todos')
+  );
+
+  readonly totalPacientes = computed(() => this.patients().length);
+  readonly nuevosEsteMes = computed(() => this.patients().filter((p) => esDelMesActual(p.created_at)).length);
+  readonly inactivos = computed(() => enSegmento(this.patients(), 'inactivos').length);
 
   /** Navegar al detalle de un paciente */
   viewPatient(id: string): void {

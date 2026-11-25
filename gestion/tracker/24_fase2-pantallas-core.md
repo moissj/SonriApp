@@ -28,7 +28,16 @@
 - [x] Gates (tsc 0 / 76 tests / build) + verificador APROBADO
 - Diferido: drag&drop reprogramar; panel lateral (mini-calendario/filtros); "Ver horarios libres"; Drawer focus-trap/return-focus; quitar `effect`+markForCheck redundante; citas.ts/.html >200 (deuda muy reducida); manual Agenda.
 
-## Wave D — Pacientes + Detalle (4.5/4.6) — pendiente
+## Wave D — Pacientes + Detalle (4.5/4.6) ✅
+- [x] Avatar nuevo (`shared/components/avatar/` + `iniciales()` pura, elimina getInitials duplicado)
+- [x] Fix "Última cita" (última cita pasada, sin cambio de contrato); rótulo unificado tabla/móvil
+- [x] Lista: page-header, Avatar, mini-KPIs (Total/Nuevos mes/Inactivos), filtro Todos/Activos/Inactivos; p-table conservado
+- [x] Detalle: cabecera compacta, banda alertas real (alergias+antecedentes), tab Citas con `ESTADO_CITA`, `calcularEdad` Bogotá
+- [x] `segmentos.funcion.ts` + `edad.funcion.ts` (+specs); manuales pacientes/detalle
+- [x] Gates (tsc 0 / 87 tests / build / sincronizar) + verificador APROBADO
+- Diferido: DataTable genérico; estado de error de lista + `select('*')` (consultas-eficientes, preexistente); contadores Presupuestos/Pagos/Consentimientos; alertas clínicas historia (Fase 3); getAge en formulario/historia; partir pacientes.html(227)/detalle.html(345).
+
+## Fase 2 COMPLETA ✅ — Waves B (Inicio) · C1 (modal) · C2 (agenda) · D (pacientes/detalle). Falta solo pulido/deuda arriba.
 
 ## Diferido (ver contrato)
 - Gráficos ingresos 6m / top5 tratamientos; KPIs ocupación/ticket/inactivos>6m/delta mes-anterior; sparklines+deltas (requieren agregado nuevo -> capa-datos).

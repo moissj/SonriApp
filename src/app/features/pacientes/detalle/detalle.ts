@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal, OnInit, viewChild } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, OnInit, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Location, DatePipe } from '@angular/common';
 import { PatientService, Patient } from '../../../core/services/patient.service';
@@ -10,6 +10,9 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
 import { PresupuestosComponent } from './presupuestos/presupuestos';
 import { PagosComponent } from './pagos/pagos';
 import { ConsentimientosPacienteComponent } from '../../consentimientos/components/consentimientos-paciente/consentimientos-paciente';
+import { AvatarComponent } from '../../../shared/components/avatar/avatar';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge';
+import { calcularEdad } from '../../../core/funciones/edad.funcion';
 import { tieneAlergiaReal } from './funciones/alergia.funcion';
 
 type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'consentimientos' | 'comunicacion';
@@ -20,6 +23,8 @@ type TabId = 'info' | 'citas' | 'presupuestos' | 'pagos' | 'consentimientos' | '
   imports: [
     RouterLink,
     DatePipe,
+    AvatarComponent,
+    StatusBadgeComponent,
     CardComponent,
     AlertComponent,
     EmptyStateComponent,
@@ -109,26 +114,26 @@ export class PacienteDetailComponent implements OnInit {
     this.activeTab.set(tab);
   }
 
-  getInitials(name: string): string {
-    if (!name) return '';
-    const parts = name.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-    return parts[0][0].toUpperCase();
-  }
+  readonly edad = computed(() => calcularEdad(this.patient()?.fecha_nacimiento ?? null));
 
-  getAge(birthdate: string | null): number | null {
-    if (!birthdate) return null;
-    const birth = new Date(birthdate);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
-      age--;
-    }
-    return age;
-  }
+  /** Alertas reales del paciente: alergias y antecedentes médicos con texto. */
+  readonly alertas = computed(() => {
+    const p = this.patient();
+    if (!p) return [];
+    const lista: { tipo: string; texto: string }[] = [];
+    if (tieneAlergiaReal(p.alergias)) lista.push({ tipo: 'Alergia', texto: p.alergias! });
+    if (p.antecedentes_medicos?.trim()) lista.push({ tipo: 'Antecedentes', texto: p.antecedentes_medicos.trim() });
+    return lista;
+  });
+
+  readonly tabs = computed<{ id: TabId; label: string; contador: number }[]>(() => [
+    { id: 'info', label: 'Información', contador: 0 },
+    { id: 'citas', label: 'Citas', contador: this.citas().length },
+    { id: 'presupuestos', label: 'Presupuestos', contador: 0 },
+    { id: 'pagos', label: 'Pagos', contador: 0 },
+    { id: 'consentimientos', label: 'Consentimientos', contador: 0 },
+    { id: 'comunicacion', label: 'Comunicación', contador: this.mensajes().length },
+  ]);
 
   readonly confirmModal = viewChild(ConfirmModalComponent);
 

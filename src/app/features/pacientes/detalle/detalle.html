@@ -1,39 +1,15 @@
-<div class="px-4 py-5 max-w-screen-lg mx-auto pb-24 md:pb-6">
-  <!-- Cabecera de control -->
-  <div class="flex items-center justify-between mb-5">
+<div class="px-4 py-5 max-w-7xl mx-auto pb-24 md:pb-6">
+  <div class="mb-4">
     <button
+      type="button"
       (click)="goBack()"
-      class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 active:scale-95 transition-all"
-      aria-label="Regresar"
+      class="inline-flex items-center gap-1.5 min-h-10 px-3 rounded-xl bg-white border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
     >
-      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
       </svg>
+      Volver
     </button>
-
-    <div class="flex items-center gap-2">
-      <!-- Editar -->
-      <a
-        [routerLink]="['/pacientes', patientId, 'editar']"
-        class="inline-flex items-center gap-2 bg-white border border-gray-200 text-gray-700 text-sm font-semibold px-4 py-2 rounded-xl hover:bg-gray-50 transition-colors shadow-sm"
-      >
-        <svg class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-        </svg>
-        Editar
-      </a>
-
-      <!-- Eliminar -->
-      <button
-        (click)="triggerDelete()"
-        class="inline-flex items-center justify-center h-10 w-10 rounded-xl bg-white border border-red-200 text-red-600 hover:bg-red-50 active:scale-95 transition-all"
-        aria-label="Eliminar paciente"
-      >
-        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
-      </button>
-    </div>
   </div>
 
   @if (errorMessage()) {
@@ -53,53 +29,80 @@
     </div>
   } @else {
     @if (patient()) {
-      <!-- Tarjeta del Perfil del Paciente -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5 text-center">
-        <div class="flex flex-col items-center">
-          <div class="h-14 w-14 rounded-full bg-sky-50 border-2 border-sky-100 text-sky-700 font-bold text-xl flex items-center justify-center mb-4">
-            {{ getInitials(patient()!.nombre_completo) }}
-          </div>
-          <h1 class="text-xl font-bold text-gray-900 leading-snug">
-            {{ patient()!.nombre_completo }}
-          </h1>
-          <span class="inline-flex items-center gap-1.5 mt-2 bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider">
+      <!-- Cabecera compacta -->
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 flex flex-wrap items-center gap-4">
+        <app-avatar [nombre]="patient()!.nombre_completo" tamano="lg" />
+        <div class="min-w-0 flex-1 basis-48">
+          <h1 class="text-xl font-bold text-slate-900 leading-snug truncate">{{ patient()!.nombre_completo }}</h1>
+          <p class="text-sm text-slate-600 mt-0.5">
             {{ patient()!.tipo_documento }} {{ patient()!.numero_documento }}
-          </span>
+            @if (edad() !== null) { <span> · {{ edad() }} años</span> }
+          </p>
         </div>
-
-        <!-- Acciones rápidas de comunicación -->
-        @if (patient()!.telefono) {
-          <div class="flex justify-center gap-4 mt-5 border-t border-gray-50 pt-5">
-            <!-- Botón Llamar -->
+        <div class="flex flex-wrap items-center gap-2">
+          @if (patient()!.telefono) {
             <a
               [href]="'tel:' + patient()!.telefono"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition-colors shadow-sm"
+              class="inline-flex items-center gap-2 min-h-10 px-3 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
             >
-              <svg class="h-4 w-4 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg class="h-4 w-4 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.94.725l.548 2.2a1 1 0 01-.321.988l-1.305.98a10.582 10.582 0 004.872 4.872l.98-1.305a1 1 0 01.988-.321l2.2.548a1 1 0 01.725.94V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
               Llamar
             </a>
-
-            <!-- Botón WhatsApp (usa WhatsappService, sin lógica duplicada) -->
             <button
               type="button"
               (click)="enviarWhatsApp()"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-emerald-100 bg-emerald-50 text-emerald-800 text-xs font-semibold hover:bg-emerald-100 transition-colors shadow-sm"
+              class="inline-flex items-center gap-2 min-h-10 px-3 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-800 text-sm font-semibold hover:bg-emerald-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-600"
             >
-              <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24">
+              <svg class="h-4 w-4 text-emerald-600" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.513 2.262 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.97C16.579 1.966 14.11 .94 11.479.94c-5.436 0-9.86 4.37-9.864 9.8.001 2.01.536 3.97 1.549 5.679L2.126 21.84l5.521-1.446zm11.385-6.666c-.33-.164-1.952-.951-2.251-1.06-.3-.108-.518-.163-.736.164-.218.327-.844 1.06-.1.163v-.001c.218-.328.844-1.06 1.06-1.332.218-.272.108-.544-.027-.708-.136-.165-1.226-2.915-1.68-3.997-.443-1.053-.896-.91-1.226-.927-.318-.016-.681-.02-.1.163l.635-.064c.318.016.681.018 1.044.201.363.182 1.225.817 1.633 1.635.408.816.408 1.5.204 1.907-.204.408-.816 1.089-1.225 1.498a3.1 3.1 0 01-2.179.882c-.328 0-.612-.016-.844-.049l.608.033c.328 0 .612.015.953-.163.34-.18 1.96-.952 2.259-1.062.3-.109.52-.164.738.163z" />
               </svg>
               WhatsApp
             </button>
-          </div>
-        }
+          }
+          <a
+            [routerLink]="['/pacientes', patientId, 'editar']"
+            class="inline-flex items-center gap-2 min-h-10 px-3 rounded-xl border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
+          >
+            Editar
+          </a>
+          <button
+            type="button"
+            (click)="triggerDelete()"
+            class="inline-flex items-center justify-center min-h-10 min-w-10 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-600"
+            aria-label="Eliminar paciente"
+          >
+            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <!-- Alertas reales (alergias y antecedentes) -->
+      @if (alertas().length > 0) {
+        <div class="flex flex-wrap gap-2 mb-4" role="list" aria-label="Alertas del paciente">
+          @for (a of alertas(); track a.tipo) {
+            <span
+              role="listitem"
+              [class]="a.tipo === 'Alergia' ? 'bg-red-50 border-red-200 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'"
+              class="inline-flex items-start gap-1.5 max-w-full rounded-xl border px-3 py-1.5 text-sm"
+            >
+              <svg class="h-4 w-4 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <span class="min-w-0"><strong>{{ a.tipo }}:</strong> <span class="line-clamp-2 break-words">{{ a.texto }}</span></span>
+            </span>
+          }
+        </div>
+      }
+
 
       <!-- Acceso a la Historia Clínica completa (módulo independiente) -->
       <a
         [routerLink]="['/historia-clinica', patientId]"
-        class="group flex items-center justify-between gap-3 bg-gradient-to-r from-sky-600 to-teal-600 text-white rounded-2xl px-5 py-4 mb-5 shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
+        class="group flex items-center justify-between gap-3 bg-gradient-to-r from-primary-600 to-teal-600 text-white rounded-2xl px-5 py-4 mb-5 shadow-sm hover:shadow-md transition-all active:scale-[0.99]"
       >
         <div class="flex items-center gap-3 min-w-0">
           <div class="h-11 w-11 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
@@ -118,65 +121,22 @@
       </a>
 
       <!-- Selector de Pestañas (Tabs) -->
-      <div class="tab-bar flex border-b border-gray-100 mb-5 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1">
-        <button
-          (click)="changeTab('info')"
-          [class.bg-sky-50]="activeTab() === 'info'"
-          [class.text-sky-700]="activeTab() === 'info'"
-          class="flex-1 text-center px-3 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
-        >
-          Información
-        </button>
-        <button
-          (click)="changeTab('citas')"
-          [class.bg-sky-50]="activeTab() === 'citas'"
-          [class.text-sky-700]="activeTab() === 'citas'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5"
-        >
-          Citas
-          @if (citas().length > 0) {
-            <span class="inline-flex items-center justify-center h-4.5 min-w-4.5 bg-sky-200 text-sky-800 text-xxs px-1 py-0.5 rounded-full font-bold">
-              {{ citas().length }}
-            </span>
-          }
-        </button>
-        <button
-          (click)="changeTab('presupuestos')"
-          [class.bg-sky-50]="activeTab() === 'presupuestos'"
-          [class.text-sky-700]="activeTab() === 'presupuestos'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
-        >
-          Presupuestos
-        </button>
-        <button
-          (click)="changeTab('pagos')"
-          [class.bg-sky-50]="activeTab() === 'pagos'"
-          [class.text-sky-700]="activeTab() === 'pagos'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
-        >
-          Pagos
-        </button>
-        <button
-          (click)="changeTab('consentimientos')"
-          [class.bg-sky-50]="activeTab() === 'consentimientos'"
-          [class.text-sky-700]="activeTab() === 'consentimientos'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all"
-        >
-          Consentimientos
-        </button>
-        <button
-          (click)="changeTab('comunicacion')"
-          [class.bg-sky-50]="activeTab() === 'comunicacion'"
-          [class.text-sky-700]="activeTab() === 'comunicacion'"
-          class="flex-1 text-center py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5"
-        >
-          Comunicación
-          @if (mensajes().length > 0) {
-            <span class="inline-flex items-center justify-center h-4.5 min-w-4.5 bg-sky-200 text-sky-800 text-xxs px-1 py-0.5 rounded-full font-bold">
-              {{ mensajes().length }}
-            </span>
-          }
-        </button>
+      <div class="tab-bar flex border-b border-gray-100 mb-5 bg-white rounded-2xl p-1.5 shadow-sm overflow-x-auto gap-1" role="tablist">
+        @for (t of tabs(); track t.id) {
+          <button
+            type="button"
+            role="tab"
+            [attr.aria-selected]="activeTab() === t.id"
+            (click)="changeTab(t.id)"
+            [class]="activeTab() === t.id ? 'bg-primary-50 text-primary-700' : 'text-slate-600 hover:bg-slate-50'"
+            class="flex-1 min-h-10 whitespace-nowrap text-center px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-600"
+          >
+            {{ t.label }}
+            @if (t.contador > 0) {
+              <span class="inline-flex items-center justify-center min-w-5 bg-primary-100 text-primary-800 text-xxs px-1 py-0.5 rounded-full font-bold">{{ t.contador }}</span>
+            }
+          </button>
+        }
       </div>
 
       <!-- Contenedores de Pestañas -->
@@ -184,22 +144,6 @@
       <!-- 1. Información Personal -->
       @if (activeTab() === 'info') {
         <div class="space-y-5">
-          <!-- Alerta Crítica de Alergias -->
-          @if (tieneAlergiaReal(patient()!.alergias)) {
-            <div class="bg-red-50 border border-red-200 rounded-2xl p-4 flex gap-3 text-red-950">
-              <svg class="h-5 w-5 text-red-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              <div>
-                <h4 class="font-bold text-xs uppercase tracking-wider text-red-800">Alerta de Alergia</h4>
-                <p class="text-sm mt-1 font-semibold">{{ patient()!.alergias }}</p>
-              </div>
-            </div>
-          } @else {
-            <div class="bg-gray-50 border border-gray-200 rounded-2xl p-4 flex gap-3 text-gray-600">
-              <span class="text-sm font-medium">Sin alergias registradas</span>
-            </div>
-          }
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <!-- Columna Datos Personales -->
@@ -213,8 +157,8 @@
                   <span class="block text-xxs font-medium text-gray-400 uppercase tracking-wider">Fecha Nacimiento</span>
                   <span class="text-gray-800 font-medium">
                     {{ patient()!.fecha_nacimiento ? (patient()!.fecha_nacimiento | date: 'dd/MM/yyyy') : 'No registrada' }}
-                    @if (getAge(patient()!.fecha_nacimiento)) {
-                      <span class="text-gray-500 text-xs">({{ getAge(patient()!.fecha_nacimiento) }} años)</span>
+                    @if (edad() !== null) {
+                      <span class="text-gray-500 text-xs">({{ edad() }} años)</span>
                     }
                   </span>
                 </div>
@@ -293,7 +237,7 @@
                       <svg class="h-3.5 w-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                       </svg>
-                      {{ cita.fecha_hora | date: 'dd/MM/yyyy - hh:mm a' }}
+                      {{ cita.fecha_hora | date: 'dd/MM/yyyy - hh:mm a' : '-0500' }}
                     </p>
                     <p class="text-xs text-gray-500 mt-0.5 flex items-center gap-1.5">
                       <svg class="h-3.5 w-3.5 text-gray-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -303,21 +247,7 @@
                     </p>
                   </div>
 
-                  <!-- Badge de Estado -->
-                  <span
-                    [class.bg-green-50]="cita.estado === 'completada'"
-                    [class.text-green-800]="cita.estado === 'completada'"
-                    [class.border-green-200]="cita.estado === 'completada'"
-                    [class.bg-amber-50]="cita.estado === 'pendiente'"
-                    [class.text-amber-800]="cita.estado === 'pendiente'"
-                    [class.border-amber-200]="cita.estado === 'pendiente'"
-                    [class.bg-red-50]="cita.estado === 'cancelada'"
-                    [class.text-red-800]="cita.estado === 'cancelada'"
-                    [class.border-red-200]="cita.estado === 'cancelada'"
-                    class="inline-flex items-center text-xxs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border"
-                  >
-                    {{ cita.estado }}
-                  </span>
+                  <app-status-badge [estado]="cita.estado" />
                 </div>
               </app-card>
             }
@@ -370,7 +300,7 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex items-center flex-wrap gap-2">
                       @if (msg.tipo_plantilla) {
-                        <span class="inline-flex items-center bg-sky-50 text-sky-700 text-xxs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-sky-100">
+                        <span class="inline-flex items-center bg-primary-50 text-primary-700 text-xxs font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border border-primary-100">
                           {{ msg.tipo_plantilla }}
                         </span>
                       } @else {

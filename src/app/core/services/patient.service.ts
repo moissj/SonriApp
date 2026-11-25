@@ -94,9 +94,10 @@ export class PatientService {
       if (error) throw error;
 
       return (data || []).map((patient: any) => {
-        // Encontrar la fecha de la última cita
-        const citas = patient.citas || [];
-        const ultimaCita = citas.length > 0 ? citas[0].fecha_hora : null;
+        // Última cita ya ocurrida (las futuras no cuentan); citas viene ordenado desc
+        const ahora = new Date();
+        const pasada = (patient.citas || []).find((c: { fecha_hora: string }) => new Date(c.fecha_hora) <= ahora);
+        const ultimaCita = pasada ? pasada.fecha_hora : null;
         return {
           ...patient,
           ultima_cita: ultimaCita,

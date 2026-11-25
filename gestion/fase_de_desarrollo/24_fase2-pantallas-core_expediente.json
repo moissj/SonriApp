@@ -1,0 +1,45 @@
+{
+  "plan": "24_fase2-pantallas-core",
+  "version": 1,
+  "fecha": "2026-11-25",
+  "alcance": "Fase 2 del rediseno (brief secciones 4.1 Inicio, 4.2 Agenda, 4.3 modal Nueva cita, 4.5 Pacientes, 4.6 Detalle). Rediseno visual/UX de pantallas core + componentes base JIT (KpiCard, DataTable, Avatar, Drawer, Toast, SegmentedControl). Sin cambios de modelo de datos, columnas, contratos de servicio ni RLS. KPIs nuevos: usar datos existentes o calcular en cliente con TODO; NO crear migraciones en esta fase (si un KPI exige agregado nuevo, se difiere o se documenta como pendiente de vista/RPC aditiva).",
+  "fuente": "docs/producto/rediseno-sonriapp-brief.md",
+  "estrategia": "Pantalla por pantalla: relevar -> contrato -> rebuild (cliente-web) -> gates -> verificador -> commit. Un wave = una pantalla (o un lote de componentes base).",
+  "waves": {
+    "B_inicio": {
+      "estado": "en curso",
+      "owner": "cliente-web",
+      "objetivo": "Rediseñar Inicio (brief 4.1): fila de KpiCards, héroe 'Siguiente paciente', timeline 'Agenda de hoy', gráfico 'Citas por estado', reemplazar tarjeta Reportes. Usar datos existentes; sin migraciones.",
+      "crear_componente": "src/app/shared/components/kpi-card/kpi-card.ts (standalone, OnPush, selector app-kpi-card). Inputs (signals): titulo(required string), valor(required string), icono?(string Lucide), tono?('primary'|'success'|'warning'|'danger'|'neutral' default 'primary'), delta?(number, % — opcional), deltaLabel?(string), sparkline?(number[] — opcional), tooltip?(string), enlace?(string routerLink). Render: tarjeta rounded-xl shadow-card p-4; icono en chip tono-50/tono-600; valor text-2xl font-semibold; delta con flecha arriba/abajo y color success/danger segun signo; sparkline opcional via SVG polyline inline (sin chart.js); si enlace, toda la tarjeta es <a routerLink>. aria/title para tooltip. <=140 lineas.",
+      "inicio": {
+        "kpis": "Fila responsive de 4-5 KpiCards SOLO con datos reales disponibles: 'Citas hoy' (citasHoy().length, icono calendar-days, enlace /citas); 'Nuevos pacientes' (pacientesNuevosMes, users, /pacientes); 'Ingresos del mes' (ReporteService cobradoMes, copCurrency, wallet, /reportes); 'Cartera' (saldoPendiente, copCurrency, tono danger si>0, /reportes); 'Tasa de confirmación' (calculo cliente: (confirmadas+atendidas)/totalCitasMes*100 desde citasPorEstado; si total 0 -> '—'). NO poner delta ni sparkline falsos: dejar esos inputs vacios (delta/sparkline se pueblan cuando exista agregado historico -> diferido).",
+        "hero": "Héroe 'Siguiente paciente': primera cita de hoy con fecha_hora >= ahora y estado != cancelada. Mostrar nombre paciente, hora (America/Bogota), tipo_tratamiento, app-status-badge [estado], y acciones: 'Ver historia' (routerLink /historia-clinica/{{paciente_id}}), 'Ir a la agenda' (/citas). Si no hay -> estado vacio 'Sin citas pendientes hoy'. (Alertas médicas del paciente en el héroe -> diferido Fase 3.)",
+        "timeline": "'Agenda de hoy': reestilizar la lista citasHoy como timeline (hora a la izquierda, tarjeta a la derecha con borde-izquierdo color del tono de ESTADO_CITA, paciente + tratamiento + status-badge). Reusar src/app/shared/estado-cita/estado-cita.ts (ESTADO_CITA + tonoAClasesBadge). Vacio existente conservado.",
+        "grafico": "Reemplazar la tarjeta 'Reportes' (inicio.html:103-117) por una tarjeta con gráfico doughnut 'Citas por estado del mes' usando <app-chart [config]> (ChartConfiguration doughnut) con labels/colores desde ESTADO_CITA (pendiente ambar, confirmada primary, atendida verde, cancelada slate, no_asistio rojo, en_atencion violeta). Datos desde ReporteService.getReporteMensual().citasPorEstado. Pie de la tarjeta: enlace 'Ver reportes' a /reportes. Importar ChartComponent en inicio.",
+        "tz_fix": "Corregir ventana de 'hoy' en src/app/core/services/dashboard.service.ts (hoy usa setHours local): construir [inicio,fin] del dia en America/Bogota usando hoyBogota() de core/funciones/fecha-bogota.funcion.ts (dia 'YYYY-MM-DD' + offset -05:00). Cambio de correctitud, sin tocar la forma de DashboardData.",
+        "datos_extra": "Inyectar ReporteService (core/services) en inicio para cobradoMes + citasPorEstado. Mantener DashboardService para lo demas. Ancho: usar max-w-7xl para el grid del dashboard.",
+        "diferido": [
+          "Gráficos 'ingresos 6 meses' (barras) y 'top 5 tratamientos' -> requieren agregado historico/nuevo -> wave posterior o capa-datos (vista/RPC aditiva).",
+          "KPIs 'Ocupación semanal', 'Ticket promedio', 'Inactivos >6m', 'Ingresos mes vs anterior (delta)' -> requieren agregado nuevo -> diferido.",
+          "Sparklines y deltas en KpiCards -> requieren serie temporal -> diferido (inputs ya soportados)."
+        ]
+      },
+      "validacion": "npx tsc --noEmit -p tsconfig.app.json (0); npm run build (warning examen-ingreso.css permitido); npm test -- --watch=false verde.",
+      "reglas": "OnPush/signals; sin console.log; sin PII en logs; tokens (no sky-* nuevos); iconos Lucide (registrar nuevos en app.config sin duplicar); accesibilidad (aria, foco, contraste >=4.5:1); America/Bogota; archivos <=200 lineas."
+    },
+    "C_agenda_modal": { "estado": "pendiente", "objetivo": "Brief 4.2 Agenda (Dia/Semana/Mes/Lista, color por estado, Drawer detalle, linea hora actual) + 4.3 modal Nueva cita (orden Paciente->Tratamiento->Fecha/hora->Duracion chips->Notas; horarios libres; leer ?nueva=1; opciones avanzadas). Construir Drawer + SegmentedControl JIT." },
+    "D_pacientes_detalle": { "estado": "pendiente", "objetivo": "Brief 4.5 Pacientes (DataTable, filtros, mini-KPIs, corregir 'Ultima cita') + 4.6 Detalle (cabecera compacta, banda de alertas con datos reales, pestañas con contadores). Construir DataTable + Avatar JIT." }
+  },
+  "diferido_fase_posterior": [
+    "Agregados/vistas/RPC para KPIs historicos (ingresos 6m, mes-vs-anterior, ocupacion, ticket, inactivos>6m) -> capa-datos cuando se prioricen.",
+    "Alertas medicas del paciente en hero/detalle -> Fase 3 (historia clinica).",
+    "Drag&drop reprogramar en agenda -> dentro de wave C si alcanza; si no, Fase posterior.",
+    "Contenedor unico max-w-7xl global + soltar wrappers por pantalla -> se hace pantalla por pantalla en esta fase."
+  ],
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check"
+  ]
+}

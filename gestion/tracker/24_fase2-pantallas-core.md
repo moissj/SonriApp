@@ -21,9 +21,12 @@
 - [x] Helpers puros `cita-modal.funcion.ts` (+spec 5 tests); `cita-modal.ts` 195 líneas (<200)
 - [x] Gates (tsc 0 / 65 tests / build / sincronizar) + verificador APROBADO
 - Diferido C1: "Ver horarios libres" (→ C2); toggle recordatorio (Cita sin campo = modelo); spec de `mensajeSolape`/`valoresFormulario`; TZ Bogotá en texto de solape.
-### C2 — Agenda (4.2) + Drawer JIT
-- [ ] SegmentedControl para vistas + vista Lista; colores por `ESTADO_CITA`; línea hora actual; Drawer detalle de cita
-- [ ] Diferido: drag&drop reprogramar; panel lateral (mini-calendario/filtros) según alcance
+### C2 — Agenda (4.2) + Drawer JIT ✅
+- [x] SegmentedControl vistas Día/Semana/Mes/Lista; colores por `ESTADO_CITA` (clases estáticas); línea hora actual (Bogotá, interval limpio); bloques proporcionales; Drawer + cita-detalle (reusa updateCitaEstado/openCitaForm/requestCancel)
+- [x] Helpers puros `agenda.funcion.ts`/`calendario.funcion.ts` (+specs); citas.ts 405→260, citas.html 447→258
+- [x] Barra agenda compactada a una fila (pedido usuario); `citasDelDia` ref estable
+- [x] Gates (tsc 0 / 76 tests / build) + verificador APROBADO
+- Diferido: drag&drop reprogramar; panel lateral (mini-calendario/filtros); "Ver horarios libres"; Drawer focus-trap/return-focus; quitar `effect`+markForCheck redundante; citas.ts/.html >200 (deuda muy reducida); manual Agenda.
 
 ## Wave D — Pacientes + Detalle (4.5/4.6) — pendiente
 

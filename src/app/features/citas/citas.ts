@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, viewChild, OnInit, OnDestroy, ChangeDetectorRef, effect } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule, DatePipe, NgTemplateOutlet } from '@angular/common';
 import { toSignal, toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
@@ -11,13 +11,19 @@ import { WhatsappService } from '../../core/services/whatsapp.service';
 import { supabase } from '../../core/supabase.client';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal';
+import { SegmentedControlComponent, OpcionSegmento } from '../../shared/components/segmented-control/segmented-control';
 import { CitaModalComponent } from './cita-modal/cita-modal';
-import { aFechaBogota, hoyBogota } from '../../core/funciones/fecha-bogota.funcion';
+import { CitaDetalleComponent } from './cita-detalle/cita-detalle';
+import { aFechaBogota, fechaLargaBogota, hoyBogota } from '../../core/funciones/fecha-bogota.funcion';
+import { VistaAgenda, cabecerasSemana, celdasMes, desplazar, rangoConsulta, textoRango } from './funciones/calendario.funcion';
+import { HORA_INICIO, HORA_FIN, PX_POR_HORA, agruparPorDia, clasesCita, horaBogota, posicionAhora, posicionBloque } from './funciones/agenda.funcion';
+
+type EstadoCita = Cita['estado'];
 
 @Component({
   selector: 'app-citas',
   standalone: true,
-  imports: [CommonModule, DatePipe, StatusBadgeComponent, ConfirmModalComponent, CitaModalComponent],
+  imports: [CommonModule, DatePipe, NgTemplateOutlet, StatusBadgeComponent, ConfirmModalComponent, CitaModalComponent, CitaDetalleComponent, SegmentedControlComponent],
   templateUrl: './citas.html',
   styleUrl: './citas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +33,6 @@ export class CitasComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly whatsapp = inject(WhatsappService);
   private readonly cdr = inject(ChangeDetectorRef);
-
   private readonly route = inject(ActivatedRoute);
 
   constructor() {
@@ -43,205 +48,95 @@ export class CitasComponent implements OnInit, OnDestroy {
   }
 
   readonly selectedDate = signal<string>(hoyBogota());
-  readonly currentView = signal<'dia' | 'semana' | 'mes'>('dia');
+  readonly currentView = signal<VistaAgenda>('dia');
   readonly refreshTrigger = signal<number>(0);
-  readonly activeMenuCita = signal<Cita | null>(null);
+  readonly opcionesVista: OpcionSegmento<VistaAgenda>[] = [
+    { label: 'Día', value: 'dia' },
+    { label: 'Semana', value: 'semana' },
+    { label: 'Mes', value: 'mes' },
+    { label: 'Lista', value: 'lista' },
+  ];
+
+  /** Detalle de cita abierto en el Drawer (se resuelve por id para ver el estado optimista) */
+  readonly detalleId = signal<string | null>(null);
+  readonly detalleAbierto = signal(false);
 
   /** Cita pendiente de confirmar cancelación (acción destructiva) */
   readonly citaPendingCancel = signal<Cita | null>(null);
 
   // Registro de overrides locales para Optimistic Updates
-  readonly localCitasOverride = signal<Record<string, 'pendiente' | 'confirmada' | 'atendida' | 'cancelada' | 'no_asistio'>>({});
+  readonly localCitasOverride = signal<Record<string, EstadoCita>>({});
 
   readonly citaModal = viewChild(CitaModalComponent);
   readonly confirmModal = viewChild(ConfirmModalComponent);
 
   private realtimeChannel: any;
+  private timerAhora?: ReturnType<typeof setInterval>;
 
-  // Rango de la semana del selectedDate (Lunes - Domingo)
-  readonly weekRange = computed(() => {
-    const d = new Date(this.selectedDate() + 'T00:00:00');
-    const day = d.getDay(); // 0 es Domingo, 1 es Lunes
-    const diffToMonday = day === 0 ? -6 : 1 - day;
-    
-    const monday = new Date(d);
-    monday.setDate(d.getDate() + diffToMonday);
-    
-    const sunday = new Date(monday);
-    sunday.setDate(monday.getDate() + 6);
-    
-    return { monday, sunday };
-  });
+  /** Instante actual (se refresca cada minuto) para la línea de hora actual */
+  readonly ahora = signal(new Date());
+  readonly hoy = computed(() => aFechaBogota(this.ahora()));
+  readonly lineaAhora = computed(() => posicionAhora(this.ahora()));
+  readonly altoGrilla = (HORA_FIN - HORA_INICIO) * PX_POR_HORA;
+  readonly pxHora = PX_POR_HORA;
+  readonly clasesCita = clasesCita;
+  readonly horaBogota = horaBogota;
+  readonly etiquetaDia = (dia: string): string => fechaLargaBogota(new Date(`${dia}T12:00:00Z`));
 
-  // Array de fechas de la semana actual para la vista semanal
-  readonly weekDates = computed(() => {
-    const { monday } = this.weekRange();
-    const dates: Date[] = [];
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(monday);
-      date.setDate(monday.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
-  });
-
-  // Cabeceras de la semana (Español)
-  readonly weekHeaders = computed(() => {
-    const dates = this.weekDates();
-    const daysSpanish = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-    return dates.map((date) => {
-      const dayName = daysSpanish[date.getDay()];
-      const dayNum = date.getDate();
-      const dateStr = aFechaBogota(date);
-      return {
-        label: `${dayName} ${dayNum}`,
-        dateStr,
-      };
-    });
-  });
-
-  // Array de 42 celdas para la cuadrícula del mes
-  readonly monthDates = computed(() => {
-    const d = new Date(this.selectedDate() + 'T00:00:00');
-    const year = d.getFullYear();
-    const month = d.getMonth();
-    
-    const firstDay = new Date(year, month, 1);
-    const firstDayOfWeek = firstDay.getDay(); // 0 = Domingo, 1 = Lunes
-    
-    // Cuántos días restar para llegar al primer Lunes de la cuadrícula
-    const diff = firstDayOfWeek === 0 ? -6 : 1 - firstDayOfWeek;
-    const startCalendar = new Date(firstDay);
-    startCalendar.setDate(firstDay.getDate() + diff);
-    
-    const dates: Date[] = [];
-    for (let i = 0; i < 42; i++) {
-      const cellDate = new Date(startCalendar);
-      cellDate.setDate(startCalendar.getDate() + i);
-      dates.push(cellDate);
-    }
-    return dates;
-  });
-
-  // Celdas del mes mapeadas con metadatos
-  readonly monthCells = computed(() => {
-    const dates = this.monthDates();
-    const activeDate = new Date(this.selectedDate() + 'T00:00:00');
-    const currentMonth = activeDate.getMonth();
-    const todayStr = hoyBogota();
-
-    return dates.map((date) => {
-      const dateStr = aFechaBogota(date);
-      const isCurrentMonth = date.getMonth() === currentMonth;
-      const isToday = dateStr === todayStr;
-      return {
-        date,
-        dayNum: date.getDate(),
-        dateStr,
-        isCurrentMonth,
-        isToday,
-      };
-    });
-  });
-
-  // Rango de fechas a consultar dependiendo de la vista activa
-  readonly fetchRange = computed(() => {
-    const view = this.currentView();
-    const dateStr = this.selectedDate();
-    
-    if (view === 'dia') {
-      return {
-        start: `${dateStr}T00:00:00.000Z`,
-        end: `${dateStr}T23:59:59.999Z`
-      };
-    } else if (view === 'semana') {
-      const { monday, sunday } = this.weekRange();
-      const mondayStr = monday.toISOString().split('T')[0];
-      const sundayStr = sunday.toISOString().split('T')[0];
-      return {
-        start: `${mondayStr}T00:00:00.000Z`,
-        end: `${sundayStr}T23:59:59.999Z`
-      };
-    } else {
-      const dates = this.monthDates();
-      const startStr = dates[0].toISOString().split('T')[0];
-      const endStr = dates[41].toISOString().split('T')[0];
-      return {
-        start: `${startStr}T00:00:00.000Z`,
-        end: `${endStr}T23:59:59.999Z`
-      };
-    }
-  });
-
-  // Texto del rango de fecha actual (estilo Teams)
-  readonly dateRangeText = computed(() => {
-    const view = this.currentView();
-    const dateStr = this.selectedDate();
-    const d = new Date(dateStr + 'T00:00:00');
-    
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
-    
-    if (view === 'dia') {
-      return d.toLocaleDateString('es-ES', options);
-    } else if (view === 'semana') {
-      const { monday, sunday } = this.weekRange();
-      const startDay = monday.getDate();
-      const startMonth = monday.toLocaleDateString('es-ES', { month: 'short' });
-      const endDay = sunday.getDate();
-      const endMonth = sunday.toLocaleDateString('es-ES', { month: 'short' });
-      const year = sunday.getFullYear();
-      return `${startDay} de ${startMonth} - ${endDay} de ${endMonth}, ${year}`;
-    } else {
-      const monthName = d.toLocaleDateString('es-ES', { month: 'long' });
-      const year = d.getFullYear();
-      return `${monthName.charAt(0).toUpperCase() + monthName.slice(1)} de ${year}`;
-    }
-  });
+  readonly weekHeaders = computed(() => cabecerasSemana(this.selectedDate()));
+  readonly monthCells = computed(() => celdasMes(this.selectedDate(), hoyBogota()));
+  readonly fetchRange = computed(() => rangoConsulta(this.currentView(), this.selectedDate()));
+  readonly dateRangeText = computed(() => textoRango(this.currentView(), this.selectedDate()));
 
   // Cargar citas reactivas
   readonly citas = toSignal(
-    toObservable(computed(() => {
-      return { range: this.fetchRange(), trigger: this.refreshTrigger() };
-    })).pipe(
-      switchMap(({ range }) => {
-        return from(this.citaService.getCitas(range.start, range.end));
-      })
+    toObservable(computed(() => ({ range: this.fetchRange(), trigger: this.refreshTrigger() }))).pipe(
+      switchMap(({ range }) => from(this.citaService.getCitas(range.start, range.end)))
     ),
     { initialValue: [] as Cita[] }
   );
 
   // Mezclar citas con los overrides locales de estado
   readonly displayCitas = computed(() => {
-    const raw = this.citas();
     const overrides = this.localCitasOverride();
-    return raw.map((c) => {
-      if (c.id && overrides[c.id]) {
-        return { ...c, estado: overrides[c.id] };
-      }
-      return c;
-    });
+    return this.citas().map((c) => (c.id && overrides[c.id] ? { ...c, estado: overrides[c.id] } : c));
   });
 
-  // Citas del día seleccionado (útil en vista mensual móvil)
-  readonly selectedDayCitas = computed(() => {
-    const dateStr = this.selectedDate();
-    return this.displayCitas().filter((cita) => {
-      return cita.fecha_hora.split('T')[0] === dateStr;
-    });
+  /** Citas agrupadas por día Bogota, en orden cronológico (vista Lista) */
+  readonly grupos = computed(() => agruparPorDia(this.displayCitas()));
+  private readonly porDia = computed(() => new Map(this.grupos().map((g) => [g.dia, g.citas])));
+
+  /** Bloques de grilla (posición y alto proporcional) por día; excluye citas fuera de 08-20 */
+  readonly bloques = computed(() => {
+    const mapa = new Map<string, { cita: Cita; top: number; height: number }[]>();
+    for (const [dia, lista] of this.porDia()) {
+      mapa.set(dia, lista.flatMap((cita) => {
+        const pos = posicionBloque(cita.fecha_hora, cita.duracion_minutos);
+        return pos ? [{ cita, ...pos }] : [];
+      }));
+    }
+    return mapa;
   });
+
+  readonly selectedDayCitas = computed(() => this.porDia().get(this.selectedDate()) ?? []);
+  readonly citaDetalle = computed(() => this.displayCitas().find((c) => c.id === this.detalleId()) ?? null);
 
   // Horas para el grid (8:00 AM a 7:00 PM)
-  readonly hours = Array.from({ length: 12 }, (_, i) => {
-    const h = i + 8;
-    return h < 10 ? `0${h}:00` : `${h}:00`;
-  });
+  readonly hours = Array.from({ length: HORA_FIN - HORA_INICIO }, (_, i) => `${String(i + HORA_INICIO).padStart(2, '0')}:00`);
+
+  private readonly sinCitas: readonly Cita[] = [];
+  citasDelDia(dia: string): readonly Cita[] {
+    return this.porDia().get(dia) ?? this.sinCitas;
+  }
 
   ngOnInit(): void {
     this.setupRealtimeSubscription();
     void this.whatsapp.preloadPlantillas();
+    this.timerAhora = setInterval(() => this.ahora.set(new Date()), 60_000);
   }
 
   ngOnDestroy(): void {
+    clearInterval(this.timerAhora);
     if (this.realtimeChannel) {
       supabase.removeChannel(this.realtimeChannel);
     }
@@ -253,24 +148,15 @@ export class CitasComponent implements OnInit, OnDestroy {
 
     this.realtimeChannel = supabase
       .channel('citas-realtime-channel')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'citas',
-          filter: `odontologo_id=eq.${user.id}`,
-        },
-        () => {
-          this.refreshTrigger.update((n) => n + 1);
-          this.localCitasOverride.set({});
-        }
-      )
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'citas', filter: `odontologo_id=eq.${user.id}` }, () => {
+        this.refreshTrigger.update((n) => n + 1);
+        this.localCitasOverride.set({});
+      })
       .subscribe();
   }
 
-  setView(view: 'dia' | 'semana' | 'mes'): void {
-    this.currentView.set(view);
+  setView(view: VistaAgenda | null): void {
+    if (view) this.currentView.set(view);
   }
 
   changeDate(event: Event): void {
@@ -281,29 +167,11 @@ export class CitasComponent implements OnInit, OnDestroy {
   }
 
   prev(): void {
-    const view = this.currentView();
-    const d = new Date(this.selectedDate() + 'T00:00:00');
-    if (view === 'dia') {
-      d.setDate(d.getDate() - 1);
-    } else if (view === 'semana') {
-      d.setDate(d.getDate() - 7);
-    } else {
-      d.setMonth(d.getMonth() - 1);
-    }
-    this.selectedDate.set(d.toISOString().split('T')[0]);
+    this.selectedDate.set(desplazar(this.currentView(), this.selectedDate(), -1));
   }
 
   next(): void {
-    const view = this.currentView();
-    const d = new Date(this.selectedDate() + 'T00:00:00');
-    if (view === 'dia') {
-      d.setDate(d.getDate() + 1);
-    } else if (view === 'semana') {
-      d.setDate(d.getDate() + 7);
-    } else {
-      d.setMonth(d.getMonth() + 1);
-    }
-    this.selectedDate.set(d.toISOString().split('T')[0]);
+    this.selectedDate.set(desplazar(this.currentView(), this.selectedDate(), 1));
   }
 
   goToday(): void {
@@ -316,12 +184,9 @@ export class CitasComponent implements OnInit, OnDestroy {
   }
 
   openCitaForm(cita?: Cita, customTime?: string, customDate?: string): void {
-    let targetTime = '09:00:00';
-    if (customTime) {
-      targetTime = `${customTime}:00`;
-    }
+    const targetTime = customTime ? `${customTime}:00` : '09:00:00';
     const targetDate = customDate || this.selectedDate();
-    
+
     this.citaModal()?.open(cita || {
       paciente_id: '',
       fecha_hora: `${targetDate}T${targetTime}`,
@@ -332,18 +197,20 @@ export class CitasComponent implements OnInit, OnDestroy {
     });
   }
 
-  openMenu(cita: Cita, event: Event): void {
-    event.stopPropagation();
-    this.activeMenuCita.set(cita);
+  verDetalle(cita: Cita): void {
+    if (!cita.id) return;
+    this.detalleId.set(cita.id);
+    this.detalleAbierto.set(true);
   }
 
-  closeMenu(): void {
-    this.activeMenuCita.set(null);
+  editarDesdeDetalle(cita: Cita): void {
+    this.detalleAbierto.set(false);
+    this.openCitaForm(cita);
   }
 
   /** Solicita confirmación antes de cancelar (acción destructiva) */
   requestCancel(cita: Cita): void {
-    this.closeMenu();
+    this.detalleAbierto.set(false);
     this.citaPendingCancel.set(cita);
     this.confirmModal()?.open();
   }
@@ -352,16 +219,13 @@ export class CitasComponent implements OnInit, OnDestroy {
   confirmCancel(): void {
     const cita = this.citaPendingCancel();
     if (cita) {
-      this.updateCitaEstado(cita, 'cancelada');
+      void this.updateCitaEstado(cita, 'cancelada');
     }
     this.citaPendingCancel.set(null);
   }
 
-  /**
-   * Envía un mensaje por WhatsApp al paciente usando la plantilla indicada.
-   * Toda la lógica vive en WhatsappService (render + URL + registro).
-   */
-  enviarWhatsApp(cita: Cita, tipo: Extract<TipoPlantilla, 'confirmacion' | 'recordatorio'>): void {
+  /** Mensaje WhatsApp al paciente; render, URL y registro viven en WhatsappService. */
+  enviarWhatsApp(cita: Cita, tipo: Extract<TipoPlantilla, 'confirmacion' | 'recordatorio'> = 'recordatorio'): void {
     void this.whatsapp.enviar({
       paciente: {
         id: cita.paciente_id,
@@ -371,24 +235,16 @@ export class CitasComponent implements OnInit, OnDestroy {
       tipo,
       cita: { id: cita.id, fecha_hora: cita.fecha_hora },
     });
-    this.closeMenu();
   }
 
-  async updateCitaEstado(cita: Cita, nuevoEstado: 'pendiente' | 'confirmada' | 'atendida' | 'cancelada' | 'no_asistio'): Promise<void> {
+  async updateCitaEstado(cita: Cita, nuevoEstado: EstadoCita): Promise<void> {
     if (!cita.id) return;
-    this.closeMenu();
 
     // Optimistic Update
-    this.localCitasOverride.update((prev) => ({
-      ...prev,
-      [cita.id!]: nuevoEstado,
-    }));
+    this.localCitasOverride.update((prev) => ({ ...prev, [cita.id!]: nuevoEstado }));
 
     try {
-      await this.citaService.saveCita({
-        ...cita,
-        estado: nuevoEstado,
-      });
+      await this.citaService.saveCita({ ...cita, estado: nuevoEstado });
     } catch (err) {
       console.error('Error al actualizar estado en Supabase, realizando rollback:', err);
       this.localCitasOverride.update((prev) => {

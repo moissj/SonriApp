@@ -15,7 +15,7 @@ import { PatientService } from '../../../core/services/patient.service';
 import { UbicacionService, Departamento, Municipio } from '../../../core/services/ubicacion.service';
 import { EpsService, Eps } from '../../../core/services/eps.service';
 import { InputComponent } from '../../../shared/components/input/input';
-import { ButtonComponent } from '../../../shared/components/button/button';
+import { FormFooterComponent } from '../../../shared/components/form-footer/form-footer';
 import { AlertComponent } from '../../../shared/components/alert/alert';
 import { CardComponent } from '../../../shared/components/card/card';
 import { ParentescoSelectComponent } from '../../../shared/components/parentesco-select/parentesco-select';
@@ -29,7 +29,7 @@ const CELULAR_REGEX = /^(\+57)?3[0-9]{9}$/;
   imports: [
     ReactiveFormsModule,
     InputComponent,
-    ButtonComponent,
+    FormFooterComponent,
     AlertComponent,
     CardComponent,
     ParentescoSelectComponent,

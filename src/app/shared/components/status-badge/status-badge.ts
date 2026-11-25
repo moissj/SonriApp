@@ -1,7 +1,8 @@
 import { Component, ChangeDetectionStrategy, input, computed } from '@angular/core';
 
 /** Estados de cita y estados de cuenta soportados por el badge */
-export type CitaEstado = 'pendiente' | 'confirmada' | 'atendida' | 'cancelada' | 'no_asistio';
+import { CitaEstado, ESTADO_CITA, tonoAClasesBadge } from '../../estado-cita/estado-cita';
+export type { CitaEstado };
 export type CuentaEstado = 'activo' | 'suspendido' | 'vencido';
 export type BadgeEstado = CitaEstado | CuentaEstado;
 
@@ -16,12 +17,9 @@ export class StatusBadgeComponent {
   estado = input.required<BadgeEstado>();
 
   label = computed(() => {
-    switch (this.estado()) {
-      case 'pendiente': return 'Pendiente';
-      case 'confirmada': return 'Confirmada';
-      case 'atendida': return 'Atendida';
-      case 'cancelada': return 'Cancelada';
-      case 'no_asistio': return 'No asistió';
+    const e = this.estado();
+    if (e in ESTADO_CITA) return ESTADO_CITA[e as CitaEstado].label;
+    switch (e) {
       case 'activo': return 'Activo';
       case 'suspendido': return 'Suspendido';
       case 'vencido': return 'Vencido';
@@ -31,16 +29,11 @@ export class StatusBadgeComponent {
 
   badgeClass = computed(() => {
     const base = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border';
-    switch (this.estado()) {
-      case 'pendiente':
-        return `${base} bg-yellow-50 text-yellow-800 border-yellow-200`;
-      case 'confirmada':
-        return `${base} bg-blue-50 text-blue-800 border-blue-200`;
-      case 'atendida':
+    const e = this.estado();
+    if (e in ESTADO_CITA) return `${base} ${tonoAClasesBadge(ESTADO_CITA[e as CitaEstado].tono)}`;
+    switch (e) {
       case 'activo': // success
         return `${base} bg-green-50 text-green-800 border-green-200`;
-      case 'cancelada':
-      case 'no_asistio':
       case 'suspendido': // danger
         return `${base} bg-red-50 text-red-800 border-red-200`;
       case 'vencido': // warning

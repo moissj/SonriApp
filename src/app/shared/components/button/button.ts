@@ -1,4 +1,23 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+
+type Variante = 'primary' | 'secondary' | 'ghost' | 'danger';
+type Tamano = 'sm' | 'md' | 'lg';
+
+const BASE =
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-1 disabled:opacity-60 disabled:cursor-not-allowed';
+
+const VARIANTES: Record<Variante, string> = {
+  primary: 'bg-primary-600 hover:bg-primary-700 text-white',
+  secondary: 'bg-white text-primary-700 border border-primary-300 hover:bg-primary-50',
+  ghost: 'bg-transparent text-primary-700 hover:bg-slate-100',
+  danger: 'bg-danger-600 hover:bg-danger-700 text-white',
+};
+
+const TAMANOS: Record<Tamano, string> = {
+  sm: 'text-xs px-2.5 py-1',
+  md: 'text-sm px-3.5 py-1.5',
+  lg: 'text-sm px-4 py-2',
+};
 
 @Component({
   selector: 'app-button',
@@ -8,32 +27,16 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonComponent {
-  @Input() variant: 'primary' | 'secondary' | 'ghost' = 'primary';
-  @Input() size: 'sm' | 'md' | 'lg' = 'md';
-  @Input() type: 'button' | 'submit' | 'reset' = 'button';
-  @Input() loading = false;
-  @Input() disabled = false;
-  @Input() fullWidth = false;
+  readonly variant = input<Variante>('primary');
+  readonly size = input<Tamano>('md');
+  readonly type = input<'button' | 'submit' | 'reset'>('button');
+  readonly loading = input(false);
+  readonly disabled = input(false);
+  readonly fullWidth = input(false);
 
-  get classes(): string {
-    const base =
-      'inline-flex items-center justify-center gap-2 font-semibold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed';
-
-    const variants: Record<string, string> = {
-      primary: 'bg-sky-600 text-white hover:bg-sky-700 active:bg-sky-800 focus:ring-sky-500',
-      secondary:
-        'bg-white text-sky-700 border border-sky-300 hover:bg-sky-50 active:bg-sky-100 focus:ring-sky-400',
-      ghost: 'bg-transparent text-gray-600 hover:bg-gray-100 focus:ring-gray-400',
-    };
-
-    const sizes: Record<string, string> = {
-      sm: 'text-xs px-3 py-1.5',
-      md: 'text-sm px-4 py-2',
-      lg: 'text-sm px-5 py-2.5',
-    };
-
-    return [base, variants[this.variant], sizes[this.size], this.fullWidth ? 'w-full' : '']
+  readonly classes = computed(() =>
+    [BASE, VARIANTES[this.variant()], TAMANOS[this.size()], this.fullWidth() ? 'w-full' : '']
       .filter(Boolean)
-      .join(' ');
-  }
+      .join(' '),
+  );
 }

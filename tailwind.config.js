@@ -3,75 +3,30 @@ module.exports = {
   content: [
     './src/**/*.{html,ts}'
   ],
+  // Dark mode: preparado, sin activar (Fase 4). Sin estilos dark: en componentes aún.
+  darkMode: 'class',
   theme: {
     extend: {
       // ─── Paleta SonriApp ────────────────────────────────────────────────────
       colors: {
+        // primary = sky-600 (color real de la app). Escala azul Tailwind sky.
         primary: {
-          50:  '#EDF7F8',
-          100: '#C5E9EC',
-          200: '#8DD0D6',
-          300: '#55B8BF',
-          400: '#2AA0A9',
-          500: '#0E7C86',
-          600: '#0B6570',
-          700: '#094E58',
-          800: '#063740',
-          900: '#042028',
-          DEFAULT: '#0E7C86',
+          50: '#F0F9FF', 100: '#E0F2FE', 200: '#BAE6FD', 300: '#7DD3FC', 400: '#38BDF8',
+          500: '#0EA5E9', 600: '#0284C7', 700: '#0369A1', 800: '#075985', 900: '#0C4A6E',
+          DEFAULT: '#0284C7',
         },
-        secondary: {
-          50:  '#E6FAF9',
-          100: '#C0F1EE',
-          200: '#8AE5DF',
-          300: '#6FDBD5',
-          400: '#5ECFCA',
-          500: '#4FD1C5',
-          600: '#3DBDB1',
-          700: '#2EA299',
-          800: '#208880',
-          900: '#126E67',
-          DEFAULT: '#4FD1C5',
-        },
-        success: {
-          50:  '#E8F8EF',
-          100: '#C5EDDA',
-          200: '#8EDDB5',
-          300: '#57CE90',
-          400: '#3ED581',
-          500: '#2ECC71',
-          600: '#25A55B',
-          700: '#1C7E46',
-          800: '#135730',
-          900: '#0A3019',
-          DEFAULT: '#2ECC71',
-        },
-        warning: {
-          50:  '#FEF7E8',
-          100: '#FDEAC4',
-          200: '#FBD58A',
-          300: '#F9BF50',
-          400: '#F7B23A',
-          500: '#F5A623',
-          600: '#C9861B',
-          700: '#9D6513',
-          800: '#71450B',
-          900: '#452504',
-          DEFAULT: '#F5A623',
-        },
-        danger: {
-          50:  '#FEECEB',
-          100: '#FAC9C6',
-          200: '#F59590',
-          300: '#F0615A',
-          400: '#EA5547',
-          500: '#E74C3C',
-          600: '#CB3628',
-          700: '#A2291F',
-          800: '#7A1D16',
-          900: '#51100D',
-          DEFAULT: '#E74C3C',
-        },
+        // accent (teal) reemplaza a secondary (sin usos; eliminado).
+        accent: { 50: '#F0FDFA', 100: '#CCFBF1', 500: '#14B8A6', 600: '#0D9488', 700: '#0F766E', DEFAULT: '#14B8A6' },
+        // Semánticos: DEFAULT = 600 (contraste AA con texto blanco).
+        success: { 50: '#F0FDF4', 600: '#16A34A', 700: '#15803D', DEFAULT: '#16A34A' },
+        warning: { 50: '#FFFBEB', 600: '#D97706', 700: '#B45309', DEFAULT: '#D97706' },
+        danger:  { 50: '#FEF2F2', 600: '#DC2626', 700: '#B91C1C', DEFAULT: '#DC2626' },
+        info:    { 50: '#F0F9FF', 600: '#0284C7', 700: '#0369A1', DEFAULT: '#0284C7' },
+        // Estado de cita 'en atención' (violeta propio, no usar violet de Tailwind).
+        'cita-atencion': '#7C3AED',
+        // Neutros: se usa slate de Tailwind. Roles: texto slate-900 #0F172A,
+        // texto secundario slate-600 #475569 (mínimo slate-500 #64748B sobre blanco),
+        // fondo slate-50 #F8FAFC, superficie #FFFFFF, borde slate-200 #E2E8F0.
         light: '#F7FAFA',
         dark:  '#1F2A30',
       },
@@ -89,6 +44,9 @@ module.exports = {
         'small':    ['0.875rem', { lineHeight: '1.25rem' }],                       // 14px secundario
         'caption':  ['0.75rem',  { lineHeight: '1rem' }],                          // 12px etiquetas
       },
+
+      // lg 8px inputs/botones, xl 12px tarjetas (full ya existe en Tailwind).
+      borderRadius: { lg: '8px', xl: '12px' },
 
       // ─── Sombras de tarjeta ──────────────────────────────────────────────────
       boxShadow: {

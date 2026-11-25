@@ -266,14 +266,11 @@
       </app-card>
 
       <!-- Botones de acción -->
-      <div class="flex items-center gap-3 pt-2">
-        <app-button variant="secondary" size="md" [disabled]="isLoading()" class="flex-1" (click)="goBack()">
-          Cancelar
-        </app-button>
-        <app-button variant="primary" type="submit" size="md" [loading]="isLoading()" [disabled]="isLoading()" class="flex-1">
-          {{ isEditMode() ? 'Actualizar' : 'Guardar' }}
-        </app-button>
-      </div>
+      <app-form-footer
+        [saving]="isLoading()"
+        [submitLabel]="isEditMode() ? 'Actualizar' : 'Guardar'"
+        (cancelar)="goBack()"
+      />
     }
   </form>
 </div>

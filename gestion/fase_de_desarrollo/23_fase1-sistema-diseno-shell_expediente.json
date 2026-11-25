@@ -1,0 +1,104 @@
+{
+  "plan": "23_fase1-sistema-diseno-shell",
+  "version": 1,
+  "fecha": "2026-11-25",
+  "alcance": "Fase 1 del rediseno (docs/producto/rediseno-sonriapp-brief.md secciones 2, 3, 7): sistema de diseno (tokens) + refactor del shell existente (sidenav/header/bottom-nav) + componentes base que el shell/Fase 2 consumen. Solo presentacion/UX; sin cambios de tablas, columnas, contratos de servicio ni RLS.",
+  "fuente": "docs/producto/rediseno-sonriapp-brief.md",
+  "hallazgos_relevamiento": {
+    "shell_existe": "app.html: flex + <app-sidenav/> + <app-header/> + <main> + <app-bottom-nav/>; showLayout (app.ts:19-28) oculta layout en /auth y /onboarding.",
+    "layout_service": "src/app/core/services/layout.service.ts: sidenavCollapsed + isDesktop. No maneja titulo ni nav activo.",
+    "sidenav": "src/app/layout/sidenav/sidenav.ts:28-83 navItems[] (9) con icon SVG path inline. collapsed=layout.sidenavCollapsed.",
+    "header": "src/app/layout/header/ topbar; titulo via route data.title; boton colapso header.html:12.",
+    "bottom_nav": "src/app/layout/bottom-nav/ (movil, md:hidden) + sheet 'Mas'.",
+    "tokens_blast_radius": "primary usado en 1 linea (historial.html:14); secondary 0. sky-* en 242 lineas/31 archivos (sky-600=#0284C7). Redefinir primary es casi gratis; barrido sky->primary se DIFIERE.",
+    "estado_cita_duplicado": "status-badge.ts tiene mapa; duplican reportes.ts:15-19, citas.html:325/336, detalle.html:311-316, presupuestos.html:159.",
+    "shared_presentes": "Card, Alert, ConfirmModal, Modal, StatusBadge, Chart, ParentescoSelect, PatientAutocomplete, Input, Button, EmptyState. FALTAN: Avatar, Drawer, Toast, SegmentedControl, KpiCard, DataTable."
+  },
+  "tareas": {
+    "T1_tokens": {
+      "owner": "cliente-web",
+      "objetivo": "Definir el sistema de diseno en tailwind.config.js. Redefinir primary a azul; agregar acento/semanticos/neutros/radios/sombras y variables CSS para dark mode (sin activar dark).",
+      "modificar": "tailwind.config.js",
+      "contrato": [
+        "primary: escala 50-900 azul, DEFAULT y 600 = #0284C7 (base sky-600). 700=#0369A1 (hover), 500=#0EA5E9, 50=#F0F9FF, 100=#E0F2FE, 200=#BAE6FD, 300=#7DD3FC, 400=#38BDF8, 800=#075985, 900=#0C4A6E.",
+        "accent (teal): DEFAULT/500 #14B8A6, 600 #0D9488, 50 #F0FDFA, 100 #CCFBF1, 700 #0F766E.",
+        "semanticos: success #16A34A, warning #D97706, danger #DC2626, info #0284C7 (cada uno con 50/600/700 minimo).",
+        "neutros: usar slate de Tailwind (no redefinir); documentar en comentario los roles: texto #0F172A, texto-secundario #475569 (nunca mas claro que #64748B sobre blanco), fondo #F8FAFC, superficie #FFFFFF, borde #E2E8F0.",
+        "borderRadius: card 'xl'=12px (ya ~), input/boton 'lg'=8px, badge 'full'. shadow-card ya existe; conservar.",
+        "Conservar fontSize semantico y font Inter existentes. NO borrar tokens actuales usados."
+      ],
+      "no_tocar": "No migrar sky-* a primary-* en features (barrido diferido). Solo definir tokens.",
+      "validacion": "npx tsc --noEmit -p tsconfig.app.json (0); npm run build (sin error; warning preexistente examen-ingreso.css permitido).",
+      "terminado": "Tokens disponibles; build verde; ningun uso actual roto."
+    },
+    "T2_estado_cita": {
+      "owner": "cliente-web",
+      "objetivo": "Fuente unica estado-cita -> {label, color-token, icono Lucide}. StatusBadge la consume.",
+      "crear": "src/app/shared/estado-cita/estado-cita.ts (mapa puro + helper) + .spec.ts",
+      "api": "ESTADO_CITA: Record<CitaEstado,{label:string; tono:'warning'|'primary'|'violet'|'success'|'neutral'|'danger'; icono:string}>. Mapa del brief seccion 2: pendiente=ambar/warning, confirmada=azul/primary, en_atencion=violeta #7C3AED, atendida=verde/success, cancelada=gris/neutral, no_asistio=rojo/danger.",
+      "modificar": "status-badge.ts: consumir ESTADO_CITA para label+clases (sin cambiar su API publica input 'estado'). Mantener soporte CuentaEstado como esta.",
+      "diferido": "Migrar las duplicaciones en reportes.ts/citas.html/detalle.html/presupuestos a esta fuente -> Fase 2 (cuando esas pantallas se rediseñen). Registrar en pendientes.",
+      "datos": "'en_atencion' puede no existir aun en el tipo CitaEstado; si falta, agregarlo al type union (aditivo, sin tocar BD; el enum de BD ya lo define o se maneja como string). Verificar CitaEstado en status-badge.ts.",
+      "validacion": "tsc 0; vitest del spec verde.",
+      "terminado": "Un solo mapa; status-badge lo usa; spec cubre los 6 estados."
+    },
+    "T3_button_formfooter": {
+      "owner": "cliente-web",
+      "objetivo": "ButtonComponent a tokens/compacto (sin cambiar API publica) + FormFooter nuevo; migrar 1 footer piloto.",
+      "modificar_button": "src/app/shared/components/button/button.ts: variantes primary=bg-primary-600 hover:bg-primary-700, secondary=bg-white text-primary-700 border-primary-300, ghost igual, +danger=bg-danger-600. focus:ring-primary-500. Radio rounded-lg. Escala: sm text-xs px-2.5 py-1, md text-sm px-3.5 py-1.5, lg text-sm px-4 py-2. Migrar @Input()->input() signals sin cambiar API.",
+      "crear_formfooter": "src/app/shared/components/form-footer/form-footer.ts (+.spec si aplica). Inputs: saving(bool, spinner+disabled en Guardar), submitLabel='Guardar', cancelLabel='Cancelar', submitType='submit'. Output (cancelar). Usa ButtonComponent. Layout desktop 'flex justify-end gap-3', movil 'flex-col-reverse' full-width.",
+      "piloto": "Migrar el footer de src/app/features/pacientes/formulario/ a <app-form-footer>. Validar que guarda/cancela igual.",
+      "diferido": "Resto de footers (tratamientos, perfil, evoluciones, examen-ingreso) -> Fase 2.",
+      "validacion": "tsc 0; build verde; tests verdes.",
+      "terminado": "Boton por tokens; FormFooter funciona en piloto sin regresion."
+    },
+    "T4_sidenav": {
+      "owner": "cliente-web",
+      "objetivo": "Sidenav agrupado + iconos Lucide + tokens + pie (consultorio activo + version).",
+      "modificar": "src/app/layout/sidenav/sidenav.ts + .html",
+      "contrato": [
+        "Agrupar navItems en 3 grupos con encabezado: Operacion (Inicio '/', Agenda '/citas', Recordatorios '/recordatorios') · Clinica (Pacientes '/pacientes', Historial '/historial', Plantillas '/plantillas') · Gestion (Tratamientos '/tratamientos', Reportes '/reportes'). 'Mi perfil' SALE del sidenav -> pasa al menu del avatar (T5).",
+        "Iconos: reemplazar SVG path inline por <lucide-icon name=...>; registrar nuevos iconos en app.config. Un icono por item.",
+        "Colapsado (72px): solo iconos con tooltip (aria-label); expandido (260px): icono+label con encabezados de grupo ocultos en colapsado.",
+        "Pie: nombre del consultorio/cuenta activa (AuthService) + version app. Boton de colapso puede quedar en header (ya existe) o moverse; no romper layout.service.",
+        "Estilos a tokens (primary para activo, slate para texto/borde). Item activo: fondo primary-50, texto primary-700, barra primary-600."
+      ],
+      "accesibilidad": "nav con aria-label; item activo aria-current='page'; foco visible.",
+      "validacion": "tsc 0; build verde; revisar 1920/1366/390.",
+      "terminado": "Sidenav agrupado con Lucide y tokens; perfil fuera; rutas intactas."
+    },
+    "T5_header_pageheader": {
+      "owner": "cliente-web",
+      "objetivo": "Topbar: breadcrumb + boton +Nueva cita + campana + menu avatar; bottom-nav a Lucide/tokens; PageHeader nuevo; contenedor max-w-7xl.",
+      "modificar": [
+        "src/app/layout/header/header.ts+.html: breadcrumb desde route data.title (sin titulo duplicado); boton '+ Nueva cita' (routerLink '/citas' con intent de abrir modal: navegar con queryParam ?nueva=1; la apertura global del modal real se difiere a Fase 2); campana con punto rojo solo si hay no leidas (si no hay fuente, dejar sin punto + TODO); menu avatar (Mi perfil->/perfil, Configuracion->/configuracion/eps, Cerrar sesion->AuthService.logout). Iconos Lucide.",
+        "src/app/layout/bottom-nav/: SVG->Lucide, tokens; conservar sheet 'Mas'.",
+        "src/app/app.html: <main> contenedor max-w-7xl mx-auto px-6 (24px) consistente.",
+        "src/app/app.routes.ts: agregar data.title a las rutas que falten (citas 'Agenda', recordatorios, pacientes, historial, plantillas, tratamientos, reportes, perfil, configuracion/eps) para el breadcrumb."
+      ],
+      "crear_pageheader": "src/app/shared/components/page-header/page-header.ts+.html: inputs titulo, subtitulo?, y slot de acciones (ng-content). Pilotar en 1-2 pantallas (inicio, pacientes); adopcion global -> Fase 2.",
+      "diferido": "GlobalSearch Ctrl+K -> Fase 2 (busqueda cross-entidad). Apertura global real del modal Nueva cita -> Fase 2.",
+      "validacion": "tsc 0; build verde; revisar responsive.",
+      "terminado": "Topbar con breadcrumb+acciones+avatar; bottom-nav Lucide; PageHeader creado y pilotado; contenedor unificado."
+    }
+  },
+  "diferido_fase_posterior": [
+    "Barrido masivo sky-* -> primary-* (242 lineas) -> fase de barrido dedicada.",
+    "Componentes KpiCard, DataTable, Drawer, Toast, SegmentedControl, Avatar -> construir JIT en Fase 2 cuando una pantalla los consuma.",
+    "GlobalSearch (Ctrl/Cmd+K) y apertura global del modal Nueva cita -> Fase 2.",
+    "Adopcion de PageHeader en todas las pantallas -> Fase 2.",
+    "Activar dark mode (variables preparadas en T1) -> Fase 4.",
+    "Migrar duplicaciones estado-cita en features -> Fase 2."
+  ],
+  "fuera_de_alcance": [
+    "Cambios de modelo de datos, columnas, contratos de servicio o RLS.",
+    "Logica de negocio (solo presentacion/UX)."
+  ],
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check"
+  ],
+  "revision": "Cada ola: gate verde + commit. Al cierre: verificador adversarial + revision 1920/1366/390."
+}

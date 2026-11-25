@@ -1,8 +1,8 @@
 <div [class]="containerClass">
 
-  <!-- Ícono emoji por @Input -->
+  <!-- Icono Lucide por @Input -->
   @if (icon) {
-    <span [class]="iconClass" role="img" aria-hidden="true">{{ icon }}</span>
+    <lucide-icon [name]="icon" [class]="iconClass" aria-hidden="true" />
   }
 
   <!-- Slot para ícono SVG personalizado: <svg empty-icon ...> -->

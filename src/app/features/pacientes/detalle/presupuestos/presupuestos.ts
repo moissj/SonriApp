@@ -1,3 +1,4 @@
+import { LucideAngularModule } from 'lucide-angular';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -30,7 +31,7 @@ import { ConfirmModalComponent } from '../../../../shared/components/confirm-mod
 @Component({
   selector: 'app-presupuestos',
   standalone: true,
-  imports: [FormsModule, DatePipe, CopCurrencyPipe, CardComponent, EmptyStateComponent, ConfirmModalComponent],
+  imports: [LucideAngularModule, FormsModule, DatePipe, CopCurrencyPipe, CardComponent, EmptyStateComponent, ConfirmModalComponent],
   templateUrl: './presupuestos.html',
   styleUrl: './presupuestos.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

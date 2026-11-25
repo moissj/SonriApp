@@ -1,14 +1,16 @@
 import { Component, ChangeDetectionStrategy, Input } from '@angular/core';
+import { LucideAngularModule } from 'lucide-angular';
 
 @Component({
   selector: 'app-empty-state',
   standalone: true,
+  imports: [LucideAngularModule],
   templateUrl: './empty-state.html',
   styleUrl: './empty-state.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmptyStateComponent {
-  /** Emoji o carácter unicode que representa el estado vacío */
+  /** Nombre del icono Lucide (kebab-case) que representa el estado vacío */
   @Input() icon = '';
   /** Título principal — requerido */
   @Input({ required: true }) title!: string;
@@ -24,11 +26,11 @@ export class EmptyStateComponent {
 
   get iconClass(): string {
     const size: Record<string, string> = {
-      sm: 'text-4xl mb-3',
-      md: 'text-5xl sm:text-6xl mb-4',
-      lg: 'text-6xl sm:text-7xl mb-5',
+      sm: 'w-10 h-10 mb-3',
+      md: 'w-12 h-12 sm:w-14 sm:h-14 mb-4',
+      lg: 'w-14 h-14 sm:w-16 sm:h-16 mb-5',
     };
-    return `block ${size[this.size]}`;
+    return `block text-gray-400 ${size[this.size]}`;
   }
 
   get titleClass(): string {

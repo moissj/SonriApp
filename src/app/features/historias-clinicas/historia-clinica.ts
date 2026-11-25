@@ -1,3 +1,4 @@
+import { LucideAngularModule } from 'lucide-angular';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -20,7 +21,7 @@ import { ExamenIngresoComponent } from './examen-ingreso/examen-ingreso';
 @Component({
   selector: 'app-historia-clinica-completa',
   standalone: true,
-  imports: [CardComponent, EmptyStateComponent, EvolucionesComponent, OdontogramaComponent, ExamenIngresoComponent],
+  imports: [LucideAngularModule, CardComponent, EmptyStateComponent, EvolucionesComponent, OdontogramaComponent, ExamenIngresoComponent],
   templateUrl: './historia-clinica.html',
   styleUrl: './historia-clinica.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

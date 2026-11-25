@@ -1,3 +1,4 @@
+import { LucideAngularModule } from 'lucide-angular';
 import { Component, ChangeDetectionStrategy, inject, signal, computed } from '@angular/core';
 import { RouterLink, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -12,7 +13,7 @@ import { StatusBadgeComponent } from '../../shared/components/status-badge/statu
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [RouterLink, DatePipe, CopCurrencyPipe, CardComponent, StatusBadgeComponent],
+  imports: [LucideAngularModule, RouterLink, DatePipe, CopCurrencyPipe, CardComponent, StatusBadgeComponent],
   templateUrl: './inicio.html',
   styleUrl: './inicio.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

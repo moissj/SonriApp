@@ -15,7 +15,7 @@
   @if (cargando()) {
     <p class="text-sm text-gray-500" role="status">Cargando…</p>
   } @else if (!error() && dias().length === 0) {
-    <app-empty-state icon="🔔" title="No hay citas para recordar en los próximos 7 días." />
+    <app-empty-state icon="bell" title="No hay citas para recordar en los próximos 7 días." />
   } @else {
     @for (dia of dias(); track dia.fecha) {
       <section [attr.aria-label]="fechaLarga(dia.fecha)" class="space-y-2">

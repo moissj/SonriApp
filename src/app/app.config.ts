@@ -3,11 +3,16 @@ import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { provideServiceWorker } from '@angular/service-worker';
 import { providePrimeNG } from 'primeng/config';
 import Aura from '@primeuix/themes/aura';
+import { importProvidersFrom } from '@angular/core';
+import { LucideAngularModule, BarChart3, Bell, Building2, Calendar, Camera, Check, CheckCircle, ClipboardList, FilePen, FileText, Image, MessageCircle, PenLine, Receipt, Search, Stethoscope, User, Users, Wallet, AlertTriangle } from 'lucide-angular';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    importProvidersFrom(
+      LucideAngularModule.pick({ BarChart3, Bell, Building2, Calendar, Camera, Check, CheckCircle, ClipboardList, FilePen, FileText, Image, MessageCircle, PenLine, Receipt, Search, Stethoscope, User, Users, Wallet, AlertTriangle }),
+    ),
     provideRouter(routes, withComponentInputBinding()),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),

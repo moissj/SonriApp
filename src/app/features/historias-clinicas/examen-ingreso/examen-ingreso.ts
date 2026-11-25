@@ -1,3 +1,4 @@
+import { LucideAngularModule } from 'lucide-angular';
 import {
   Component,
   ChangeDetectionStrategy,
@@ -29,7 +30,7 @@ import { aplicarTodosHd } from './funciones/aplicar-todos-hd.funcion';
 @Component({
   selector: 'app-examen-ingreso',
   standalone: true,
-  imports: [FormsModule, ChecklistItemComponent, ExploracionFacialComponent],
+  imports: [LucideAngularModule, FormsModule, ChecklistItemComponent, ExploracionFacialComponent],
   templateUrl: './examen-ingreso.html',
   styleUrl: './examen-ingreso.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

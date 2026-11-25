@@ -3,7 +3,7 @@
   <!-- Saludo -->
   <section>
     <p class="text-sm text-gray-500 capitalize">{{ todayLabel() }}</p>
-    <h2 class="text-xl font-bold text-gray-800 mt-0.5">¡Hola, {{ firstName() || 'doctor' }}! 👋</h2>
+    <h2 class="text-xl font-bold text-gray-800 mt-0.5">¡Hola, {{ firstName() || 'doctor' }}!</h2>
     @if (profile()?.nombre_consultorio) {
       <p class="text-sm text-sky-700 font-medium mt-0.5">{{ profile()!.nombre_consultorio }}</p>
     }
@@ -107,7 +107,7 @@
   <section class="pb-2">
     <a routerLink="/reportes" class="flex items-center justify-between bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:border-sky-300 hover:shadow-md transition-all">
       <div class="flex items-center gap-3">
-        <span class="text-2xl" aria-hidden="true">📊</span>
+        <lucide-icon name="bar-chart-3" class="w-6 h-6 text-sky-700" aria-hidden="true" />
         <div>
           <p class="font-semibold text-gray-800">Reportes</p>
           <p class="text-xs text-gray-500">Citas por estado, reactivación y facturación del mes</p>

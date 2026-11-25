@@ -8,14 +8,19 @@
 ## Checklist
 - [x] Contrato `expediente.json` + plan + tracker
 - [x] Lucide instalado (`lucide-angular ^1.0.0`)
-- [ ] T1 — Utilidad `fecha-bogota.funcion.ts` (+spec) + aplicar en citas/inicio (bug "hoy")
-- [ ] T2 — Cita modal: conflicto solo con paciente+fecha+hora
-- [ ] T3 — Antecedentes sin preseleccion + Si/No/No sabe + quitar "Todos Si"
-- [ ] T4 — Chip alergia neutro cuando no hay alergia real
-- [ ] T5 — Emojis -> iconos Lucide + tildes/capitalizacion
-- [ ] Gates verde (tsc / build / test / sincronizar)
-- [ ] Revisión adversarial (`verificador`)
-- [ ] Commit local + push (OK)
+- [x] T1 — `fecha-bogota.funcion.ts` (+spec) aplicado en citas/inicio (bug "hoy") — commit `62a231e`
+- [x] T2 — Cita modal: conflicto solo con paciente+fecha+hora (usa `selectedPatient()`) — `62a231e`
+- [x] T3 — Antecedentes `null` + modo `si-no-nosabe` + sin "Todos Si" — `62a231e`
+- [x] T4 — `tieneAlergiaReal` + chip neutro — `62a231e`
+- [x] Gates verde T1-T4 (tsc 0 / build ok / 55 tests / sincronizar OK)
+- [x] T5 — 24 emojis -> iconos Lucide (`app.config` registra 20; `empty-state` por nombre) — commit `2fca604`
+- [x] Revisión adversarial (`verificador`): **APROBADO**, 0 bloqueantes (fecha Bogota real, conflicto con paciente, antecedentes null+tri-estado, chip alergia, 0 emojis en UI, sin cambios de datos/RLS)
+- [ ] **Pendiente OK:** push
+
+## Deuda no-bloqueante
+- `cita-modal.ts` 221 lineas (>200) — PREEXISTENTE, diff minimo.
+- JSDoc de `mode` en checklist-item omite `si-no-nosabe` (el type si lo incluye).
+- Emojis en TEXTO de mensajes WhatsApp (`plantilla.service.ts`, `presupuestos.ts:281`) — contenido al paciente, no UI; se conservan.
 
 ## Pendientes / deuda (a fases posteriores)
 - "Ver horarios libres" en modal de cita -> Fase 2 (4.3).

@@ -14,8 +14,9 @@
 - [x] Gates verde (tsc 0 / build 0 / test 43 / sincronizar OK / parser 5/5)
 - [x] Revisión adversarial (`verificador`): **APROBADO**, 0 bloqueantes (RLS fail-closed, SERVICE_ROLE solo env/fuera de src, idempotencia, labels accesibilidad)
 - [x] Commit local del código (migración + loader + servicios + perfil)
-- [ ] Manual: actualizar página de perfil (nuevos campos del prestador)
-- [ ] **PASO PROD (OK explícito):** aplicar migración a cloud + hidratar catálogos SISPRO + validar conteos
+- [x] Manual: `docs/manual/perfil.md` creado (incluye datos del prestador)
+- [x] PROD — migración aplicada a cloud (HTTP 201) + verificada (prof_cols=3, tablas=2, policies=8, indices=2) + registrada en `schema_migrations`
+- [ ] PROD — **hidratación catálogos SISPRO**: bloqueada por (a) `SERVICE_ROLE_KEY` ausente, (b) SISPRO sin descarga directa → requiere scraper de postbacks ViewState (CUPS 13.640 filas) o export por email
 - [ ] **Pendiente OK:** push
 
 ## Pendientes / deuda

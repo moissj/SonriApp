@@ -54,7 +54,7 @@ export class TratamientoService {
     return data as Tratamiento;
   }
 
-  async updateTratamiento(id: string, cambios: Partial<NuevoTratamiento>): Promise<Tratamiento> {
+  async updateTratamiento(id: string, cambios: Partial<NuevoTratamiento> & { activo?: boolean }): Promise<Tratamiento> {
     const user = this.auth.user();
     if (!user) throw new Error('No hay usuario autenticado.');
 

@@ -1,14 +1,23 @@
-import { Component, ChangeDetectionStrategy, inject, signal, viewChild } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import {
-  TratamientoService,
-  Tratamiento,
-} from '../../core/services/tratamiento.service';
+import { Component, ChangeDetectionStrategy, inject, signal, computed, viewChild } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TableModule } from 'primeng/table';
+import { TratamientoService, Tratamiento } from '../../core/services/tratamiento.service';
 import { CopCurrencyPipe } from '../../shared/pipes/cop-currency.pipe';
 import { CardComponent } from '../../shared/components/card/card';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state';
 import { ModalComponent } from '../../shared/components/modal/modal';
 import { ConfirmModalComponent } from '../../shared/components/confirm-modal/confirm-modal';
+import { PageHeaderComponent } from '../../shared/components/page-header/page-header';
+import { KpiCard } from '../../shared/components/kpi-card/kpi-card';
+import { ButtonComponent } from '../../shared/components/button/button';
+import { InputComponent } from '../../shared/components/input/input';
+import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
+import { FormFooterComponent } from '../../shared/components/form-footer/form-footer';
+import { LayoutService } from '../../core/services/layout.service';
+import { SegmentedControlComponent, OpcionSegmento } from '../../shared/components/segmented-control/segmented-control';
+import { FiltroEstado, contarActivos, duracionPromedio, filtrarTratamientos, precioPromedio } from './funciones/tratamientos.funcion';
 
 @Component({
   selector: 'app-tratamientos',
@@ -20,6 +29,15 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal/con
     EmptyStateComponent,
     ModalComponent,
     ConfirmModalComponent,
+    TableModule,
+    NgTemplateOutlet,
+    PageHeaderComponent,
+    KpiCard,
+    ButtonComponent,
+    InputComponent,
+    StatusBadgeComponent,
+    FormFooterComponent,
+    SegmentedControlComponent,
   ],
   templateUrl: './tratamientos.html',
   styleUrl: './tratamientos.scss',
@@ -28,6 +46,7 @@ import { ConfirmModalComponent } from '../../shared/components/confirm-modal/con
 export class TratamientosComponent {
   private readonly tratamientoService = inject(TratamientoService);
   private readonly fb = inject(FormBuilder);
+  readonly layout = inject(LayoutService);
 
   readonly tratamientos = signal<Tratamiento[]>([]);
   readonly loading = signal(true);
@@ -38,6 +57,20 @@ export class TratamientosComponent {
   readonly editing = signal<Tratamiento | null>(null);
   /** Tratamiento pendiente de eliminar */
   readonly toDelete = signal<Tratamiento | null>(null);
+
+  readonly buscarControl = new FormControl('', { nonNullable: true });
+  private readonly busqueda = toSignal(this.buscarControl.valueChanges, { initialValue: '' });
+  readonly estado = signal<FiltroEstado | null>('todos');
+  readonly estados: OpcionSegmento<FiltroEstado>[] = [
+    { label: 'Todos', value: 'todos' }, { label: 'Activos', value: 'activos' }, { label: 'Inactivos', value: 'inactivos' },
+  ];
+
+  readonly tratamientosFiltrados = computed(() =>
+    filtrarTratamientos(this.tratamientos(), this.estado() ?? 'todos', this.busqueda()),
+  );
+  readonly totalActivos = computed(() => contarActivos(this.tratamientos()));
+  readonly precioProm = computed(() => precioPromedio(this.tratamientos()));
+  readonly duracionProm = computed(() => duracionPromedio(this.tratamientos()));
 
   private readonly modal = viewChild(ModalComponent);
   private readonly confirmModal = viewChild(ConfirmModalComponent);
@@ -119,6 +152,23 @@ export class TratamientosComponent {
       this.error.set('No se pudo guardar el tratamiento. Intenta de nuevo.');
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  limpiarFiltros(): void {
+    this.buscarControl.setValue('');
+    this.estado.set('todos');
+  }
+
+  /** Activa/desactiva (reversible, sin confirmación). */
+  async alternarActivo(t: Tratamiento): Promise<void> {
+    this.error.set(null);
+    try {
+      const actualizado = await this.tratamientoService.updateTratamiento(t.id, { activo: !t.activo });
+      this.tratamientos.update((list) => list.map((x) => (x.id === actualizado.id ? actualizado : x)));
+    } catch (err) {
+      console.error('Error cambiando estado del tratamiento:', err);
+      this.error.set('No se pudo cambiar el estado del tratamiento.');
     }
   }
 

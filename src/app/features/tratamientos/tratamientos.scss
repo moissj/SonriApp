@@ -8,3 +8,94 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* ===================== Tabla de pacientes (PrimeNG) ===================== */
+:host ::ng-deep .trat-table {
+  --table-border: #eef2f6;
+  font-size: 0.875rem;
+
+  .p-datatable-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  /* Encabezado: fondo claro, texto sobrio en mayúsculas */
+  .p-datatable-thead > tr > th {
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.75rem;
+    border: none;
+    border-bottom: 1px solid var(--table-border);
+    white-space: nowrap;
+  }
+
+  /* Celdas del cuerpo */
+  .p-datatable-tbody > tr > td {
+    padding: 0.25rem 0.75rem;
+    border: none;
+    border-bottom: 1px solid var(--table-border);
+    background: transparent;
+  }
+
+  /* Última fila sin borde inferior */
+  .p-datatable-tbody > tr:last-child > td {
+    border-bottom: none;
+  }
+
+  /* Hover suave con tinte de marca */
+  .p-datatable-tbody > tr {
+    transition: background-color 0.15s ease;
+  }
+  .p-datatable-tbody > tr:hover {
+    background: #f0f9ff !important;
+  }
+
+  /* Estado de ordenamiento activo en encabezado */
+  .p-datatable-thead > tr > th.p-datatable-column-sorted,
+  .p-datatable-thead > tr > th[aria-sort]:not([aria-sort='none']) {
+    color: #0284c7;
+    background: #f0f9ff;
+  }
+
+  .p-sorticon {
+    color: #94a3b8;
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  /* Paginador integrado y limpio */
+  .p-paginator {
+    background: #f8fafc;
+    border: none;
+    border-top: 1px solid var(--table-border);
+    padding: 0.4rem 0.75rem;
+    color: #64748b;
+    font-size: 0.75rem;
+    min-height: 2.25rem;
+  }
+
+  .p-paginator .p-paginator-page,
+  .p-paginator .p-paginator-next,
+  .p-paginator .p-paginator-prev,
+  .p-paginator .p-paginator-first,
+  .p-paginator .p-paginator-last {
+    min-width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+  }
+
+  .p-paginator .p-paginator-page.p-paginator-page-selected {
+    background: #0284c7;
+    color: #fff;
+    border-radius: 0.4rem;
+  }
+}
+
+.text-xxs {
+  font-size: 0.65rem;
+  line-height: 1rem;
+}

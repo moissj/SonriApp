@@ -37,7 +37,17 @@
 - [x] Gates (tsc 0 / 87 tests / build / sincronizar) + verificador APROBADO
 - Diferido: DataTable genérico; estado de error de lista + `select('*')` (consultas-eficientes, preexistente); contadores Presupuestos/Pagos/Consentimientos; alertas clínicas historia (Fase 3); getAge en formulario/historia; partir pacientes.html(227)/detalle.html(345).
 
-## Fase 2 COMPLETA ✅ — Waves B (Inicio) · C1 (modal) · C2 (agenda) · D (pacientes/detalle). Falta solo pulido/deuda arriba.
+## Wave E — Densidad compacta global ✅ (commit 727834a, push)
+- [x] Componentes base + pantallas Fase 2 + layout compactados; regla táctil relajada (decisión usuario); memoria `densidad-compacta`.
+
+## Wave F — Tratamientos (fuera de scope Fase 2 original, pedido usuario) ✅
+- [x] Datatable `p-table` dinámico (sort/búsqueda/filtro Todos/Activos/Inactivos); KPIs reales (Total/Activos/Precio prom/Duración prom) + helpers `tratamientos.funcion.ts`+spec
+- [x] `activo` expuesto (badge + activar/desactivar; tipo de param `updateTratamiento` extendido aditivo)
+- [x] Botón "Nuevo" → `app-button sm` (elimina `<button>` sky-600 grande); modal a tokens; 0 sky- en el módulo
+- [x] Manual `docs/manual/tratamientos.md`; gates (tsc 0 / 92 tests / build / sincronizar) + verificador APROBADO
+- Diferido: toggle activo sin disable-en-vuelo (idempotente); KPI "más usado" (query nueva); `app-input` aún trae sky-* internos (afecta toda la app → fix de tokens aparte); DataTable genérico; soft-delete.
+
+## Fase 2 COMPLETA ✅ — B (Inicio) · C1 (modal) · C2 (agenda) · D (pacientes/detalle) · E (densidad) · F (tratamientos).
 
 ## Diferido (ver contrato)
 - Gráficos ingresos 6m / top5 tratamientos; KPIs ocupación/ticket/inactivos>6m/delta mes-anterior; sparklines+deltas (requieren agregado nuevo -> capa-datos).

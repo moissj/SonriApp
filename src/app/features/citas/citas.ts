@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal, computed, viewChild, OnInit, OnDestroy, ChangeDetectorRef, effect } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { toSignal, toObservable } from '@angular/core/rxjs-interop';
+import { toSignal, toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
 import { switchMap } from 'rxjs/operators';
 import { from } from 'rxjs';
 import { CitaService, Cita } from '../../core/services/cita.service';
@@ -27,7 +28,13 @@ export class CitasComponent implements OnInit, OnDestroy {
   private readonly whatsapp = inject(WhatsappService);
   private readonly cdr = inject(ChangeDetectorRef);
 
+  private readonly route = inject(ActivatedRoute);
+
   constructor() {
+    // ?nueva=1 abre el modal de nueva cita (acceso rápido desde otras pantallas)
+    this.route.queryParamMap.pipe(takeUntilDestroyed()).subscribe((p) => {
+      if (p.get('nueva') === '1') setTimeout(() => this.openCitaForm());
+    });
     effect(() => {
       // Trigger change detection when displayCitas updates
       this.displayCitas();

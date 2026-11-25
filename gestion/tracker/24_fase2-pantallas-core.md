@@ -13,7 +13,18 @@
 - [x] Gates verde (tsc 0 / 60 tests / build / sincronizar) + verificador APROBADO
 - Obs no-bloqueantes: default tono KpiCard 'neutral' (instancias pasan explícito); signal `proximas7` quedó sin uso (limpiar); `en_atencion` fuera de tasa/doughnut (limitación fuente ReporteService).
 
-## Wave C — Agenda + modal (4.2/4.3) — pendiente
+## Wave C — Agenda + modal (4.2/4.3)
+### C1 — Modal Nueva cita (4.3) + SegmentedControl JIT ✅
+- [x] SegmentedControl nuevo (`shared/components/segmented-control/`, táctil min-h-10)
+- [x] Modal: reorden Paciente→Tratamiento→Fecha/hora→Duración(chips)→Notas; Estado/Canal en "Opciones avanzadas"; botón loading + "qué falta"
+- [x] `citas.ts` lee `?nueva=1` (ActivatedRoute) → abre modal
+- [x] Helpers puros `cita-modal.funcion.ts` (+spec 5 tests); `cita-modal.ts` 195 líneas (<200)
+- [x] Gates (tsc 0 / 65 tests / build / sincronizar) + verificador APROBADO
+- Diferido C1: "Ver horarios libres" (→ C2); toggle recordatorio (Cita sin campo = modelo); spec de `mensajeSolape`/`valoresFormulario`; TZ Bogotá en texto de solape.
+### C2 — Agenda (4.2) + Drawer JIT
+- [ ] SegmentedControl para vistas + vista Lista; colores por `ESTADO_CITA`; línea hora actual; Drawer detalle de cita
+- [ ] Diferido: drag&drop reprogramar; panel lateral (mini-calendario/filtros) según alcance
+
 ## Wave D — Pacientes + Detalle (4.5/4.6) — pendiente
 
 ## Diferido (ver contrato)

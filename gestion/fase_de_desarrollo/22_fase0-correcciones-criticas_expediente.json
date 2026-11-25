@@ -1,0 +1,67 @@
+{
+  "plan": "22_fase0-correcciones-criticas",
+  "version": 1,
+  "fecha": "2026-11-25",
+  "alcance": "Fase 0 del rediseno (docs/producto/rediseno-sonriapp-brief.md seccion 1): correcciones criticas de UI. Solo presentacion/UX y bugs de fecha/estado; sin cambios de tablas, columnas, contratos de servicio ni RLS.",
+  "fuente": "docs/producto/rediseno-sonriapp-brief.md",
+  "tareas": {
+    "T1_fecha_bogota": {
+      "objetivo": "Centralizar fechas en America/Bogota y corregir el desfase de 'hoy'.",
+      "crear": "src/app/core/funciones/fecha-bogota.funcion.ts (+ .spec.ts)",
+      "api": [
+        "hoyBogota(): string  // YYYY-MM-DD del dia actual en America/Bogota (Intl formatToParts, locale en-CA)",
+        "aFechaBogota(d: Date|string): string  // YYYY-MM-DD en America/Bogota",
+        "fechaLargaBogota(d: Date|string): string  // 'martes, 24 de noviembre de 2026' es-CO, preposiciones minuscula, timeZone America/Bogota"
+      ],
+      "aplicar": [
+        "citas.ts: reemplazar los new Date().toISOString().split('T')[0] de 'hoy'/selectedDate inicial/boton Hoy por hoyBogota(); el isToday (l.123-128) compara aFechaBogota; NO cambiar la logica de semana/mes mas alla de usar fechas locales consistentes",
+        "inicio.ts:34 todayLabel -> fechaLargaBogota(new Date())"
+      ],
+      "test": "spec cubre: a las 23:30 del 24 en America/Bogota (simular con fecha UTC 2026-11-25T04:30:00Z) hoyBogota()==='2026-11-24'; formato largo correcto.",
+      "regla": "Nunca medianoche local; YYYY-MM-DD de negocio. Ver .claude/rules/frontend/fechas-y-http.md"
+    },
+    "T2_cita_conflicto": {
+      "objetivo": "El aviso de conflicto solo con paciente+fecha+hora validos.",
+      "modificar": "src/app/features/citas/cita-modal/cita-modal.ts:81-100",
+      "cambio": "Guardar en el valueChanges: evaluar checkOverlap solo si val.paciente_id && val.fecha_hora && val.duracion_minutos; si falta alguno -> overlapCitas.set([]).",
+      "diferido": "Boton 'Ver horarios libres' / sugerir slots -> Fase 2 (rediseno modal 4.3). Registrar en pendientes.",
+      "test": "N/A unitario directo (logica en componente); verificar que al abrir sin paciente no hay aviso."
+    },
+    "T3_antecedentes": {
+      "objetivo": "Antecedentes sin preseleccion + control Si/No/No sabe + quitar 'Todos Si'.",
+      "modificar": [
+        "checklist-item.ts: opciones como computed() (no getter); soportar modo con 3 estados Si/No/No sabe (valor 'si'|'no'|'no_sabe'|null). Para antecedentes usar ese modo.",
+        "examen-ingreso.html:16-19: eliminar boton 'Todos Si' (setAllAntecedentes('si')); conservar 'Todos No'.",
+        "examen-ingreso.ts: verificar que buildDefaultChecklist deja valor:null (sin preseleccion); si deja 'no', corregir a null."
+      ],
+      "datos": "antecedentes_salud es jsonb; 'no_sabe' es aditivo, sin migracion. Sin CHECK que lo bloquee (verificar).",
+      "diferido": "Observacion obligatoria al marcar Si + creacion de alerta medica -> Fase 3 (HC 4.7).",
+      "test": "aplicar-todos-hd.funcion no cambia; si se agrega helper de opciones puro, su spec."
+    },
+    "T4_alergia_chip": {
+      "objetivo": "Chip rojo de alergia solo con alergia real; vacio/'N/A' -> chip neutro 'Sin alergias registradas'.",
+      "crear": "helper puro tieneAlergiaReal(alergias: string|null): boolean (trim, descarta vacio y valores tipo 'n/a','na','ninguna','no','no aplica','ninguno').",
+      "modificar": "detalle.html:187-195: @if (tieneAlergiaReal(...)) chip rojo con el texto; @else chip neutro gris 'Sin alergias registradas'.",
+      "test": "spec del helper: 'N/A'/'na'/''/'ninguna' -> false; 'Penicilina' -> true."
+    },
+    "T5_iconos_tildes": {
+      "objetivo": "Reemplazar 24 emojis (14 archivos) por iconos Lucide; corregir tildes/capitalizacion.",
+      "setup": "Patron Lucide standalone: importar iconos puntuales y LucideAngularModule por componente (o un modulo compartido de iconos en shared/). Decidir patron minimo y documentarlo.",
+      "archivos_emoji": ["inicio.html","historial.html","admin.html","tratamientos.html","pacientes.html","historias-clinicas/historia-clinica.html","reportes.html","recordatorios.html","configuracion-eps.html","evoluciones.html","pacientes/detalle/detalle.html","examen-ingreso.html","pagos.html","presupuestos.html"],
+      "regla": "Sin emojis; botones solo-icono con aria-label; tildes correctas (Moises->Moises con tilde, Hipertension con tilde).",
+      "nota": "Barrido grande; se puede partir en 2 sub-pasos si excede."
+    }
+  },
+  "fuera_de_alcance": [
+    "Cambios de modelo de datos, columnas o RLS",
+    "Horarios libres sugeridos en modal (Fase 2)",
+    "Alerta medica desde antecedente 'Si' + observacion obligatoria (Fase 3)",
+    "AppShell/Sidebar/Topbar/tokens (Fase 1)"
+  ],
+  "gates": [
+    "npx tsc --noEmit -p tsconfig.app.json",
+    "npm run build",
+    "npm test -- --watch=false",
+    "node tools/agentes/sincronizar.mjs --check"
+  ]
+}

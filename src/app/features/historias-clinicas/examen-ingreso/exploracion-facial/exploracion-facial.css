@@ -9,9 +9,9 @@
 .ef-btns { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
 
 .ef-btn {
-  min-width: 40px; min-height: 40px; padding: 0 8px;
+  min-width: 28px; min-height: 28px; padding: 0 6px;
   border-radius: 6px; border: 1.5px solid #d1d5db; background: #f9fafb;
-  font-size: .75rem; font-weight: 700; color: #6b7280; cursor: pointer;
+  font-size: .72rem; font-weight: 700; color: #6b7280; cursor: pointer;
   transition: background .15s, border-color .15s, color .15s;
 }
 .ef-btn:hover { border-color: #93c5fd; background: #eff6ff; color: #1d4ed8; }

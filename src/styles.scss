@@ -23,8 +23,8 @@ html, body {
    print-consentimiento) y solo se imprime esa zona. Sin bandera (Ctrl+P nativo)
    se imprime la página completa como de costumbre. */
 @media print {
-  .no-print { display: none !important; }
-
+  /* Ocultar SOLO por visibility: la zona imprimible puede vivir dentro de un
+     contenedor .no-print, y un display:none del padre no se revierte en el hijo. */
   body.print-odontograma *,
   body.print-consentimiento * {
     visibility: hidden;

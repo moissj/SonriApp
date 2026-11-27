@@ -11,8 +11,8 @@ comment on column public.historias_clinicas.cie10_codigo is
   'Diagnostico principal CIE10 (FK catalogo_cie10). Nulable; el texto libre vive en diagnostico.';
 
 -- Codigo de procedimiento CUPS por tratamiento del catalogo (1:1).
-alter table public.tratamientos
+alter table public.tratamientos_catalogo
   add column if not exists cups_codigo text references public.catalogo_cups(codigo);
 
-comment on column public.tratamientos.cups_codigo is
+comment on column public.tratamientos_catalogo.cups_codigo is
   'Codigo de procedimiento CUPS (FK catalogo_cups). Nulable.';

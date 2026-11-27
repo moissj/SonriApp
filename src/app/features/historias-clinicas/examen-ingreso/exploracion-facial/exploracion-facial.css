@@ -19,8 +19,8 @@
 .ef-btn:focus-visible { outline: 2px solid #1d4ed8; outline-offset: 2px; }
 
 .ef-input, .ef-select, .ef-textarea {
-  font-size: .8rem; border: 1px solid #e5e7eb; border-radius: 8px; padding: 6px 10px;
-  color: #111827; background: #f9fafb; font-family: inherit; min-height: 40px;
+  font-size: .8rem; border: 1px solid #d1d5db; border-radius: 8px; padding: 5px 9px;
+  color: #111827; background: #f9fafb; font-family: inherit; min-height: 32px;
   box-sizing: border-box;
 }
 .ef-input:focus-visible, .ef-select:focus-visible, .ef-textarea:focus-visible {
@@ -28,6 +28,6 @@
 }
 .ef-input { flex: 1 1 160px; }
 .ef-select { flex: 0 1 200px; }
-.ef-textarea { width: 100%; min-height: 64px; resize: vertical; }
+.ef-textarea { width: 100%; min-height: 52px; resize: vertical; }
 
-.ef-block { display: flex; flex-direction: column; gap: 4px; padding: 8px 0; }
+.ef-block { display: flex; flex-direction: column; gap: 3px; padding: 6px 0; }

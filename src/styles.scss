@@ -19,16 +19,24 @@ html, body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #C5E9EC; border-radius: 9999px; }
 
-/* Impresión de consentimientos: solo se muestra .zona-imprimir */
+/* Impresión aislada por contexto: el botón marca el <body> (print-odontograma |
+   print-consentimiento) y solo se imprime esa zona. Sin bandera (Ctrl+P nativo)
+   se imprime la página completa como de costumbre. */
 @media print {
-  body * {
+  .no-print { display: none !important; }
+
+  body.print-odontograma *,
+  body.print-consentimiento * {
     visibility: hidden;
   }
-  .zona-imprimir,
-  .zona-imprimir * {
+  body.print-odontograma .zona-odontograma,
+  body.print-odontograma .zona-odontograma *,
+  body.print-consentimiento .zona-consentimiento,
+  body.print-consentimiento .zona-consentimiento * {
     visibility: visible;
   }
-  .zona-imprimir {
+  body.print-odontograma .zona-odontograma,
+  body.print-consentimiento .zona-consentimiento {
     position: absolute;
     left: 0;
     top: 0;

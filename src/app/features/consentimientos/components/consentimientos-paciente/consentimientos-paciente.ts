@@ -80,6 +80,13 @@ export class ConsentimientosPacienteComponent implements OnInit {
   }
 
   imprimir(): void {
+    // Aísla la impresión al consentimiento (no arrastra el odontograma de la misma ficha)
+    document.body.classList.add('print-consentimiento');
+    const limpiar = (): void => {
+      document.body.classList.remove('print-consentimiento');
+      window.removeEventListener('afterprint', limpiar);
+    };
+    window.addEventListener('afterprint', limpiar);
     window.print();
   }
 

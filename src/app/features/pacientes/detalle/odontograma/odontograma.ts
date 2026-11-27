@@ -190,8 +190,14 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
   /** Fecha de hoy en America/Bogota, formato colombiano */
   fechaHoy = (): string => new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', dateStyle: 'long' }).format(new Date());
 
-  /** Imprime/PDF del odontograma activo (patrón de consentimientos: @media print en styles.scss) */
+  /** Imprime/PDF SOLO el odontograma: marca el <body> para aislar su zona del resto (consentimientos) */
   imprimir(): void {
+    document.body.classList.add('print-odontograma');
+    const limpiar = (): void => {
+      document.body.classList.remove('print-odontograma');
+      window.removeEventListener('afterprint', limpiar);
+    };
+    window.addEventListener('afterprint', limpiar);
     window.print();
   }
 

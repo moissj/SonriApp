@@ -121,7 +121,8 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
       this.superficiesMap.set(map);
       this.marcasPorPieza.set(agruparMarcasPorPieza(marcas));
     } catch (err) {
-      console.error('Error cargando odontograma:', err);
+      // Sin PII: solo code/message, nunca el objeto de error completo (datos-sensibles-salud)
+      console.error('Error cargando odontograma:', (err as { code?: string; message?: string })?.code ?? (err as Error)?.message);
       this.error.set('No se pudo cargar el odontograma.');
     } finally {
       this.loading.set(false);

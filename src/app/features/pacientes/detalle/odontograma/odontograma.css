@@ -103,7 +103,26 @@
 /* --- Editor: bandeja de instrumento, menú, x por símbolo --- */
 /* Bandeja: fondo tenue que agrupa las herramientas como una paleta clínica */
 .odo-tray { background: #f8fafc; }
-.odo-grupo-label { letter-spacing: 0.06em; }
+
+/* Categorías en acordeón: tabs que abren/cierran grupos de la paleta */
+.odo-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-height: 1.9rem;
+  padding: 0 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  color: #475569;
+  background: #fff;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+.odo-cat:hover { background: #f1f5f9; }
+/* Categoría abierta = pastilla oscura (distinta del azul de "herramienta cargada") */
+.odo-cat.activa { background: #0f172a; border-color: #0f172a; color: #fff; }
+.odo-cat-caret { font-size: 0.6rem; opacity: 0.75; }
 
 .odo-tool {
   display: inline-flex;
@@ -138,7 +157,8 @@
 /* Diente seleccionado: número subrayado + recuadro resaltado en color de marca */
 .diente-sel .tooth-num { text-decoration: underline; }
 .diente-sel .tooth-box-rect { stroke: #0284c7; stroke-width: 1.5; }
-.tooth-box-rect { cursor: pointer; transition: stroke 0.12s ease; }
+/* Caja de marca vacía: tenue para no competir con el diente; se resalta al pasar/seleccionar */
+.tooth-box-rect { cursor: pointer; stroke: #cbd5e1; transition: stroke 0.12s ease; }
 .tooth-group:hover .tooth-box-rect { stroke: #0284c7; }
 .tooth-box-rect:focus-visible { outline: 2px solid #0f172a; }
 .quitar-simbolo { opacity: 0; cursor: pointer; }

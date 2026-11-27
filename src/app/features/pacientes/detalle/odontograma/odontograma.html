@@ -27,18 +27,30 @@
   } @else if (!ciclo.necesitaCrear()) {
     @if (!ciclo.bloqueado()) {
     <!-- Toolbar de edición -->
-    <div role="toolbar" aria-label="Herramientas del odontograma" class="odo-tray rounded-2xl border border-slate-200 shadow-card p-2.5 space-y-2">
+    <div role="toolbar" aria-label="Herramientas del odontograma" class="odo-tray sticky top-2 z-20 rounded-2xl border border-slate-200 shadow-card p-2.5 space-y-2">
+      <!-- Categorías en acordeón (una abierta a la vez) + hallazgo activo -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        @for (g of leyenda; track g.titulo) {
+          <button type="button" class="odo-cat" [class.activa]="catAbierta() === g.titulo"
+            [attr.aria-expanded]="catAbierta() === g.titulo" (click)="toggleCat(g.titulo)">
+            {{ g.titulo }}<span aria-hidden="true" class="odo-cat-caret">{{ catAbierta() === g.titulo ? '▾' : '▸' }}</span>
+          </button>
+        }
+        <span class="ml-auto text-xs text-slate-500 pr-0.5">Activo: <span class="font-semibold text-slate-700">{{ herramientaLabel() }}</span></span>
+      </div>
+      <!-- Chips de la categoría abierta -->
       @for (g of leyenda; track g.titulo) {
-        <div class="flex flex-wrap items-center gap-1.5" role="group" [attr.aria-label]="g.titulo">
-          <span class="odo-grupo-label text-xxs font-bold text-slate-500 uppercase w-full sm:w-28 shrink-0">{{ g.titulo }}</span>
-          @for (i of g.items; track i.h.id) {
-            <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === i.h.id" [attr.aria-pressed]="ed.herramienta() === i.h.id" (click)="ed.elegir(i.h.id)">
-              @if (i.h.estadoEnum) { <span aria-hidden="true" [attr.class]="'swatch estado-' + i.h.estadoEnum"></span> }
-              @if (i.glifo) { <span aria-hidden="true" [attr.class]="'font-bold tk-' + i.h.token">{{ i.glifo }}</span> }
-              {{ i.h.label }}
-            </button>
-          }
-        </div>
+        @if (catAbierta() === g.titulo) {
+          <div class="flex flex-wrap items-center gap-1.5" role="group" [attr.aria-label]="g.titulo">
+            @for (i of g.items; track i.h.id) {
+              <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === i.h.id" [attr.aria-pressed]="ed.herramienta() === i.h.id" (click)="ed.elegir(i.h.id)">
+                @if (i.h.estadoEnum) { <span aria-hidden="true" [attr.class]="'swatch estado-' + i.h.estadoEnum"></span> }
+                @if (i.glifo) { <span aria-hidden="true" [attr.class]="'font-bold tk-' + i.h.token">{{ i.glifo }}</span> }
+                {{ i.h.label }}
+              </button>
+            }
+          </div>
+        }
       }
       <div class="flex flex-wrap items-center gap-1.5 border-t border-slate-200 pt-2 mt-0.5" role="group" aria-label="Acciones">
         <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === 'goma'" [attr.aria-pressed]="ed.herramienta() === 'goma'" (click)="ed.elegir('goma')">⌫ Goma (E)</button>

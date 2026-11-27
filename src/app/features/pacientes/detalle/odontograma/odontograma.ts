@@ -63,6 +63,20 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
   /** Leyenda y paleta de la toolbar (mismo catálogo agrupado) */
   readonly leyenda = leyendaHallazgos();
 
+  /** Paleta en acordeón: categoría abierta (una a la vez); arranca en la primera */
+  readonly catAbierta = signal(this.leyenda[0]?.titulo ?? '');
+  toggleCat(titulo: string): void {
+    this.catAbierta.update((c) => (c === titulo ? '' : titulo));
+  }
+  /** Etiqueta legible del hallazgo activo (para el indicador "Activo: …") */
+  readonly herramientaLabel = computed(() => {
+    const h = this.ed.herramienta();
+    if (!h) return 'ninguno';
+    if (h === 'goma') return 'Goma';
+    for (const g of this.leyenda) for (const i of g.items) if (i.h.id === h) return i.h.label;
+    return h;
+  });
+
   /** Geometría protegida (constantes y paths) expuesta al template */
   readonly geo = geo;
   readonly intermedios = (fdi: string) => geo.segmentosAnillo(fdi, false);

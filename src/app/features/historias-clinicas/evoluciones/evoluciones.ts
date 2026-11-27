@@ -14,11 +14,13 @@ import {
 } from '../../../core/services/historias-clinicas.service';
 import { CardComponent } from '../../../shared/components/card/card';
 import { EmptyStateComponent } from '../../../shared/components/empty-state/empty-state';
+import { CodigoBuscadorComponent } from '../../../shared/components/codigo-buscador/codigo-buscador';
+import { Cie10Service } from '../../../core/services/cie10.service';
 
 @Component({
   selector: 'app-evoluciones',
   standalone: true,
-  imports: [ReactiveFormsModule, DatePipe, CardComponent, EmptyStateComponent],
+  imports: [ReactiveFormsModule, DatePipe, CardComponent, EmptyStateComponent, CodigoBuscadorComponent],
   templateUrl: './evoluciones.html',
   styleUrl: './evoluciones.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -26,6 +28,10 @@ import { EmptyStateComponent } from '../../../shared/components/empty-state/empt
 export class EvolucionesComponent implements OnInit {
   private readonly historiasService = inject(HistoriasClinicasService);
   private readonly fb = inject(FormBuilder);
+  private readonly cie10Service = inject(Cie10Service);
+
+  readonly cie10 = signal<{ codigo: string; descripcion: string } | null>(null);
+  readonly buscarCie10 = (q: string) => this.cie10Service.buscar(q);
 
   /** Id del paciente cuyas evoluciones se gestionan */
   readonly pacienteId = input.required<string>();
@@ -87,10 +93,13 @@ export class EvolucionesComponent implements OnInit {
         motivo_consulta,
         diagnostico: diagnostico.trim() || null,
         notas_clinicas: notas_clinicas.trim() || null,
+        cie10_codigo: this.cie10()?.codigo ?? null,
       });
-      // Insertar al inicio (orden cronológico inverso)
-      this.historias.update((prev) => [nueva, ...prev]);
+      // Insertar al inicio (orden cronológico inverso); la descripción viene del código elegido
+      const conDescripcion = { ...nueva, cie10_descripcion: this.cie10()?.descripcion ?? null };
+      this.historias.update((prev) => [conDescripcion, ...prev]);
       this.form.reset();
+      this.cie10.set(null);
       this.showForm.set(false);
     } catch (err) {
       console.error('Error guardando evolución:', err);

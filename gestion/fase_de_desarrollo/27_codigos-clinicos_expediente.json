@@ -1,0 +1,62 @@
+{
+  "plan": "27_codigos-clinicos",
+  "version": 1,
+  "fecha": "2026-11-27",
+  "alcance": "Integrar CIE10 (diagnosticos) en Evoluciones y CUPS (procedimientos) en el catalogo Tratamientos, via un unico componente buscador reusable. Da uso a Cie10Service/CupsService (hoy huerfanos). ADITIVO: no se pierde ni sobrescribe ningun dato clinico. Fuera de alcance: herencia CUPS en presupuesto_items, varios dx por evolucion, CUPS en citas.",
+  "decisiones_usuario": {
+    "cardinalidad_dx": "1 diagnostico principal (columna cie10_codigo). Varios dx = plan aparte si RIPS lo exige. Reversible.",
+    "relacion_cups": "1:1 por tratamiento (cups_codigo).",
+    "ritmo": "Procede de corrido. Prod (migracion) y push al final con OK explicito."
+  },
+  "modelo_datos": {
+    "principio": "ADITIVO e idempotente. Columnas nulables con FK al catalogo. Sin policy RLS nueva (heredan de la tabla tenant). Catalogos ya exponen SELECT a authenticated.",
+    "alter_historias_clinicas": "ADD COLUMN IF NOT EXISTS cie10_codigo text REFERENCES public.catalogo_cie10(codigo). Convive con 'diagnostico' (texto libre, se conserva).",
+    "alter_tratamientos": "ADD COLUMN IF NOT EXISTS cups_codigo text REFERENCES public.catalogo_cups(codigo).",
+    "fk": "catalogo_*.codigo es PRIMARY KEY (verificado). ON DELETE/UPDATE: NO ACTION (default). Los catalogos se desactivan con activo=false, no se borran.",
+    "indices": "Ninguno por ahora (YAGNI). Agregar si reporting RIPS filtra por codigo.",
+    "reversibilidad": "DROP COLUMN recupera estado previo sin perder narrativa clinica."
+  },
+  "contrato_campos": [
+    { "tabla": "historias_clinicas", "campo": "cie10_codigo", "tipo": "text", "nulable": true, "fk": "catalogo_cie10(codigo)", "obligatorio_ui": false },
+    { "tabla": "tratamientos", "campo": "cups_codigo", "tipo": "text", "nulable": true, "fk": "catalogo_cups(codigo)", "obligatorio_ui": false }
+  ],
+  "tipos_ts": {
+    "HistoriaClinica": "agregar cie10_codigo?: string | null",
+    "Tratamiento": "agregar cups_codigo?: string | null",
+    "addHistoria/updateTratamiento/createTratamiento": "incluir el campo en el payload (opcional)."
+  },
+  "componente_reusable": {
+    "ruta": "src/app/shared/components/codigo-buscador/",
+    "selector": "app-codigo-buscador",
+    "inputs": {
+      "label": "string",
+      "placeholder": "string (opcional)",
+      "buscarFn": "(q: string) => Promise<{ codigo: string; descripcion: string }[]>",
+      "valor": "{ codigo: string; descripcion: string } | null (input inicial/edicion)"
+    },
+    "output": "seleccion = output<{ codigo: string; descripcion: string } | null>()",
+    "comportamiento": "Reactive Form + debounceTime(300) + distinctUntilChanged + switchMap(buscarFn); dropdown de resultados (track by codigo); seleccionar emite objeto y fija el texto; boton limpiar emite null. OnPush, signals. Error de carga -> signal error visible, nunca [] silencioso. < 200 lineas.",
+    "logica_pura": "etiqueta-codigo.funcion.ts: etiquetaCodigo({codigo,descripcion}) => `${codigo} — ${descripcion}` (o solo codigo si descripcion vacia).",
+    "modelo_patron": "patient-autocomplete (no se refactoriza; se replica patron)."
+  },
+  "cableado": {
+    "evoluciones": "En el form de nueva entrada, agregar <app-codigo-buscador> (buscarFn = cie10Service.buscar). Al seleccionar, guardar cie10_codigo en addHistoria. Mostrar codigo+desc en la tarjeta de la entrada.",
+    "tratamientos": "En el modal crear/editar, agregar <app-codigo-buscador> (buscarFn = cupsService.buscar). Guardar cups_codigo en create/update. Mostrar el codigo en la tabla. En editar, pasar 'valor' inicial."
+  },
+  "rls_seguridad": {
+    "nuevas_policies": "NINGUNA. cie10_codigo y cups_codigo viven en historias_clinicas / tratamientos, que ya filtran odontologo_id = auth.uid() + is_cuenta_activa(). Agregar columna no cambia el aislamiento.",
+    "catalogos": "catalogo_cie10 / catalogo_cups ya tienen policy SELECT para authenticated (lectura global de catalogo no sensible). El codigo no es dato clinico de paciente.",
+    "datos_sensibles": "Ningun dato de paciente en logs/errores. En tests, solo codigos sinteticos."
+  },
+  "vectores_prueba": [
+    { "fn": "etiquetaCodigo", "in": { "codigo": "K021", "descripcion": "Caries de la dentina" }, "out": "K021 — Caries de la dentina" },
+    { "fn": "etiquetaCodigo", "in": { "codigo": "Z012", "descripcion": "" }, "out": "Z012" },
+    { "caso": "buscador query vacia", "esperado": "no llama buscarFn o retorna []; sin dropdown" },
+    { "caso": "seleccion", "esperado": "emite {codigo,descripcion}; input muestra etiqueta" },
+    { "caso": "limpiar", "esperado": "emite null; input vacio" },
+    { "caso": "persistencia evolucion", "esperado": "cie10_codigo guardado y releido (dato sintetico)" },
+    { "caso": "persistencia tratamiento", "esperado": "cups_codigo guardado y releido (dato sintetico)" }
+  ],
+  "gates": ["npx tsc --noEmit -p tsconfig.app.json", "npm run build", "npm test -- --watch=false", "node tools/agentes/sincronizar.mjs --check"],
+  "criterio_terminado": "Buscador CIE10 funcional en evoluciones y CUPS en tratamientos; codigos persisten con FK; gates en verde; manual actualizado; verificador sin hallazgos criticos."
+}

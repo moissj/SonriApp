@@ -95,7 +95,10 @@
           </ng-template>
           <ng-template pTemplate="body" let-t>
             <tr>
-              <td class="font-medium text-slate-800 text-sm">{{ t.nombre }}</td>
+              <td class="font-medium text-slate-800 text-sm">
+                {{ t.nombre }}
+                @if (t.cups_codigo) { <span class="block text-xxs text-slate-500 font-normal" [title]="t.cups_descripcion ?? ''">CUPS {{ t.cups_codigo }}</span> }
+              </td>
               <td class="text-slate-500 text-xs max-w-xs"><span class="line-clamp-2">{{ t.descripcion || '—' }}</span></td>
               <td class="text-right text-sm font-semibold text-primary-700">{{ t.precio_base | copCurrency }}</td>
               <td class="text-right text-xs text-slate-600">{{ t.duracion_minutos }} min</td>
@@ -112,6 +115,7 @@
             <div class="flex items-start justify-between gap-2">
               <div class="min-w-0">
                 <h3 class="font-semibold text-sm text-gray-900 truncate">{{ t.nombre }}</h3>
+                @if (t.cups_codigo) { <p class="text-xxs text-slate-500">CUPS {{ t.cups_codigo }}</p> }
                 @if (t.descripcion) {
                   <p class="text-xs text-gray-500 mt-0.5 line-clamp-2">{{ t.descripcion }}</p>
                 }
@@ -166,6 +170,8 @@
         class="w-full px-2.5 py-1.5 border border-gray-300 rounded-lg text-sm resize-y focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-primary-500"
       ></textarea>
     </div>
+
+    <app-codigo-buscador label="Procedimiento (CUPS)" [buscarFn]="buscarCups" [valor]="cups()" (seleccion)="cups.set($event)" />
 
     <div class="grid grid-cols-2 gap-3">
       <div>

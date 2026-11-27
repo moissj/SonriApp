@@ -11,12 +11,15 @@ export interface HistoriaClinica {
   motivo_consulta: string;
   diagnostico: string | null;
   notas_clinicas: string | null;
+  cie10_codigo?: string | null;
+  /** Derivado del embed `catalogo_cie10`; no se persiste */
+  cie10_descripcion?: string | null;
   created_at?: string;
 }
 
 export type NuevaHistoria = Pick<
   HistoriaClinica,
-  'motivo_consulta' | 'diagnostico' | 'notas_clinicas'
+  'motivo_consulta' | 'diagnostico' | 'notas_clinicas' | 'cie10_codigo'
 >;
 
 /** Datos de identificación del paciente para la cabecera de la historia clínica */
@@ -62,14 +65,17 @@ export class HistoriasClinicasService {
 
     const { data, error } = await supabase
       .from('historias_clinicas')
-      .select('*')
+      .select('*, catalogo_cie10(descripcion)')
       .eq('odontologo_id', user.id)
       .eq('paciente_id', pacienteId)
       .order('fecha', { ascending: false })
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return (data ?? []) as HistoriaClinica[];
+    return (data ?? []).map(({ catalogo_cie10, ...h }: any) => ({
+      ...h,
+      cie10_descripcion: catalogo_cie10?.descripcion ?? null,
+    })) as HistoriaClinica[];
   }
 
   /** Crea una nueva entrada de evolución (fecha = hoy por defecto) */
@@ -85,6 +91,7 @@ export class HistoriasClinicasService {
         motivo_consulta: entrada.motivo_consulta,
         diagnostico: entrada.diagnostico,
         notas_clinicas: entrada.notas_clinicas,
+        cie10_codigo: entrada.cie10_codigo ?? null,
       })
       .select()
       .single();

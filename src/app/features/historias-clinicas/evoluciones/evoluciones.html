@@ -47,6 +47,8 @@
           }
         </div>
 
+        <app-codigo-buscador label="Diagnóstico (CIE10)" [buscarFn]="buscarCie10" [valor]="cie10()" (seleccion)="cie10.set($event)" />
+
         <div>
           <label class="block text-xs font-semibold text-gray-600 mb-1">Diagnóstico</label>
           <textarea
@@ -123,6 +125,9 @@
                   {{ h.fecha | date: 'dd/MM/yyyy' }}
                 </span>
                 <h4 class="font-semibold text-gray-900 text-sm mt-1.5 truncate">{{ h.motivo_consulta }}</h4>
+                @if (h.cie10_codigo) {
+                  <p class="text-xs text-sky-700 mt-0.5 truncate">CIE10: {{ h.cie10_codigo }}{{ h.cie10_descripcion ? ' — ' + h.cie10_descripcion : '' }}</p>
+                }
               </div>
               <svg
                 class="h-5 w-5 text-gray-400 shrink-0 transition-transform mt-0.5"

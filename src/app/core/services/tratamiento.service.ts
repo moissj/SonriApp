@@ -10,13 +10,23 @@ export interface Tratamiento {
   precio_base: number;
   duracion_minutos: number;
   activo: boolean;
+  cups_codigo?: string | null;
+  /** Derivado del embed `catalogo_cups`; no se persiste */
+  cups_descripcion?: string | null;
   created_at?: string;
 }
 
 export type NuevoTratamiento = Pick<
   Tratamiento,
-  'nombre' | 'descripcion' | 'precio_base' | 'duracion_minutos'
+  'nombre' | 'descripcion' | 'precio_base' | 'duracion_minutos' | 'cups_codigo'
 >;
+
+const SELECT = '*, catalogo_cups(descripcion)';
+
+/** Aplana el embed `catalogo_cups` a `cups_descripcion` */
+function mapear({ catalogo_cups, ...t }: any): Tratamiento {
+  return { ...t, cups_descripcion: catalogo_cups?.descripcion ?? null };
+}
 
 @Injectable({ providedIn: 'root' })
 export class TratamientoService {
@@ -29,7 +39,7 @@ export class TratamientoService {
 
     let query = supabase
       .from('tratamientos_catalogo')
-      .select('*')
+      .select(SELECT)
       .eq('odontologo_id', user.id)
       .order('nombre', { ascending: true });
 
@@ -37,7 +47,7 @@ export class TratamientoService {
 
     const { data, error } = await query;
     if (error) throw error;
-    return (data ?? []) as Tratamiento[];
+    return (data ?? []).map(mapear);
   }
 
   async createTratamiento(t: NuevoTratamiento): Promise<Tratamiento> {
@@ -47,11 +57,11 @@ export class TratamientoService {
     const { data, error } = await supabase
       .from('tratamientos_catalogo')
       .insert({ ...t, odontologo_id: user.id })
-      .select()
+      .select(SELECT)
       .single();
 
     if (error) throw error;
-    return data as Tratamiento;
+    return mapear(data);
   }
 
   async updateTratamiento(id: string, cambios: Partial<NuevoTratamiento> & { activo?: boolean }): Promise<Tratamiento> {
@@ -63,11 +73,11 @@ export class TratamientoService {
       .update(cambios)
       .eq('id', id)
       .eq('odontologo_id', user.id)
-      .select()
+      .select(SELECT)
       .single();
 
     if (error) throw error;
-    return data as Tratamiento;
+    return mapear(data);
   }
 
   async deleteTratamiento(id: string): Promise<void> {

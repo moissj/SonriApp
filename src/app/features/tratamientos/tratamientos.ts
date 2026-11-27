@@ -15,6 +15,8 @@ import { ButtonComponent } from '../../shared/components/button/button';
 import { InputComponent } from '../../shared/components/input/input';
 import { StatusBadgeComponent } from '../../shared/components/status-badge/status-badge';
 import { FormFooterComponent } from '../../shared/components/form-footer/form-footer';
+import { CodigoBuscadorComponent } from '../../shared/components/codigo-buscador/codigo-buscador';
+import { CupsService } from '../../core/services/cups.service';
 import { LayoutService } from '../../core/services/layout.service';
 import { SegmentedControlComponent, OpcionSegmento } from '../../shared/components/segmented-control/segmented-control';
 import { FiltroEstado, contarActivos, duracionPromedio, filtrarTratamientos, precioPromedio } from './funciones/tratamientos.funcion';
@@ -38,6 +40,7 @@ import { FiltroEstado, contarActivos, duracionPromedio, filtrarTratamientos, pre
     StatusBadgeComponent,
     FormFooterComponent,
     SegmentedControlComponent,
+    CodigoBuscadorComponent,
   ],
   templateUrl: './tratamientos.html',
   styleUrl: './tratamientos.scss',
@@ -47,6 +50,10 @@ export class TratamientosComponent {
   private readonly tratamientoService = inject(TratamientoService);
   private readonly fb = inject(FormBuilder);
   readonly layout = inject(LayoutService);
+  private readonly cupsService = inject(CupsService);
+
+  readonly cups = signal<{ codigo: string; descripcion: string } | null>(null);
+  readonly buscarCups = (q: string) => this.cupsService.buscar(q);
 
   readonly tratamientos = signal<Tratamiento[]>([]);
   readonly loading = signal(true);
@@ -101,6 +108,7 @@ export class TratamientosComponent {
   /** Abre el modal para crear un tratamiento nuevo */
   nuevo(): void {
     this.editing.set(null);
+    this.cups.set(null);
     this.form.reset({ nombre: '', descripcion: '', precio_base: 0, duracion_minutos: 30 });
     this.modal()?.open();
   }
@@ -108,6 +116,7 @@ export class TratamientosComponent {
   /** Abre el modal para editar un tratamiento existente */
   editar(t: Tratamiento): void {
     this.editing.set(t);
+    this.cups.set(t.cups_codigo ? { codigo: t.cups_codigo, descripcion: t.cups_descripcion ?? '' } : null);
     this.form.reset({
       nombre: t.nombre,
       descripcion: t.descripcion ?? '',
@@ -132,6 +141,7 @@ export class TratamientosComponent {
         descripcion: descripcion.trim() || null,
         precio_base: Number(precio_base),
         duracion_minutos: Number(duracion_minutos),
+        cups_codigo: this.cups()?.codigo ?? null,
       };
 
       const editing = this.editing();

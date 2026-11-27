@@ -5,7 +5,7 @@ import { ConfirmModalComponent } from '../../../../../shared/components/confirm-
 import { CicloOdontograma } from '../funciones/ciclo-odontograma';
 import { ComparacionOdontogramaComponent } from './comparacion-odontograma';
 
-const BTN = 'h-7 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-40';
+const BTN = 'h-8 px-3.5 text-xs rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 disabled:opacity-40';
 
 /** Segmentado Inicial|Final, panel de crear final, banner de cerrado y acciones cerrar/reabrir/comparar. */
 @Component({
@@ -14,20 +14,24 @@ const BTN = 'h-7 px-3 text-xs rounded-lg border border-gray-200 bg-white text-gr
   imports: [ModalComponent, ConfirmModalComponent, ComparacionOdontogramaComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex flex-wrap items-center gap-2">
-      <div role="group" aria-label="Tipo de odontograma" class="inline-flex gap-1">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <!-- Segmentado inset: pista gris con pastilla blanca elevada en el activo -->
+      <div role="group" aria-label="Tipo de odontograma" class="inline-flex gap-0.5 rounded-lg bg-slate-100 p-0.5">
         @for (t of tipos; track t.id) {
           <button type="button" [attr.aria-pressed]="ciclo().tipoActivo() === t.id" [disabled]="ciclo().ocupado()"
-            class="h-7 px-3 text-xs rounded-lg border font-semibold disabled:opacity-40"
-            [class]="ciclo().tipoActivo() === t.id ? 'bg-primary-600 border-primary-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'"
+            class="h-7 px-4 text-xs rounded-md font-semibold transition disabled:opacity-40"
+            [class]="ciclo().tipoActivo() === t.id ? 'bg-white text-primary-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'"
             (click)="elegirTipo.emit(t.id)">{{ t.label }}</button>
         }
       </div>
-      @if (ciclo().existeFinal()) { <app-comparacion-odontograma [pacienteId]="pacienteId()" /> }
-      @if (ciclo().meta()?.estado === 'borrador') {
-        <button type="button" [class]="btn" [disabled]="ciclo().ocupado()" (click)="confirmCerrar.open()">Cerrar odontograma</button>
-      }
-      <button type="button" [class]="btn" disabled title="Próximamente">Enviar a presupuesto (próximamente)</button>
+      <!-- Acciones separadas del segmentado -->
+      <div class="flex flex-wrap items-center gap-2">
+        @if (ciclo().existeFinal()) { <app-comparacion-odontograma [pacienteId]="pacienteId()" /> }
+        @if (ciclo().meta()?.estado === 'borrador') {
+          <button type="button" [class]="btn" [disabled]="ciclo().ocupado()" (click)="confirmCerrar.open()">Cerrar odontograma</button>
+        }
+        <button type="button" [class]="btn" disabled title="Próximamente">Enviar a presupuesto (próximamente)</button>
+      </div>
     </div>
 
     @if (ciclo().cerrado()) {

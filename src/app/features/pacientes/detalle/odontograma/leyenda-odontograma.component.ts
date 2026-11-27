@@ -12,10 +12,11 @@ import { GrupoLeyenda } from './funciones/catalogo-hallazgos';
   styleUrl: './leyenda-odontograma.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section aria-label="Leyenda del odontograma" class="space-y-2 break-inside-avoid">
+    <section aria-label="Leyenda del odontograma" class="space-y-2.5 break-inside-avoid rounded-2xl border border-slate-200 bg-slate-50 p-3.5 print:border-0 print:bg-transparent print:p-0">
+      <h4 class="text-xxs font-bold uppercase tracking-wide text-slate-400 print:hidden">Convenciones</h4>
       @for (g of grupos(); track g.titulo) {
         <div>
-          <h4 class="text-xxs font-semibold text-gray-600 uppercase mb-1">{{ g.titulo }}</h4>
+          <h4 class="text-xxs font-bold text-slate-500 uppercase tracking-wide mb-1">{{ g.titulo }}</h4>
           <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 print:grid-cols-4 gap-x-4 gap-y-1">
             @for (i of g.items; track i.h.id) {
               <li class="flex items-center gap-1.5 text-xs text-gray-700">

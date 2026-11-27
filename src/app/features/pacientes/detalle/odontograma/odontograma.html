@@ -1,15 +1,15 @@
 <div class="space-y-4">
   <div class="flex flex-wrap items-start justify-between gap-3">
-    <div class="min-w-0 flex-1 basis-60">
-      <h3 class="text-base font-semibold text-gray-800">Odontograma</h3>
-      <p class="text-xs text-gray-600 mt-0.5">
+    <div class="min-w-0 flex-1 basis-60 border-l-2 border-primary-500 pl-2.5">
+      <h3 class="text-base font-semibold text-slate-900 tracking-tight">Odontograma</h3>
+      <p class="text-xs text-slate-500 mt-0.5">
         Elige un hallazgo y toca la zona (superficies) o el recuadro del diente. Goma (E), deshacer (Ctrl+Z), clic derecho para más opciones.
       </p>
     </div>
     <!-- Zoom e impresión -->
     <div class="flex items-center gap-1 shrink-0">
-      <button type="button" (click)="zoomOut()" class="h-8 w-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="Alejar">−</button>
-      <button type="button" (click)="zoomIn()" class="h-8 w-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="Acercar">+</button>
+      <button type="button" (click)="zoomOut()" class="h-8 w-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300" aria-label="Alejar">−</button>
+      <button type="button" (click)="zoomIn()" class="h-8 w-8 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300" aria-label="Acercar">+</button>
       @if (!loading() && !ciclo.necesitaCrear()) {
         <button type="button" (click)="imprimir()" class="odo-tool h-8">Imprimir / PDF</button>
       }
@@ -27,10 +27,10 @@
   } @else if (!ciclo.necesitaCrear()) {
     @if (!ciclo.bloqueado()) {
     <!-- Toolbar de edición -->
-    <div role="toolbar" aria-label="Herramientas del odontograma" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 space-y-1.5">
+    <div role="toolbar" aria-label="Herramientas del odontograma" class="odo-tray rounded-2xl border border-slate-200 shadow-card p-2.5 space-y-2">
       @for (g of leyenda; track g.titulo) {
-        <div class="flex flex-wrap items-center gap-1" role="group" [attr.aria-label]="g.titulo">
-          <span class="text-xxs font-semibold text-gray-600 uppercase w-full sm:w-28 shrink-0">{{ g.titulo }}</span>
+        <div class="flex flex-wrap items-center gap-1.5" role="group" [attr.aria-label]="g.titulo">
+          <span class="odo-grupo-label text-xxs font-bold text-slate-500 uppercase w-full sm:w-28 shrink-0">{{ g.titulo }}</span>
           @for (i of g.items; track i.h.id) {
             <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === i.h.id" [attr.aria-pressed]="ed.herramienta() === i.h.id" (click)="ed.elegir(i.h.id)">
               @if (i.h.estadoEnum) { <span aria-hidden="true" [attr.class]="'swatch estado-' + i.h.estadoEnum"></span> }
@@ -40,12 +40,12 @@
           }
         </div>
       }
-      <div class="flex flex-wrap items-center gap-1 border-t border-gray-100 pt-1.5" role="group" aria-label="Acciones">
+      <div class="flex flex-wrap items-center gap-1.5 border-t border-slate-200 pt-2 mt-0.5" role="group" aria-label="Acciones">
         <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === 'goma'" [attr.aria-pressed]="ed.herramienta() === 'goma'" (click)="ed.elegir('goma')">⌫ Goma (E)</button>
         <button type="button" class="odo-tool" [disabled]="!ed.dienteSel()" (click)="ed.limpiarDiente(ed.dienteSel()!)">Limpiar diente</button>
         <button type="button" class="odo-tool" [disabled]="!ed.puedeUndo()" (click)="ed.deshacer()" aria-label="Deshacer">↶ Deshacer</button>
         <button type="button" class="odo-tool" [disabled]="!ed.puedeRedo()" (click)="ed.rehacer()" aria-label="Rehacer">↷ Rehacer</button>
-        <button type="button" class="odo-tool" [disabled]="!ed.puedeUndo()" (click)="pedirDescartar()">Descartar cambios</button>
+        <button type="button" class="odo-tool odo-tool--peligro" [disabled]="!ed.puedeUndo()" (click)="pedirDescartar()">Descartar cambios</button>
         <span class="ml-auto text-xs text-gray-500" role="status" aria-live="polite">
           @switch (ed.estadoGuardado()) {
             @case ('guardando') { Guardando… }
@@ -63,7 +63,7 @@
       <h2 class="text-lg font-semibold text-gray-900">Odontograma {{ tipoActivo() === 'final' ? 'final' : 'inicial' }}</h2>
       <p class="text-xs text-gray-700">Fecha de impresión: {{ fechaHoy() }}</p>
     </div>
-    <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5" tabindex="0" role="region" aria-label="Odontograma (desplazable)">
+    <div class="odontograma-wrap bg-white rounded-2xl border border-slate-200 shadow-card p-3 sm:p-5" tabindex="0" role="region" aria-label="Odontograma (desplazable)">
       <svg
         [attr.viewBox]="'0 0 ' + geo.VIEW_WIDTH + ' ' + geo.VIEW_HEIGHT"
         [style.width]="svgWidth()"

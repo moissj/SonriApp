@@ -100,26 +100,46 @@
   fill: none;
 }
 
-/* --- Editor: toolbar, menú, x por símbolo --- */
+/* --- Editor: bandeja de instrumento, menú, x por símbolo --- */
+/* Bandeja: fondo tenue que agrupa las herramientas como una paleta clínica */
+.odo-tray { background: #f8fafc; }
+.odo-grupo-label { letter-spacing: 0.06em; }
+
 .odo-tool {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  min-height: 1.75rem;
-  padding: 0 0.5rem;
+  gap: 0.4rem;
+  min-height: 1.9rem;
+  padding: 0 0.6rem;
   font-size: 0.75rem;
+  font-weight: 500;
   border: 1px solid #e2e8f0;
-  border-radius: 0.5rem;
+  border-radius: 9999px;
   color: #334155;
   background: #fff;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
 }
-.odo-tool:hover:not(:disabled) { background: #f8fafc; }
+.odo-tool:hover:not(:disabled) { background: #f8fafc; border-color: #cbd5e1; }
 .odo-tool:disabled { opacity: 0.4; }
-.odo-tool.activa { border: 2px solid #0f172a; font-weight: 700; background: #f1f5f9; }
+/* Activo = instrumento cargado: anillo de marca, sin el borde negro duro anterior */
+.odo-tool.activa {
+  border-color: #0284c7;
+  background: #f0f9ff;
+  color: #075985;
+  font-weight: 700;
+  box-shadow: 0 0 0 1px #0284c7;
+}
+/* Acción destructiva: pista roja solo al interactuar */
+.odo-tool--peligro:hover:not(:disabled) { border-color: #fca5a5; background: #fef2f2; color: #b91c1c; }
+
 .odo-menu-item { display: block; width: 100%; text-align: left; padding: 0.4rem 0.9rem; font-size: 0.8rem; color: #334155; }
 .odo-menu-item:hover, .odo-menu-item:focus-visible { background: #f1f5f9; outline: none; }
+
+/* Diente seleccionado: número subrayado + recuadro resaltado en color de marca */
 .diente-sel .tooth-num { text-decoration: underline; }
-.tooth-box-rect { cursor: pointer; }
+.diente-sel .tooth-box-rect { stroke: #0284c7; stroke-width: 1.5; }
+.tooth-box-rect { cursor: pointer; transition: stroke 0.12s ease; }
+.tooth-group:hover .tooth-box-rect { stroke: #0284c7; }
 .tooth-box-rect:focus-visible { outline: 2px solid #0f172a; }
 .quitar-simbolo { opacity: 0; cursor: pointer; }
 .quitar-simbolo rect { fill: #fff; stroke: #64748b; stroke-width: 0.8; }

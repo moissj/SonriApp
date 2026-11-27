@@ -31,3 +31,5 @@
 .ef-textarea { width: 100%; min-height: 52px; resize: vertical; }
 
 .ef-block { display: flex; flex-direction: column; gap: 3px; padding: 6px 0; }
+/* En columna, el flex-basis 160px del label se vuelve ALTO y abre un hueco: anularlo */
+.ef-block .ef-label { flex: 0 0 auto; }

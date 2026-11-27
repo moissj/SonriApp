@@ -21,7 +21,7 @@ export class EdicionOdontograma {
   readonly puedeUndo = signal(false);
   readonly puedeRedo = signal(false);
   readonly def = computed(() => CATALOGO_HALLAZGOS.find((h) => h.id === this.herramienta()));
-  private readonly pila = new PilaEdicion();
+  private pila = new PilaEdicion();
   private grupo = 0;
   private timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -32,9 +32,11 @@ export class EdicionOdontograma {
     private readonly superficies: WritableSignal<MapaSuperficies>,
     private readonly marcas: WritableSignal<MapaMarcas>,
     private readonly onError: (m: string | null) => void,
+    private readonly bloqueado: () => boolean = () => false,
   ) {}
 
   destroy(): void { clearTimeout(this.timer); }
+  reiniciar(): void { this.pila = new PilaEdicion(); this.herramienta.set(null); this.dienteSel.set(null); this.sync(); }
   elegir(id: string): void { this.herramienta.update((a) => (a === id ? null : id)); }
 
   estadoDe = (pieza: string, s: SuperficieDiente): EstadoDiente => this.superficies()[`${pieza}:${s}`]?.estado ?? 'sano';
@@ -48,16 +50,15 @@ export class EdicionOdontograma {
     const op = this.opFill(pieza, s, despues);
     if (op) await this.hacer([op], despues === 'sano');
   }
-
   async clickDiente(pieza: string): Promise<boolean> {
     this.dienteSel.set(pieza);
+    if (this.bloqueado()) return true; // solo lectura: no abre el modal de marcas
     if (this.herramienta() === 'goma') { await this.quitarUltima(pieza); return true; }
     const m = this.def()?.marcaEnum;
     if (!m) return false; // sin herramienta de marca: el componente abre el modal de marcas
     await this.alternarMarca(pieza, m);
     return true;
   }
-
   async alternarMarca(pieza: string, marca: MarcaDiente): Promise<void> {
     const actuales = this.marcas().get(pieza) ?? [];
     const agrega = !actuales.includes(marca);
@@ -95,7 +96,7 @@ export class EdicionOdontograma {
 
   /** Deshace toda la sesión (hasta vaciar la pila); se detiene ante un fallo. */
   async descartar(): Promise<void> {
-    while (this.pila.puedeUndo && this.estadoGuardado() !== 'error') await this.deshacer();
+    while (!this.bloqueado() && this.pila.puedeUndo && this.estadoGuardado() !== 'error') await this.deshacer();
   }
 
   abrirMenu(e: MouseEvent, pieza: string): void {
@@ -132,16 +133,15 @@ export class EdicionOdontograma {
   }
 
   private async hacer(ops: OpEdicion[], avisaQuitar: boolean): Promise<void> {
-    const g = ++this.grupo;
-    const conGrupo = ops.map((o) => ({ ...o, grupo: g }));
-    if (!(await this.aplicar(conGrupo))) return;
+    const g = ++this.grupo; const conGrupo = ops.map((o) => ({ ...o, grupo: g }));
+    if (this.bloqueado() || !(await this.aplicar(conGrupo))) return;
     conGrupo.forEach((o) => this.pila.push(o));
     this.sync();
     if (avisaQuitar) this.avisar('Hallazgo eliminado');
   }
 
   private async mover(sacar: () => OpEdicion[], devolver: () => OpEdicion[], deshaciendo: boolean): Promise<void> {
-    const ops = sacar();
+    const ops = this.bloqueado() ? [] : sacar();
     if (!ops.length) return;
     const orientadas = deshaciendo ? ops.map(invertir) : ops;
     if (!(await this.aplicar(orientadas))) devolver(); // la op vuelve a su pila de origen

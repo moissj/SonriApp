@@ -25,8 +25,11 @@
 - [x] Pila pura `editor-odontograma.ts` + spec; controlador `edicion-odontograma.ts`; `odontograma.ts` 155 lineas
 - [x] Gates: tsc 0, build OK, 124 tests. Fix N0: `isSelected` passthrough (template colgado). Deuda: modal de notas por superficie retirado; `odontograma.css` +162B sobre budget (F6).
 
-## F5 — Inicial/Final
-- [ ] Segmentado Inicial|Final, crear final (copiar/blanco), cerrar/reabrir con motivo, comparar, vinculo presupuesto
+## F5 — Inicial/Final ✓ (local)
+- [x] Segmentado Inicial|Final, crear final (copiar/blanco), cerrar/reabrir con motivo, comparar (dientes con cambios + indice COP/ceo)
+- [x] Solo-lectura al cerrar (cliente) + sub-componentes en `ciclo/`, `crearFinal` en service, funciones puras (indice-cop, comparar, estado-meta) + specs. tsc/build 0, 134 tests.
+- [ ] **F5b (capa-datos):** trigger/RLS para impedir ESCRITURA en odontograma `cerrado` (hoy el bloqueo es solo cliente — historia-clinica-integridad)
+- [~] Vinculo presupuesto DIFERIDO (boton "proximamente"); COP/ceo criterio clinico A CONFIRMAR; service 305 lineas (deuda codigo-limpio)
 
 ## F6 — Leyenda / PDF / a11y
 - [ ] Leyenda 4 col desde catalogo, toolbar, PDF, pulido movil + accesibilidad

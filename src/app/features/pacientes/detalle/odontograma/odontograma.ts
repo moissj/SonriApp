@@ -7,12 +7,14 @@ import { hallazgosMarca, leyendaHallazgos, glifoDe } from './funciones/catalogo-
 import { vistaDePieza, VistaPieza } from './funciones/vista-marcas.funcion';
 import { EdicionOdontograma } from './funciones/edicion-odontograma';
 import * as geo from './funciones/geometria-odontograma.funcion';
+import { CicloOdontograma } from './funciones/ciclo-odontograma';
+import { CicloOdontogramaComponent } from './ciclo/ciclo-odontograma.component';
 import { etiquetaZona } from './funciones/etiquetas-odontograma.funcion';
 
 @Component({
   selector: 'app-odontograma',
   standalone: true,
-  imports: [ModalComponent, ConfirmModalComponent],
+  imports: [ModalComponent, ConfirmModalComponent, CicloOdontogramaComponent],
   templateUrl: './odontograma.html',
   styleUrl: './odontograma.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,9 +32,17 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
   /** Marcas nivel-diente: pieza -> marcas activas */
   readonly marcasPorPieza = signal<Map<string, MarcaDiente[]>>(new Map());
 
-  /** Estado del editor: herramienta, autosave, undo/redo, menú contextual y toast */
+  /** Tipo mostrado (sembrado por el input `tipo`); el segmentado lo cambia */
+  readonly tipoActivo = signal<OdontogramaTipo>('inicial');
+  /** Meta, crear final, cerrar y reabrir */
+  readonly ciclo = new CicloOdontograma(
+    this.odontogramaService, () => this.pacienteId(), this.tipoActivo, () => this.load(), (m) => this.error.set(m),
+  );
+
+  /** Estado del editor: herramienta, autosave, undo/redo, menú contextual y toast (solo lectura si el ciclo bloquea) */
   readonly ed = new EdicionOdontograma(
-    this.odontogramaService, () => this.pacienteId(), () => this.tipo(), this.superficiesMap, this.marcasPorPieza, (m) => this.error.set(m),
+    this.odontogramaService, () => this.pacienteId(), () => this.tipoActivo(), this.superficiesMap, this.marcasPorPieza,
+    (m) => this.error.set(m), () => this.ciclo.bloqueado(),
   );
 
   /** Zoom: 1 = ajustado al ancho; >1 = ampliado con scroll (mejor toque en móvil) */
@@ -83,6 +93,7 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.tipoActivo.set(this.tipo());
     void this.load();
   }
 
@@ -98,9 +109,11 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
+      const tipo = this.tipoActivo();
       const [registros, marcas] = await Promise.all([
-        this.odontogramaService.getOdontograma(this.pacienteId(), this.tipo()),
-        this.odontogramaService.getMarcas(this.pacienteId(), this.tipo()),
+        this.odontogramaService.getOdontograma(this.pacienteId(), tipo),
+        this.odontogramaService.getMarcas(this.pacienteId(), tipo),
+        this.ciclo.cargarMetas(),
       ]);
       const map: Record<string, PiezaOdontograma> = {};
       for (const r of registros) map[`${r.pieza}:${r.superficie}`] = r;
@@ -112,6 +125,14 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  cambiarTipo(t: OdontogramaTipo): void {
+    if (t === this.tipoActivo()) return;
+    this.ed.reiniciar();
+    this.tipoActivo.set(t);
+    this.error.set(null);
+    void this.load();
   }
 
   onSurfaceClick(fdi: string, superficie: SuperficieDiente): void {

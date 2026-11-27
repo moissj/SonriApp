@@ -250,6 +250,35 @@ export class OdontogramaService {
   }
 
   /**
+   * Crea el odontograma final en borrador; si `copiarDesdeInicial`, copia primero superficies y marcas
+   * del inicial. La meta se escribe al final (es el "commit"): si la copia falla, reintentar es seguro
+   * (todo es upsert con ignoreDuplicates, nunca pisa ni reabre un final existente).
+   */
+  async crearFinal(pacienteId: string, copiarDesdeInicial: boolean): Promise<void> {
+    const user = this.auth.user();
+    if (!user) throw new Error('No hay usuario autenticado.');
+    const base = { odontologo_id: user.id, paciente_id: pacienteId, tipo: 'final', fecha: hoyBogota() };
+    if (copiarDesdeInicial) {
+      const [sup, marcas] = await Promise.all([this.getOdontograma(pacienteId, 'inicial'), this.getMarcas(pacienteId, 'inicial')]);
+      const filasSup = sup.map((s) => ({ ...base, pieza: s.pieza, superficie: s.superficie, estado: s.estado, notas: s.notas }));
+      const filasMarcas = marcas.map((m) => ({ ...base, pieza: m.pieza, marca: m.marca, notas: m.notas }));
+      if (filasSup.length) {
+        const { error } = await supabase.from('odontogramas').upsert(filasSup, { onConflict: 'paciente_id,pieza,superficie,tipo', ignoreDuplicates: true });
+        if (error) throw error;
+      }
+      if (filasMarcas.length) {
+        const { error } = await supabase.from('odontograma_marcas').upsert(filasMarcas, { onConflict: 'paciente_id,pieza,marca,tipo', ignoreDuplicates: true });
+        if (error) throw error;
+      }
+    }
+    const { error } = await supabase.from('odontograma_meta').upsert(
+      { ...base, estado: 'borrador', creado_por: user.id },
+      { onConflict: 'paciente_id,tipo', ignoreDuplicates: true }
+    );
+    if (error) throw error;
+  }
+
+  /**
    * Registra un cambio en la auditoría append-only. Falla suave a propósito: un fallo
    * de auditoría no debe bloquear el autosave clínico. No se loguea el error (puede
    * traer valores de fila); solo un aviso estructural.

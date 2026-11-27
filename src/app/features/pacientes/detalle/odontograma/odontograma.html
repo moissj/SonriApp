@@ -13,13 +13,16 @@
     </div>
   </div>
 
+  <app-odontograma-ciclo [ciclo]="ciclo" [pacienteId]="pacienteId()" (elegirTipo)="cambiarTipo($event)" />
+
   @if (error()) {
     <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
   }
 
   @if (loading()) {
     <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse h-64"></div>
-  } @else {
+  } @else if (!ciclo.necesitaCrear()) {
+    @if (!ciclo.bloqueado()) {
     <!-- Toolbar de edición -->
     <div role="toolbar" aria-label="Herramientas del odontograma" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 space-y-1.5">
       @for (g of leyenda; track g.titulo) {
@@ -49,6 +52,7 @@
         </span>
       </div>
     </div>
+    }
 
     <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5">
       <svg

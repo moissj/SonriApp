@@ -5,7 +5,6 @@
 
   <select
     [id]="id"
-    [value]="seleccion()"
     [disabled]="isDisabled()"
     (change)="onSelectChange($any($event.target).value)"
     (blur)="onBlur()"
@@ -16,9 +15,10 @@
     [class.focus:border-sky-500]="!error"
     [class.focus:ring-sky-200]="!error"
   >
-    <option value="" disabled>Selecciona parentesco</option>
+    <!-- [selected] en cada opción (no [value] en el <select>): el binding [value] del select nativo no selecciona la opción de forma fiable -->
+    <option value="" disabled [selected]="!seleccion()">Selecciona parentesco</option>
     @for (op of opciones; track op) {
-      <option [value]="op">{{ op }}</option>
+      <option [value]="op" [selected]="op === seleccion()">{{ op }}</option>
     }
   </select>
 

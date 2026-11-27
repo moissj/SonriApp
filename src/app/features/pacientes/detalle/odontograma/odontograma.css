@@ -165,3 +165,29 @@
 .swatch.estado-corona { background: var(--odo-corona); }
 .swatch.estado-endodoncia { background: var(--odo-endo-realizada); }
 .swatch.estado-implante { background: var(--odo-implante); }
+
+/* --- Editor: toolbar, menú, x por símbolo --- */
+.odo-tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 1.75rem;
+  padding: 0 0.5rem;
+  font-size: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  color: #334155;
+  background: #fff;
+}
+.odo-tool:hover:not(:disabled) { background: #f8fafc; }
+.odo-tool:disabled { opacity: 0.4; }
+.odo-tool.activa { border: 2px solid #0f172a; font-weight: 700; background: #f1f5f9; }
+.odo-menu-item { display: block; width: 100%; text-align: left; padding: 0.4rem 0.9rem; font-size: 0.8rem; color: #334155; }
+.odo-menu-item:hover, .odo-menu-item:focus-visible { background: #f1f5f9; outline: none; }
+.diente-sel .tooth-num { text-decoration: underline; }
+.tooth-box-rect { cursor: pointer; }
+.tooth-box-rect:focus-visible { outline: 2px solid #0f172a; }
+.quitar-simbolo { opacity: 0; cursor: pointer; }
+.quitar-simbolo rect { fill: #fff; stroke: #64748b; stroke-width: 0.8; }
+.quitar-simbolo text { font-size: 7px; fill: #0f172a; font-weight: 700; }
+.tooth-box:hover .quitar-simbolo, .tooth-box:focus-within .quitar-simbolo, .quitar-simbolo:focus { opacity: 1; }

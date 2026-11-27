@@ -1,46 +1,44 @@
-import { Component, ChangeDetectionStrategy, inject, input, signal, computed, viewChild, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { OdontogramaService, PiezaOdontograma, EstadoDiente, SuperficieDiente, MarcaDiente } from '../../../../core/services/odontograma.service';
+import { Component, ChangeDetectionStrategy, inject, input, signal, computed, viewChild, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { OdontogramaService, PiezaOdontograma, SuperficieDiente, MarcaDiente, OdontogramaTipo } from '../../../../core/services/odontograma.service';
 import { ModalComponent } from '../../../../shared/components/modal/modal';
+import { ConfirmModalComponent } from '../../../../shared/components/confirm-modal/confirm-modal';
 import { agruparMarcasPorPieza } from '../../../../core/funciones/marcas-odontograma.funcion';
-import { hallazgosFill, hallazgosMarca, leyendaHallazgos, glifoDe } from './funciones/catalogo-hallazgos';
-import { aplicarToggle, conflictos } from './funciones/compatibilidad-hallazgos';
+import { hallazgosMarca, leyendaHallazgos, glifoDe } from './funciones/catalogo-hallazgos';
 import { vistaDePieza, VistaPieza } from './funciones/vista-marcas.funcion';
+import { EdicionOdontograma } from './funciones/edicion-odontograma';
 import * as geo from './funciones/geometria-odontograma.funcion';
-import { etiquetaZona, tituloSuperficie } from './funciones/etiquetas-odontograma.funcion';
+import { etiquetaZona } from './funciones/etiquetas-odontograma.funcion';
 
 @Component({
   selector: 'app-odontograma',
   standalone: true,
-  imports: [FormsModule, ModalComponent],
+  imports: [ModalComponent, ConfirmModalComponent],
   templateUrl: './odontograma.html',
   styleUrl: './odontograma.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OdontogramaComponent implements OnInit {
+export class OdontogramaComponent implements OnInit, OnDestroy {
   private readonly odontogramaService = inject(OdontogramaService);
 
   readonly pacienteId = input.required<string>();
+  readonly tipo = input<OdontogramaTipo>('inicial');
 
   readonly loading = signal(true);
-  readonly saving = signal(false);
   readonly error = signal<string | null>(null);
   /** Estado por superficie: clave `${pieza}:${superficie}` -> registro */
   private readonly superficiesMap = signal<Record<string, PiezaOdontograma>>({});
-
-  readonly selPieza = signal<string | null>(null);
-  readonly selSuperficie = signal<SuperficieDiente | null>(null);
-
-  readonly formEstado = signal<EstadoDiente>('sano');
-  readonly formNotas = signal<string>('');
-  /** Zoom: 1 = ajustado al ancho; >1 = ampliado con scroll (mejor toque en móvil) */
-  readonly zoom = signal(1);
-
-  private readonly modal = viewChild<ModalComponent>('modalSuperficie');
-  private readonly modalMarcas = viewChild<ModalComponent>('modalMarcas');
-
   /** Marcas nivel-diente: pieza -> marcas activas */
   readonly marcasPorPieza = signal<Map<string, MarcaDiente[]>>(new Map());
+
+  /** Estado del editor: herramienta, autosave, undo/redo, menú contextual y toast */
+  readonly ed = new EdicionOdontograma(
+    this.odontogramaService, () => this.pacienteId(), () => this.tipo(), this.superficiesMap, this.marcasPorPieza, (m) => this.error.set(m),
+  );
+
+  /** Zoom: 1 = ajustado al ancho; >1 = ampliado con scroll (mejor toque en móvil) */
+  readonly zoom = signal(1);
+  private readonly modalMarcas = viewChild<ModalComponent>('modalMarcas');
+  private readonly confirmDescartar = viewChild<ConfirmModalComponent>('confirmDescartar');
   readonly marcaPieza = signal<string | null>(null);
   readonly marcasSel = computed(() => this.marcasPorPieza().get(this.marcaPieza() ?? '') ?? []);
   /** Recuadro y figuras por pieza ya resueltos (evita crear arrays en el template) */
@@ -50,9 +48,8 @@ export class OdontogramaComponent implements OnInit {
     return out;
   });
 
-  /** Selector de superficie: solo fills del catálogo */
-  readonly estados = hallazgosFill().map((h) => ({ value: h.estadoEnum as EstadoDiente, label: h.label }));
   readonly hallazgosMarca = hallazgosMarca().map((h) => ({ ...h, glifo: glifoDe(h) }));
+  /** Leyenda y paleta de la toolbar (mismo catálogo agrupado) */
   readonly leyenda = leyendaHallazgos();
 
   /** Geometría protegida (constantes y paths) expuesta al template */
@@ -63,8 +60,13 @@ export class OdontogramaComponent implements OnInit {
   /** Ancho del SVG: 100% (ajustado) en zoom 1, o en píxeles al ampliar */
   readonly svgWidth = computed(() => (this.zoom() === 1 ? '100%' : `${geo.VIEW_WIDTH * this.zoom()}px`));
 
-  estadoDe(fdi: string, superficie: SuperficieDiente): EstadoDiente {
-    return this.superficiesMap()[`${fdi}:${superficie}`]?.estado ?? 'sano';
+  estadoDe(fdi: string, superficie: SuperficieDiente) {
+    return this.ed.estadoDe(fdi, superficie);
+  }
+
+  /** Resalta las superficies del diente seleccionado (la superficie no distingue: se marca la pieza entera). */
+  isSelected(fdi: string, _superficie: SuperficieDiente): boolean {
+    return this.ed.dienteSel() === fdi;
   }
 
   etiquetaZona(fdi: string, superficie: SuperficieDiente): string {
@@ -80,26 +82,25 @@ export class OdontogramaComponent implements OnInit {
     return null;
   }
 
-  isSelected(fdi: string, superficie: SuperficieDiente): boolean {
-    return this.selPieza() === fdi && this.selSuperficie() === superficie;
-  }
-
-  readonly tituloModal = computed(() => {
-    const p = this.selPieza();
-    const s = this.selSuperficie();
-    return p && s ? tituloSuperficie(p, s) : '';
-  });
-
   ngOnInit(): void {
     void this.load();
+  }
+
+  ngOnDestroy(): void {
+    this.ed.destroy();
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  onKey(e: KeyboardEvent): void {
+    this.ed.onKey(e);
   }
 
   private async load(): Promise<void> {
     this.loading.set(true);
     try {
       const [registros, marcas] = await Promise.all([
-        this.odontogramaService.getOdontograma(this.pacienteId()),
-        this.odontogramaService.getMarcas(this.pacienteId()),
+        this.odontogramaService.getOdontograma(this.pacienteId(), this.tipo()),
+        this.odontogramaService.getMarcas(this.pacienteId(), this.tipo()),
       ]);
       const map: Record<string, PiezaOdontograma> = {};
       for (const r of registros) map[`${r.pieza}:${r.superficie}`] = r;
@@ -114,40 +115,12 @@ export class OdontogramaComponent implements OnInit {
   }
 
   onSurfaceClick(fdi: string, superficie: SuperficieDiente): void {
-    const actual = this.superficiesMap()[`${fdi}:${superficie}`];
-    this.selPieza.set(fdi);
-    this.selSuperficie.set(superficie);
-    this.formEstado.set(actual?.estado ?? 'sano');
-    this.formNotas.set(actual?.notas ?? '');
-    this.modal()?.open();
+    void this.ed.clickZona(fdi, superficie);
   }
 
-  async save(): Promise<void> {
-    const pieza = this.selPieza();
-    const superficie = this.selSuperficie();
-    if (!pieza || !superficie) return;
-
-    this.saving.set(true);
-    this.error.set(null);
-    try {
-      const registro = await this.odontogramaService.saveSuperficie(
-        this.pacienteId(),
-        pieza,
-        superficie,
-        this.formEstado(),
-        this.formNotas().trim() || null
-      );
-      this.superficiesMap.update((prev) => ({ ...prev, [`${pieza}:${superficie}`]: registro }));
-      this.modal()?.close();
-    } catch (err) {
-      console.error('Error guardando superficie:', err);
-      this.error.set('No se pudo guardar el estado de la superficie.');
-    } finally {
-      this.saving.set(false);
-    }
-  }
-
-  onBoxClick(fdi: string): void {
+  /** Con herramienta de marca/goma actúa; sin ella abre el modal de marcas (fallback) */
+  async onBoxClick(fdi: string): Promise<void> {
+    if (await this.ed.clickDiente(fdi)) return;
     this.marcaPieza.set(fdi);
     this.modalMarcas()?.open();
   }
@@ -158,27 +131,23 @@ export class OdontogramaComponent implements OnInit {
 
   closeMarcas = (): void => this.modalMarcas()?.close();
 
-  /** Toggle optimista con reglas de compatibilidad; revierte todo si algún setMarca falla */
-  async toggleMarca(marca: MarcaDiente): Promise<void> {
+  toggleMarca(marca: MarcaDiente): void {
     const pieza = this.marcaPieza();
+    if (pieza) void this.ed.alternarMarca(pieza, marca);
+  }
+
+  /** Acción del menú contextual y cierre */
+  accionMenu(accion: 'sano' | 'limpiar' | 'ultimo'): void {
+    const pieza = this.ed.menu()?.pieza;
+    this.ed.menu.set(null);
     if (!pieza) return;
-    const previo = this.marcasPorPieza();
-    const actuales = previo.get(pieza) ?? [];
-    const activa = !actuales.includes(marca);
-    const quitar = activa ? conflictos(actuales, marca) : [];
-    this.marcasPorPieza.set(new Map(previo).set(pieza, aplicarToggle(actuales, marca)));
-    this.error.set(null);
-    try {
-      const id = this.pacienteId();
-      await Promise.all([
-        ...quitar.map((m) => this.odontogramaService.setMarca(id, pieza, m, false)),
-        this.odontogramaService.setMarca(id, pieza, marca, activa),
-      ]);
-    } catch (err) {
-      console.error('Error guardando marca:', err);
-      this.marcasPorPieza.set(previo);
-      this.error.set('No se pudo guardar la marca.');
-    }
+    if (accion === 'sano') void this.ed.marcarSano(pieza);
+    else if (accion === 'limpiar') void this.ed.limpiarDiente(pieza);
+    else void this.ed.quitarUltima(pieza);
+  }
+
+  pedirDescartar(): void {
+    this.confirmDescartar()?.open();
   }
 
   zoomIn(): void {
@@ -187,12 +156,5 @@ export class OdontogramaComponent implements OnInit {
 
   zoomOut(): void {
     this.zoom.update((z) => Math.max(1, z - 0.5));
-  }
-
-  closeModal = (): void => this.modal()?.close();
-
-  onModalClosed(): void {
-    this.selPieza.set(null);
-    this.selSuperficie.set(null);
   }
 }

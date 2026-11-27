@@ -3,7 +3,7 @@
     <div>
       <h3 class="text-base font-semibold text-gray-800">Odontograma</h3>
       <p class="text-xs text-gray-500 mt-0.5">
-        Toca una zona del diente: centro (oclusal/incisal), caras (anillo medio) o tercio cervical (aro exterior).
+        Elige un hallazgo y toca la zona (superficies) o el recuadro del diente. Goma (E), deshacer (Ctrl+Z), clic derecho para más opciones.
       </p>
     </div>
     <!-- Controles de zoom -->
@@ -20,6 +20,36 @@
   @if (loading()) {
     <div class="bg-white rounded-2xl border border-gray-100 p-6 animate-pulse h-64"></div>
   } @else {
+    <!-- Toolbar de edición -->
+    <div role="toolbar" aria-label="Herramientas del odontograma" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 space-y-1.5">
+      @for (g of leyenda; track g.titulo) {
+        <div class="flex flex-wrap items-center gap-1" role="group" [attr.aria-label]="g.titulo">
+          <span class="text-xxs font-semibold text-gray-500 uppercase w-28 shrink-0">{{ g.titulo }}</span>
+          @for (i of g.items; track i.h.id) {
+            <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === i.h.id" [attr.aria-pressed]="ed.herramienta() === i.h.id" (click)="ed.elegir(i.h.id)">
+              @if (i.h.estadoEnum) { <span [attr.class]="'swatch estado-' + i.h.estadoEnum"></span> }
+              @if (i.glifo) { <span [attr.class]="'font-bold tk-' + i.h.token">{{ i.glifo }}</span> }
+              {{ i.h.label }}
+            </button>
+          }
+        </div>
+      }
+      <div class="flex flex-wrap items-center gap-1 border-t border-gray-100 pt-1.5" role="group" aria-label="Acciones">
+        <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === 'goma'" [attr.aria-pressed]="ed.herramienta() === 'goma'" (click)="ed.elegir('goma')">⌫ Goma (E)</button>
+        <button type="button" class="odo-tool" [disabled]="!ed.dienteSel()" (click)="ed.limpiarDiente(ed.dienteSel()!)">Limpiar diente</button>
+        <button type="button" class="odo-tool" [disabled]="!ed.puedeUndo()" (click)="ed.deshacer()" aria-label="Deshacer">↶ Deshacer</button>
+        <button type="button" class="odo-tool" [disabled]="!ed.puedeRedo()" (click)="ed.rehacer()" aria-label="Rehacer">↷ Rehacer</button>
+        <button type="button" class="odo-tool" [disabled]="!ed.puedeUndo()" (click)="pedirDescartar()">Descartar cambios</button>
+        <span class="ml-auto text-xs text-gray-500" role="status" aria-live="polite">
+          @switch (ed.estadoGuardado()) {
+            @case ('guardando') { Guardando… }
+            @case ('guardado') { Guardado {{ ed.horaGuardado() }} }
+            @case ('error') { <span class="text-red-700 font-semibold">Error al guardar</span> }
+          }
+        </span>
+      </div>
+    </div>
+
     <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5">
       <svg
         [attr.viewBox]="'0 0 ' + geo.VIEW_WIDTH + ' ' + geo.VIEW_HEIGHT"
@@ -40,7 +70,7 @@
         <line x1="6" [attr.y1]="geo.DIVIDER_Y" [attr.x2]="geo.VIEW_WIDTH - 6" [attr.y2]="geo.DIVIDER_Y" class="quad-divider" />
 
         @for (t of geo.DIENTES; track t.fdi) {
-          <g [attr.transform]="'translate(' + t.cx + ',' + t.cy + ')'" class="tooth-group">
+          <g [attr.transform]="'translate(' + t.cx + ',' + t.cy + ')'" class="tooth-group" [class.diente-sel]="ed.dienteSel() === t.fdi" (contextmenu)="ed.abrirMenu($event, t.fdi)">
             <text [attr.y]="geo.NUM_DY" class="tooth-num" text-anchor="middle">{{ t.fdi }}</text>
 
             @if (piezaAusente(t.fdi); as aus) {
@@ -87,13 +117,15 @@
             <g
               class="tooth-box"
               transform="translate(0,32)"
-              role="button"
-              tabindex="0"
-              [attr.aria-label]="'Marcas de la pieza ' + t.fdi + ': ' + (vistaPorPieza().get(t.fdi)?.titulo || 'sin marcas')"
+              role="group"
               (click)="onBoxClick(t.fdi)"
-              (keydown.enter)="onBoxClick(t.fdi)"
             >
-              <rect x="-22" y="0" width="44" height="16" rx="2" fill="#fff" stroke="#9ca3af" stroke-width="1" />
+              <rect
+                x="-22" y="0" width="44" height="16" rx="2" fill="#fff" stroke="#9ca3af" stroke-width="1"
+                class="tooth-box-rect" role="button" tabindex="0"
+                [attr.aria-label]="'Marcas de la pieza ' + t.fdi + ': ' + (vistaPorPieza().get(t.fdi)?.titulo || 'sin marcas')"
+                (keydown.enter)="onBoxClick(t.fdi)"
+              />
               @for (m of vistaPorPieza().get(t.fdi)?.recuadro ?? []; track m.id) {
                 @if (m.simbolo) {
                   <text
@@ -111,6 +143,16 @@
                     [attr.class]="'forma-recuadro tk-' + m.token"
                   ><title>{{ m.label }}</title></line>
                 }
+                <g
+                  class="quitar-simbolo" role="button" tabindex="0"
+                  [attr.transform]="'translate(' + (m.x + 6) + ',3)'"
+                  [attr.aria-label]="'Quitar ' + m.label"
+                  (click)="$event.stopPropagation(); ed.quitarHallazgo(t.fdi, m.id)"
+                  (keydown.enter)="$event.stopPropagation(); ed.quitarHallazgo(t.fdi, m.id)"
+                >
+                  <rect x="-3.5" y="-3.5" width="7" height="7" rx="3" />
+                  <text y="2.5" text-anchor="middle">×</text>
+                </g>
               }
             </g>
           </g>
@@ -156,72 +198,30 @@
   </div>
 </app-modal>
 
-<!-- Modal de registro por superficie -->
-<app-modal #modalSuperficie [title]="tituloModal()" (closed)="onModalClosed()">
-  <div class="space-y-4">
-    <div>
-      <label class="block text-xs font-semibold text-gray-600 mb-2">Estado</label>
-      <div class="grid grid-cols-2 gap-2">
-        @for (e of estados; track e.value) {
-          <button
-            type="button"
-            (click)="formEstado.set(e.value)"
-            [class.ring-2]="formEstado() === e.value"
-            [class.ring-sky-500]="formEstado() === e.value"
-            [class.border-sky-300]="formEstado() === e.value"
-            class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-all"
-          >
-            <span [attr.class]="'swatch estado-' + e.value"></span>
-            {{ e.label }}
-          </button>
-        }
-        <button
-          type="button"
-          (click)="formEstado.set('sano')"
-          [class.ring-2]="formEstado() === 'sano'"
-          [class.ring-sky-500]="formEstado() === 'sano'"
-          class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-all"
-        >
-          <span class="swatch estado-sano"></span>
-          Sin hallazgo
-        </button>
-      </div>
-      @if (formEstado() === 'ausente') {
-        <p class="text-xxs text-gray-400 mt-2">Marcar "Ausente" aplica a toda la pieza y desactiva las demás zonas.</p>
-      }
-    </div>
-
-    <div>
-      <label class="block text-xs font-semibold text-gray-600 mb-1">Notas</label>
-      <textarea
-        [ngModel]="formNotas()"
-        (ngModelChange)="formNotas.set($event)"
-        rows="3"
-        placeholder="Observaciones sobre esta superficie..."
-        class="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm resize-y focus:outline-none focus:ring-2 focus:ring-sky-100 focus:border-sky-500"
-      ></textarea>
-    </div>
-
-    <div class="flex justify-end gap-3 pt-1">
-      <button type="button" (click)="closeModal()" class="text-sm font-semibold text-gray-500 hover:text-gray-700 px-3 py-2">
-        Cancelar
-      </button>
-      <button
-        type="button"
-        (click)="save()"
-        [disabled]="saving()"
-        class="inline-flex items-center gap-2 bg-sky-600 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-sky-700 transition-colors shadow-sm disabled:opacity-40"
-      >
-        @if (saving()) {
-          <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
-          </svg>
-          Guardando...
-        } @else {
-          Guardar
-        }
-      </button>
-    </div>
+<!-- Menú contextual propio (no nativo) -->
+@if (ed.menu(); as m) {
+  <div class="fixed inset-0 z-40" (click)="ed.menu.set(null)" (contextmenu)="$event.preventDefault(); ed.menu.set(null)"></div>
+  <div role="menu" [attr.aria-label]="'Acciones de la pieza ' + m.pieza" class="fixed z-50 bg-white rounded-xl border border-gray-200 shadow-lg py-1 min-w-40" [style.left.px]="m.x" [style.top.px]="m.y">
+    <button id="odo-menu-1" role="menuitem" type="button" class="odo-menu-item" (click)="accionMenu('sano')">Marcar sano</button>
+    <button role="menuitem" type="button" class="odo-menu-item" (click)="accionMenu('limpiar')">Limpiar diente</button>
+    <button role="menuitem" type="button" class="odo-menu-item" (click)="accionMenu('ultimo')">Quitar último</button>
   </div>
-</app-modal>
+}
+
+<!-- Toast de eliminación -->
+<div class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50" role="status" aria-live="polite">
+  @if (ed.toast(); as texto) {
+    <div class="bg-neutral-900 text-white text-sm rounded-xl px-4 py-2 shadow-lg flex items-center gap-3">
+      {{ texto }} ·
+      <button type="button" class="font-semibold underline" (click)="ed.deshacer()">Deshacer</button>
+    </div>
+  }
+</div>
+
+<app-confirm-modal
+  #confirmDescartar
+  title="Descartar cambios"
+  message="Se deshará todo lo editado en esta sesión. ¿Continuar?"
+  confirmText="Descartar"
+  (confirm)="ed.descartar()"
+/>

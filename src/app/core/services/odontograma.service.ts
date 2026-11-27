@@ -24,7 +24,18 @@ export type MarcaDiente =
   | 'erosion';
 
 export type OdontogramaTipo = 'inicial' | 'final';
-export type OdontogramaCierre = 'borrador' | 'cerrado';
+export type AccionOdontograma = 'agrega' | 'quita';
+
+export interface CambioAuditoria {
+  pieza: string;
+  hallazgoId: string;
+  accion: AccionOdontograma;
+  tipo?: OdontogramaTipo;
+  superficie?: string;
+  detalle?: unknown;
+}
+
+export type OdontogramaCierre ='borrador' | 'cerrado';
 
 export interface OdontogramaMeta {
   id: string;
@@ -236,5 +247,27 @@ export class OdontogramaService {
       .eq('paciente_id', pacienteId)
       .eq('tipo', tipo);
     if (error) throw error;
+  }
+
+  /**
+   * Registra un cambio en la auditoría append-only. Falla suave a propósito: un fallo
+   * de auditoría no debe bloquear el autosave clínico. No se loguea el error (puede
+   * traer valores de fila); solo un aviso estructural.
+   */
+  async registrarCambio(pacienteId: string, cambio: CambioAuditoria): Promise<void> {
+    const user = this.auth.user();
+    if (!user) return;
+    const { error } = await supabase.from('odontograma_auditoria').insert({
+      odontologo_id: user.id,
+      creado_por: user.id,
+      paciente_id: pacienteId,
+      tipo: cambio.tipo ?? 'inicial',
+      pieza: cambio.pieza,
+      hallazgo_id: cambio.hallazgoId,
+      accion: cambio.accion,
+      superficie: cambio.superficie ?? null,
+      detalle: cambio.detalle ?? null,
+    });
+    if (error) console.warn('odontograma: no se pudo registrar auditoría', error.code);
   }
 }

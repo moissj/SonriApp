@@ -1,5 +1,20 @@
 :host {
   display: block;
+  /* Tokens odo-* (espejo de tailwind.config.js) */
+  --odo-caries: #dc2626;
+  --odo-desadaptada: #f97316;
+  --odo-resina: #38bdf8;
+  --odo-amalgama: #1e3a8a;
+  --odo-sano: #16a34a;
+  --odo-corona: #ca8a04;
+  --odo-negro: #0f172a;
+  --odo-rojo: #dc2626;
+  --odo-azul: #1d4ed8;
+  --odo-teal: #14b8a6;
+  --odo-endo-realizada: #16a34a;
+  --odo-endo-indicada: #dc2626;
+  --odo-implante: #10b981;
+  --odo-ausente: #cbd5e1;
 }
 
 .odontograma-wrap {
@@ -57,27 +72,76 @@
   stroke-dasharray: 3 4;
 }
 
-/* --- Colores por estado (paleta coherente con la app) --- */
+/* --- Colores por estado (tokens odo-*) --- */
 .estado-sano {
   fill: #ffffff;
 }
 .estado-caries {
-  fill: #ef4444; /* rojo */
+  fill: var(--odo-caries);
+}
+.estado-resina {
+  fill: var(--odo-resina);
+}
+.estado-amalgama {
+  fill: var(--odo-amalgama);
+}
+.estado-obt_desadaptada {
+  fill: url(#tramaDesadaptada);
 }
 .estado-obturado {
-  fill: #0ea5e9; /* celeste (marca) */
+  fill: var(--odo-resina); /* legado: migrado a resina */
 }
 .estado-ausente {
-  fill: #cbd5e1; /* gris */
+  fill: var(--odo-ausente);
 }
 .estado-corona {
-  fill: #f59e0b; /* ámbar/dorado */
+  fill: var(--odo-corona); /* legado: ahora es marca */
 }
 .estado-endodoncia {
-  fill: #a855f7; /* púrpura */
+  fill: var(--odo-endo-realizada); /* legado: ahora es marca */
 }
 .estado-implante {
-  fill: #10b981; /* esmeralda */
+  fill: var(--odo-implante);
+}
+
+/* Trama diagonal de obturación desadaptada (<pattern id="tramaDesadaptada">) */
+.trama-base {
+  fill: var(--odo-desadaptada);
+}
+.trama-linea {
+  stroke: #ffffff;
+  stroke-width: 1.5;
+}
+
+/* Color por token de hallazgo (letras, figuras y glifos) */
+.tk-odo-caries { color: var(--odo-caries); fill: var(--odo-caries); }
+.tk-odo-desadaptada { color: var(--odo-desadaptada); fill: var(--odo-desadaptada); }
+.tk-odo-resina { color: var(--odo-resina); fill: var(--odo-resina); }
+.tk-odo-amalgama { color: var(--odo-amalgama); fill: var(--odo-amalgama); }
+.tk-odo-sano { color: var(--odo-sano); fill: var(--odo-sano); }
+.tk-odo-corona { color: var(--odo-corona); fill: var(--odo-corona); }
+.tk-odo-negro { color: var(--odo-negro); fill: var(--odo-negro); }
+.tk-odo-rojo { color: var(--odo-rojo); fill: var(--odo-rojo); }
+.tk-odo-azul { color: var(--odo-azul); fill: var(--odo-azul); }
+.tk-odo-teal { color: var(--odo-teal); fill: var(--odo-teal); }
+.tk-odo-endo-realizada { color: var(--odo-endo-realizada); fill: var(--odo-endo-realizada); }
+.tk-odo-endo-indicada { color: var(--odo-endo-indicada); fill: var(--odo-endo-indicada); }
+.tk-odo-implante { color: var(--odo-implante); fill: var(--odo-implante); }
+.tk-odo-ausente { color: var(--odo-ausente); fill: var(--odo-ausente); }
+
+/* Figura de endodoncia (ovalito): relleno translúcido + borde del token */
+.figura-ovalito {
+  fill-opacity: 0.35;
+  stroke: currentColor;
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+/* Formas del recuadro sin letra */
+.forma-recuadro {
+  stroke: currentColor;
+  stroke-linecap: round;
+  fill: none;
 }
 
 /* --- Muestras de color (leyenda y formulario) --- */
@@ -89,24 +153,15 @@
   border: 1px solid #cbd5e1;
   flex-shrink: 0;
 }
-.swatch.estado-sano {
-  background: #ffffff;
+.swatch.estado-sano { background: #ffffff; }
+.swatch.estado-caries { background: var(--odo-caries); }
+.swatch.estado-resina { background: var(--odo-resina); }
+.swatch.estado-amalgama { background: var(--odo-amalgama); }
+.swatch.estado-obt_desadaptada {
+  background: repeating-linear-gradient(45deg, var(--odo-desadaptada) 0 3px, #ffffff 3px 5px);
 }
-.swatch.estado-caries {
-  background: #ef4444;
-}
-.swatch.estado-obturado {
-  background: #0ea5e9;
-}
-.swatch.estado-ausente {
-  background: #cbd5e1;
-}
-.swatch.estado-corona {
-  background: #f59e0b;
-}
-.swatch.estado-endodoncia {
-  background: #a855f7;
-}
-.swatch.estado-implante {
-  background: #10b981;
-}
+.swatch.estado-obturado { background: var(--odo-resina); }
+.swatch.estado-ausente { background: var(--odo-ausente); }
+.swatch.estado-corona { background: var(--odo-corona); }
+.swatch.estado-endodoncia { background: var(--odo-endo-realizada); }
+.swatch.estado-implante { background: var(--odo-implante); }

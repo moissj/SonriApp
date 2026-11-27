@@ -24,6 +24,11 @@ module.exports = {
         info:    { 50: '#F0F9FF', 600: '#0284C7', 700: '#0369A1', DEFAULT: '#0284C7' },
         // Estado de cita 'en atención' (violeta propio, no usar violet de Tailwind).
         'cita-atencion': '#7C3AED',
+        // Odontograma (plan 26): espejo de las variables CSS --odo-* de odontograma.css.
+        'odo-caries': '#DC2626', 'odo-desadaptada': '#F97316', 'odo-resina': '#38BDF8', 'odo-amalgama': '#1E3A8A',
+        'odo-sano': '#16A34A', 'odo-corona': '#CA8A04', 'odo-negro': '#0F172A', 'odo-rojo': '#DC2626',
+        'odo-azul': '#1D4ED8', 'odo-teal': '#14B8A6', 'odo-endo-realizada': '#16A34A', 'odo-endo-indicada': '#DC2626',
+        'odo-implante': '#10B981', 'odo-ausente': '#CBD5E1',
         // Neutros: se usa slate de Tailwind. Roles: texto slate-900 #0F172A,
         // texto secundario slate-600 #475569 (mínimo slate-500 #64748B sobre blanco),
         // fondo slate-50 #F8FAFC, superficie #FFFFFF, borde slate-200 #E2E8F0.

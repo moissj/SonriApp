@@ -1,0 +1,94 @@
+{
+  "plan": "26_odontograma-overhaul",
+  "version": 1,
+  "fecha": "2026-11-26",
+  "alcance": "Overhaul del odontograma (modulo PROTEGIDO, regla clinica/odontograma.md): nomenclatura por recuadro, fills solo para 4 hallazgos, figura de endodoncia, edicion (borrador/toggle/deshacer), odontograma inicial/final, leyenda desde catalogo, PDF. ADITIVO: no se pierde ningun dato guardado; FDI, cuadrantes, 3 zonas concentricas, denticion temporal y piezaAusente INTACTOS. Reutiliza plan 25 (tabla odontograma_marcas, catalogo-marcas, tooth-box).",
+  "decisiones_usuario": {
+    "endodoncia": "Figura OVALITO dentro del diente: ROJO = endodoncia por realizar (endo_indicada); VERDE = endodoncia realizada (endo_realizada). Se descarta morado/lobito.",
+    "ausente": "Conservar el visual actual (circulo + X sobre el diente) Y ADEMAS marca 'A' negra en el recuadro.",
+    "obturado_viejo": "Migrar estado 'obturado' existente -> 'resina' (azul claro).",
+    "ritmo": "Plan completo de corrido (un OK). Prod (migracion) y push al final con OK explicito."
+  },
+  "representaciones": "Cada hallazgo tiene una de: 'fill' (relleno de zona de superficie, tabla odontogramas), 'figura' (figura dentro del diente, p.ej. ovalito endodoncia), 'recuadro' (letra/simbolo en el tooth-box, tabla odontograma_marcas). El color NUNCA es la unica señal: forma/letra + tooltip + leyenda.",
+  "tokens_color": {
+    "odo-caries": "#DC2626", "odo-desadaptada": "#F97316", "odo-resina": "#38BDF8", "odo-amalgama": "#1E3A8A",
+    "odo-sano": "#16A34A", "odo-corona": "#CA8A04", "odo-negro": "#0F172A", "odo-rojo": "#DC2626",
+    "odo-azul": "#1D4ED8", "odo-teal": "#14B8A6", "odo-endo-realizada": "#16A34A", "odo-endo-indicada": "#DC2626",
+    "odo-implante": "#10B981", "odo-ausente": "#CBD5E1",
+    "destino": "tailwind.config.js (extend.colors) + variables CSS en odontograma.css; una sola fuente."
+  },
+  "catalogo_hallazgos": [
+    { "id": "caries", "rep": "fill", "token": "odo-caries", "label": "Caries / Obt. temporal", "estado_enum": "caries" },
+    { "id": "obt_desadaptada", "rep": "fill", "trama": "diagonal", "token": "odo-desadaptada", "label": "Obturacion desadaptada", "estado_enum": "obt_desadaptada", "nuevo": true },
+    { "id": "resina", "rep": "fill", "token": "odo-resina", "label": "Obturado en resina/ionomero", "estado_enum": "resina", "nuevo": true },
+    { "id": "amalgama", "rep": "fill", "token": "odo-amalgama", "label": "Obturado en amalgama", "estado_enum": "amalgama", "nuevo": true },
+    { "id": "ausente", "rep": "fill+recuadro", "token": "odo-negro", "simbolo": "A", "label": "Ausente", "estado_enum": "ausente", "marca_enum": "ausente", "nota": "conserva circulo+X y agrega 'A' negra" },
+    { "id": "implante", "rep": "fill", "token": "odo-implante", "label": "Implante", "estado_enum": "implante", "nota": "sin cambios" },
+    { "id": "endo_realizada", "rep": "figura", "forma": "ovalito", "token": "odo-endo-realizada", "label": "Endodoncia realizada", "marca_enum": "endo_realizada", "nuevo": true },
+    { "id": "endo_indicada", "rep": "figura", "forma": "ovalito", "token": "odo-endo-indicada", "label": "Endodoncia a realizar", "marca_enum": "endo_indicada", "nuevo": true },
+    { "id": "sano", "rep": "recuadro", "simbolo": "S", "token": "odo-sano", "label": "Diente sano", "marca_enum": "sano", "nuevo": true, "excluyente": true },
+    { "id": "corona", "rep": "recuadro", "simbolo": "C", "token": "odo-corona", "label": "Corona", "marca_enum": "corona_acero", "nota": "reusa corona_acero del plan 25; recolor a ambar #CA8A04. PENDIENTE split adaptada/acero vs desadaptada." },
+    { "id": "sin_erupcionar", "rep": "recuadro", "simbolo": "linea-horizontal", "token": "odo-negro", "label": "Sin erupcionar", "marca_enum": "sin_erupcionar", "nuevo": true },
+    { "id": "resto_radicular", "rep": "recuadro", "simbolo": "R", "token": "odo-rojo", "label": "Resto radicular", "marca_enum": "resto_radicular", "nuevo": true },
+    { "id": "exodoncia_indicada", "rep": "recuadro", "simbolo": "X", "token": "odo-rojo", "label": "Exodoncia simple indicada", "marca_enum": "exodoncia_indicada", "nuevo": true },
+    { "id": "sellante_indicado", "rep": "recuadro", "simbolo": "S", "token": "odo-rojo", "label": "Sellante indicado", "marca_enum": "sellante_indicado", "nuevo": true, "nota": "S roja: distinta de sano (S verde) y superficie_sellada (S teal) por color+tooltip" },
+    { "id": "nucleo", "rep": "recuadro", "simbolo": "N", "token": "odo-azul", "label": "Nucleo", "marca_enum": "nucleo", "nota": "existe; recolor a #1D4ED8" },
+    { "id": "pontico", "rep": "recuadro", "simbolo": "O", "token": "odo-rojo", "label": "Pontico", "marca_enum": "pontico", "nuevo": true },
+    { "id": "protesis_removible", "rep": "recuadro", "simbolo": "barra-gruesa", "token": "odo-azul", "label": "Protesis removible", "marca_enum": "protesis_removible", "nuevo": true },
+    { "id": "erosion", "rep": "recuadro", "simbolo": "E", "token": "odo-rojo", "label": "Erosion", "marca_enum": "erosion", "nuevo": true },
+    { "id": "incluido_semi", "rep": "recuadro", "simbolo": "asterisco", "token": "odo-rojo", "label": "Incluido / Semiincluido", "marca_enum": "incluido_semi", "nota": "existe (plan 25 lo dibuja 'X' verde). PENDIENTE confirmar: pasar a asterisco rojo." },
+    { "id": "obt_temporal", "rep": "recuadro", "simbolo": "OT", "token": "odo-rojo", "label": "Obturacion temporal", "marca_enum": "obt_temporal", "nota": "existe" },
+    { "id": "superficie_sellada", "rep": "recuadro", "simbolo": "S", "token": "odo-teal", "label": "Superficie sellada", "marca_enum": "superficie_sellada", "nota": "existe, sin cambios" }
+  ],
+  "compatibilidad": {
+    "sano_excluyente": "al agregar cualquier hallazgo a un diente 'sano' se retira 'sano' (con deshacer); al marcar 'sano' pide confirmacion si hay otros.",
+    "ausente_excluyente_con": ["fills", "corona", "endo_realizada", "endo_indicada", "sellante_indicado", "nucleo", "sano"],
+    "ausente_compatible_con": ["implante", "pontico", "protesis_removible"],
+    "fill_por_zona": "un relleno por zona (centro/cada cara/cervical); elegir otro reemplaza (con deshacer).",
+    "simbolos_recuadro": "coexisten sin duplicar el mismo simbolo."
+  },
+  "modelo_datos": {
+    "principio": "ADITIVO. Ampliar enums (ALTER TYPE ADD VALUE, idempotente con guard), ampliar unique con 'tipo', tabla meta nueva para cierre. No borrar enum values. Migracion de datos clinicos REVERSIBLE y con reporte.",
+    "estado_diente_enum_add": ["obt_desadaptada", "resina", "amalgama"],
+    "marca_diente_enum_add": ["sano", "endo_realizada", "endo_indicada", "sin_erupcionar", "ausente", "resto_radicular", "exodoncia_indicada", "sellante_indicado", "pontico", "protesis_removible", "erosion"],
+    "tipo_enum_nuevo": "odontograma_tipo_enum('inicial','final')",
+    "cierre_enum_nuevo": "odontograma_cierre_enum('borrador','cerrado')",
+    "alter_odontogramas": "ADD COLUMN tipo odontograma_tipo_enum NOT NULL DEFAULT 'inicial'; drop unique(paciente_id,pieza,superficie); add unique(paciente_id,pieza,superficie,tipo). Agregar is_cuenta_activa() a policies insert/update/delete (hoy solo select lo tiene).",
+    "alter_odontograma_marcas": "ADD COLUMN tipo odontograma_tipo_enum NOT NULL DEFAULT 'inicial'; drop unique(paciente_id,pieza,marca); add unique(paciente_id,pieza,marca,tipo).",
+    "tabla_meta_nueva": "public.odontograma_meta (id uuid pk, odontologo_id uuid not null -> profiles, paciente_id uuid not null -> pacientes cascade, tipo odontograma_tipo_enum not null, estado odontograma_cierre_enum not null default 'borrador', fecha date not null default current_date, creado_por uuid, cerrado_en timestamptz, created_at, updated_at, unique(paciente_id,tipo)); RLS fail-closed (odontologo_id=auth.uid() + is_cuenta_activa en select).",
+    "historia_clinica_id": "OMITIDO (simplificacion): historia_clinica_inicial es 1:1 con paciente; key por paciente_id+tipo equivale a 1 inicial+1 final por historia. Dejar nota para multi-ciclo futuro.",
+    "mapeo_datos_existentes": [
+      "estado 'obturado' -> UPDATE a 'resina'.",
+      "estado 'sano' -> INSERT marca 'sano' (tipo inicial) para esa pieza y DELETE la fila de superficie 'sano'. (sano es blanco/implicito).",
+      "estado 'corona' -> INSERT marca 'corona_acero' (tipo inicial) y DELETE filas de superficie 'corona'.",
+      "estado 'endodoncia' -> INSERT marca 'endo_realizada' (ovalito verde) y DELETE filas de superficie 'endodoncia'.",
+      "estado 'ausente' -> conservar filas (X) e INSERT marca 'ausente' ('A') por pieza.",
+      "estado 'caries' / 'implante' -> sin cambio (solo recolor en CSS).",
+      "Todas las filas existentes reciben tipo='inicial' por el DEFAULT.",
+      "REPORTE de migracion: contar filas transformadas por tipo. Cualquier estado/marca sin equivalente se conserva (no borrar) + se reporta."
+    ],
+    "reversibilidad": "La migracion de datos (sano/corona/endodoncia -> marca + delete surface) debe poder revertirse; incluir en el mismo archivo un comentario con el UPDATE/INSERT inverso o un respaldo (CREATE TABLE ..._backup AS SELECT) antes de borrar. Requerido por supabase/migraciones-flujo + historia-clinica-integridad."
+  },
+  "fases": {
+    "F1_catalogo_tokens": { "owner": "cliente-web", "objetivo": "CatalogoHallazgos TS (fuente unica: id, rep, simbolo, token, label, enum) + tokens odo-* en tailwind.config.js y odontograma.css. Leyenda y toolbar se generaran de aqui. +spec del catalogo." },
+    "F2_datos": { "owner": "capa-datos", "objetivo": "Migracion idempotente: ampliar enums, tipo/meta, unique, RLS (is_cuenta_activa en odontogramas), mapeo de datos existentes con reporte+respaldo. Ampliar odontograma.service.ts (tipos EstadoDiente/MarcaDiente nuevos; getOdontograma/getMarcas/save con 'tipo'; getMeta/cerrar/reabrir). +spec de mapeo." },
+    "F3_recuadro_fills_figura": { "owner": "cliente-web", "objetivo": "SVG: fills de las 4 (recolor + trama desadaptada), figura ovalito endodoncia (rojo/verde) dentro del diente, recuadro con todas las marcas nuevas (letras/simbolos) desde catalogo; reglas de compatibilidad; tests de mapeo marca/estado->render. Conservar 6 superficies/FDI/piezaAusente." },
+    "F4_edicion": { "owner": "cliente-web", "objetivo": "Herramienta activa + borrador (E/Supr) + toggle + 'x' por simbolo + limpiar diente + descartar + deshacer/rehacer (>=50, Ctrl+Z/Shift+Z) + menu contextual + autosave con indicador + auditoria. Esc = solo seleccion." },
+    "F5_inicial_final": { "owner": "cliente-web", "objetivo": "Segmentado Inicial|Final + crear final (copiar/blanco) + cerrar/reabrir con motivo (meta + auditoria) + comparar (lado a lado, dientes cambiados, resumen COP/ceo) + vinculo hallazgos indicados -> presupuesto + miniaturas/PDF (sin window.print prohibido? usar impresion del navegador existente del modulo consentimientos como referencia)." },
+    "F6_leyenda_pdf_a11y": { "owner": "cliente-web", "objetivo": "Leyenda estilo papel (4 col) generada del catalogo; toolbar; export PDF (inicial+final con fecha y leyenda); pulido movil (recuadro como insignia + edicion en panel) y accesibilidad AA/teclado/aria." }
+  },
+  "protecciones": [
+    "clinica/odontograma.md: plan dedicado, aditivo, tests unit+integracion de mapeo; NO tocar FDI/cuadrantes/3 zonas/temporal/piezaAusente; solo recuadro+figuras+viewHeight.",
+    "multi-consultorio-alcance + rls-y-seguridad: RLS fail-closed; añadir is_cuenta_activa() a insert/update/delete de odontogramas.",
+    "historia-clinica-integridad: odontograma cerrado no se edita; reabrir exige motivo auditado; migracion reversible/con respaldo.",
+    "datos-sensibles-salud: cero PII en logs/tests; datos sinteticos.",
+    "codigo-limpio: archivos <=200 lineas (odontograma.ts ya ~338; F3+ exigiran extraer a funciones/)."
+  ],
+  "pendientes_confirmar": [
+    "incluido_semi: hoy 'X' verde (plan 25) vs dictado 'asterisco rojo'. Mantener verde hasta confirmar.",
+    "corona split adaptada/acero (C azul) vs desadaptada (C roja): dejar catalogo preparado, no implementar.",
+    "PDF: window.print() esta bloqueado en artifacts pero la app corre en navegador real; usar el patron de impresion de consentimientos."
+  ],
+  "gates": ["npx tsc --noEmit -p tsconfig.app.json", "npm run build", "npm test -- --watch=false", "node tools/agentes/sincronizar.mjs --check"],
+  "diferido_prod": "Aplicar migracion a prod (BD viva) y push: requieren OK explicito del usuario al final."
+}

@@ -3,13 +3,40 @@ import { supabase } from '../supabase.client';
 import { AuthService } from './auth.service';
 import { hoyBogota } from '../funciones/fecha-bogota.funcion';
 import { filaAMarca } from '../funciones/marcas-odontograma.funcion';
+import { filaAMeta } from '../funciones/meta-odontograma.funcion';
 
 export type MarcaDiente =
   | 'obt_temporal'
   | 'incluido_semi'
   | 'superficie_sellada'
   | 'corona_acero'
-  | 'nucleo';
+  | 'nucleo'
+  | 'sano'
+  | 'endo_realizada'
+  | 'endo_indicada'
+  | 'sin_erupcionar'
+  | 'ausente'
+  | 'resto_radicular'
+  | 'exodoncia_indicada'
+  | 'sellante_indicado'
+  | 'pontico'
+  | 'protesis_removible'
+  | 'erosion';
+
+export type OdontogramaTipo = 'inicial' | 'final';
+export type OdontogramaCierre = 'borrador' | 'cerrado';
+
+export interface OdontogramaMeta {
+  id: string;
+  odontologo_id: string;
+  paciente_id: string;
+  tipo: OdontogramaTipo;
+  estado: OdontogramaCierre;
+  fecha: string;
+  creado_por: string | null;
+  cerrado_en: string | null;
+  notas: string | null;
+}
 
 export interface MarcaOdontograma {
   id: string;
@@ -29,7 +56,10 @@ export type EstadoDiente =
   | 'ausente'
   | 'corona'
   | 'endodoncia'
-  | 'implante';
+  | 'implante'
+  | 'obt_desadaptada'
+  | 'resina'
+  | 'amalgama';
 
 /** Superficie/tercio de una pieza dental */
 export type SuperficieDiente =
@@ -60,7 +90,7 @@ export class OdontogramaService {
   private readonly auth = inject(AuthService);
 
   /** Registros del odontograma de un paciente */
-  async getOdontograma(pacienteId: string): Promise<PiezaOdontograma[]> {
+  async getOdontograma(pacienteId: string, tipo: OdontogramaTipo = 'inicial'): Promise<PiezaOdontograma[]> {
     const user = this.auth.user();
     if (!user) return [];
 
@@ -68,7 +98,8 @@ export class OdontogramaService {
       .from('odontogramas')
       .select('*')
       .eq('odontologo_id', user.id)
-      .eq('paciente_id', pacienteId);
+      .eq('paciente_id', pacienteId)
+      .eq('tipo', tipo);
 
     if (error) throw error;
     return (data ?? []) as PiezaOdontograma[];
@@ -76,14 +107,15 @@ export class OdontogramaService {
 
   /**
    * Guarda (upsert) el estado de una superficie de una pieza. Mantiene un
-   * único registro por (paciente, pieza, superficie) con la fecha de cambio.
+   * único registro por (paciente, pieza, superficie, tipo) con la fecha de cambio.
    */
   async saveSuperficie(
     pacienteId: string,
     pieza: string,
     superficie: SuperficieDiente,
     estado: EstadoDiente,
-    notas: string | null
+    notas: string | null,
+    tipo: OdontogramaTipo = 'inicial'
   ): Promise<PiezaOdontograma> {
     const user = this.auth.user();
     if (!user) throw new Error('No hay usuario autenticado.');
@@ -96,12 +128,13 @@ export class OdontogramaService {
           paciente_id: pacienteId,
           pieza,
           superficie,
+          tipo,
           estado,
           notas,
-          fecha: new Date().toISOString().split('T')[0],
+          fecha: hoyBogota(),
           updated_at: new Date().toISOString(),
         },
-        { onConflict: 'paciente_id,pieza,superficie' }
+        { onConflict: 'paciente_id,pieza,superficie,tipo' }
       )
       .select()
       .single();
@@ -111,7 +144,7 @@ export class OdontogramaService {
   }
 
   /** Marcas a nivel diente de un paciente (RLS filtra por odontólogo). */
-  async getMarcas(pacienteId: string): Promise<MarcaOdontograma[]> {
+  async getMarcas(pacienteId: string, tipo: OdontogramaTipo = 'inicial'): Promise<MarcaOdontograma[]> {
     const user = this.auth.user();
     if (!user) return [];
 
@@ -119,21 +152,28 @@ export class OdontogramaService {
       .from('odontograma_marcas')
       .select('id, odontologo_id, paciente_id, pieza, marca, notas, fecha, updated_at')
       .eq('odontologo_id', user.id)
-      .eq('paciente_id', pacienteId);
+      .eq('paciente_id', pacienteId)
+      .eq('tipo', tipo);
 
     if (error) throw error;
     return (data ?? []).map(filaAMarca);
   }
 
   /** Activa (inserta) o desactiva (borra) una marca de una pieza. */
-  async setMarca(pacienteId: string, pieza: string, marca: MarcaDiente, activa: boolean): Promise<void> {
+  async setMarca(
+    pacienteId: string,
+    pieza: string,
+    marca: MarcaDiente,
+    activa: boolean,
+    tipo: OdontogramaTipo = 'inicial'
+  ): Promise<void> {
     const user = this.auth.user();
     if (!user) throw new Error('No hay usuario autenticado.');
 
     if (activa) {
       const { error } = await supabase.from('odontograma_marcas').upsert(
-        { odontologo_id: user.id, paciente_id: pacienteId, pieza, marca, fecha: hoyBogota() },
-        { onConflict: 'paciente_id,pieza,marca', ignoreDuplicates: true }
+        { odontologo_id: user.id, paciente_id: pacienteId, pieza, marca, tipo, fecha: hoyBogota() },
+        { onConflict: 'paciente_id,pieza,marca,tipo', ignoreDuplicates: true }
       );
       if (error) throw error;
       return;
@@ -145,7 +185,56 @@ export class OdontogramaService {
       .eq('odontologo_id', user.id)
       .eq('paciente_id', pacienteId)
       .eq('pieza', pieza)
-      .eq('marca', marca);
+      .eq('marca', marca)
+      .eq('tipo', tipo);
+    if (error) throw error;
+  }
+
+  /** Estado de cierre (borrador/cerrado) de los odontogramas del paciente. */
+  async getMeta(pacienteId: string): Promise<OdontogramaMeta[]> {
+    const user = this.auth.user();
+    if (!user) return [];
+    const { data, error } = await supabase
+      .from('odontograma_meta')
+      .select('id, odontologo_id, paciente_id, tipo, estado, fecha, creado_por, cerrado_en, notas')
+      .eq('odontologo_id', user.id)
+      .eq('paciente_id', pacienteId);
+    if (error) throw error;
+    return (data ?? []).map(filaAMeta);
+  }
+
+  /** Cierra el odontograma del tipo dado (upsert de su meta). */
+  async cerrar(pacienteId: string, tipo: OdontogramaTipo, creadoPor?: string): Promise<void> {
+    const user = this.auth.user();
+    if (!user) throw new Error('No hay usuario autenticado.');
+    const ahora = new Date().toISOString();
+    const { error } = await supabase.from('odontograma_meta').upsert(
+      {
+        odontologo_id: user.id,
+        paciente_id: pacienteId,
+        tipo,
+        estado: 'cerrado',
+        fecha: hoyBogota(),
+        creado_por: creadoPor ?? user.id,
+        cerrado_en: ahora,
+        updated_at: ahora,
+      },
+      { onConflict: 'paciente_id,tipo' }
+    );
+    if (error) throw error;
+  }
+
+  /** Reabre un odontograma cerrado; el motivo queda en `notas` (auditoría formal: F4). */
+  async reabrir(pacienteId: string, tipo: OdontogramaTipo, motivo: string): Promise<void> {
+    const user = this.auth.user();
+    if (!user) throw new Error('No hay usuario autenticado.');
+    if (!motivo.trim()) throw new Error('El motivo de reapertura es obligatorio.');
+    const { error } = await supabase
+      .from('odontograma_meta')
+      .update({ estado: 'borrador', cerrado_en: null, notas: motivo.trim(), updated_at: new Date().toISOString() })
+      .eq('odontologo_id', user.id)
+      .eq('paciente_id', pacienteId)
+      .eq('tipo', tipo);
     if (error) throw error;
   }
 }

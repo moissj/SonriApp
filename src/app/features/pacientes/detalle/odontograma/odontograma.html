@@ -22,27 +22,34 @@
   } @else {
     <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5">
       <svg
-        [attr.viewBox]="'0 0 ' + viewWidth + ' ' + viewHeight"
+        [attr.viewBox]="'0 0 ' + geo.VIEW_WIDTH + ' ' + geo.VIEW_HEIGHT"
         [style.width]="svgWidth()"
         class="odontograma-svg h-auto select-none"
         preserveAspectRatio="xMidYMid meet"
         role="group"
         aria-label="Odontograma por superficies, numeración FDI"
       >
-        <line [attr.x1]="dividerX" y1="6" [attr.x2]="dividerX" [attr.y2]="viewHeight - 6" class="quad-divider" />
-        <line x1="6" [attr.y1]="dividerY" [attr.x2]="viewWidth - 6" [attr.y2]="dividerY" class="quad-divider" />
+        <defs>
+          <!-- Trama diagonal: obturación desadaptada (el color no es la única señal) -->
+          <pattern id="tramaDesadaptada" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+            <rect width="4" height="4" class="trama-base" />
+            <line x1="0" y1="0" x2="0" y2="4" class="trama-linea" />
+          </pattern>
+        </defs>
+        <line [attr.x1]="geo.DIVIDER_X" y1="6" [attr.x2]="geo.DIVIDER_X" [attr.y2]="geo.VIEW_HEIGHT - 6" class="quad-divider" />
+        <line x1="6" [attr.y1]="geo.DIVIDER_Y" [attr.x2]="geo.VIEW_WIDTH - 6" [attr.y2]="geo.DIVIDER_Y" class="quad-divider" />
 
-        @for (t of dientes; track t.fdi) {
+        @for (t of geo.DIENTES; track t.fdi) {
           <g [attr.transform]="'translate(' + t.cx + ',' + t.cy + ')'" class="tooth-group">
-            <text [attr.y]="numDy" class="tooth-num" text-anchor="middle">{{ t.fdi }}</text>
+            <text [attr.y]="geo.NUM_DY" class="tooth-num" text-anchor="middle">{{ t.fdi }}</text>
 
             @if (piezaAusente(t.fdi); as aus) {
               <!-- Diente ausente: pieza completa de un color, sin subzonas -->
               <circle
-                cx="0" cy="0" [attr.r]="rOuter"
+                cx="0" cy="0" [attr.r]="geo.R_OUTER"
                 class="surface estado-ausente"
                 (click)="onSurfaceClick(t.fdi, aus.superficie)"
-              />
+              ><title>{{ 'Pieza ' + t.fdi + ': Ausente' }}</title></circle>
               <path d="M -12 -12 L 12 12 M 12 -12 L -12 12" class="ausente-x" />
             } @else {
               <!-- Anillo cervical (tercio exterior): 4 caras -->
@@ -51,7 +58,7 @@
                   [attr.d]="seg.d"
                   [attr.class]="'surface estado-' + estadoDe(t.fdi, seg.superficie) + (isSelected(t.fdi, seg.superficie) ? ' selected' : '')"
                   (click)="onSurfaceClick(t.fdi, seg.superficie)"
-                />
+                ><title>{{ etiquetaZona(t.fdi, seg.superficie) }}</title></path>
               }
               <!-- Anillo intermedio: 4 caras -->
               @for (seg of intermedios(t.fdi); track seg.superficie) {
@@ -59,36 +66,51 @@
                   [attr.d]="seg.d"
                   [attr.class]="'surface estado-' + estadoDe(t.fdi, seg.superficie) + (isSelected(t.fdi, seg.superficie) ? ' selected' : '')"
                   (click)="onSurfaceClick(t.fdi, seg.superficie)"
-                />
+                ><title>{{ etiquetaZona(t.fdi, seg.superficie) }}</title></path>
               }
               <!-- Centro: oclusal / incisal -->
               <path
-                [attr.d]="pathCentro"
+                [attr.d]="geo.PATH_CENTRO"
                 [attr.class]="'surface estado-' + estadoDe(t.fdi, 'oclusal_incisal') + (isSelected(t.fdi, 'oclusal_incisal') ? ' selected' : '')"
                 (click)="onSurfaceClick(t.fdi, 'oclusal_incisal')"
-              />
+              ><title>{{ etiquetaZona(t.fdi, 'oclusal_incisal') }}</title></path>
             }
 
-            <!-- Cajita de marcas a nivel diente -->
+            <!-- Figuras (ovalito de endodoncia): centradas, sin tapar el número ni los clics -->
+            @for (f of vistaPorPieza().get(t.fdi)?.figuras ?? []; track f.id) {
+              <ellipse cx="0" cy="0" rx="6" ry="9" [attr.class]="'figura-ovalito tk-' + f.token">
+                <title>{{ f.label }}</title>
+              </ellipse>
+            }
+
+            <!-- Recuadro de marcas a nivel diente -->
             <g
               class="tooth-box"
               transform="translate(0,32)"
               role="button"
               tabindex="0"
-              [attr.aria-label]="'Marcas de la pieza ' + t.fdi"
+              [attr.aria-label]="'Marcas de la pieza ' + t.fdi + ': ' + (vistaPorPieza().get(t.fdi)?.titulo || 'sin marcas')"
               (click)="onBoxClick(t.fdi)"
               (keydown.enter)="onBoxClick(t.fdi)"
             >
               <rect x="-22" y="0" width="44" height="16" rx="2" fill="#fff" stroke="#9ca3af" stroke-width="1" />
-              @for (l of letrasPorPieza().get(t.fdi) ?? []; track l.letra) {
-                <text
-                  [attr.x]="($index - ($count - 1) / 2) * (40 / $count)"
-                  y="12"
-                  text-anchor="middle"
-                  font-size="10"
-                  font-weight="700"
-                  [attr.fill]="l.color"
-                >{{ l.letra }}</text>
+              @for (m of vistaPorPieza().get(t.fdi)?.recuadro ?? []; track m.id) {
+                @if (m.simbolo) {
+                  <text
+                    [attr.x]="m.x"
+                    y="12"
+                    text-anchor="middle"
+                    [attr.font-size]="m.fontSize"
+                    font-weight="700"
+                    [attr.class]="'tk-' + m.token"
+                  ><title>{{ m.label }}</title>{{ m.simbolo }}</text>
+                } @else {
+                  <line
+                    [attr.x1]="m.x - m.half" [attr.x2]="m.x + m.half" y1="8" y2="8"
+                    [attr.stroke-width]="m.forma === 'barra-gruesa' ? 5 : 1.5"
+                    [attr.class]="'forma-recuadro tk-' + m.token"
+                  ><title>{{ m.label }}</title></line>
+                }
               }
             </g>
           </g>
@@ -96,18 +118,22 @@
       </svg>
     </div>
 
-    <!-- Leyenda -->
-    <div class="flex flex-wrap gap-x-4 gap-y-2">
-      @for (e of estados; track e.value) {
-        <div class="flex items-center gap-1.5">
-          <span [attr.class]="'swatch estado-' + e.value"></span>
-          <span class="text-xs text-gray-600">{{ e.label }}</span>
-        </div>
-      }
-      @for (c of catalogoMarcas; track c.marca) {
-        <div class="flex items-center gap-1.5">
-          <span class="text-xs font-bold" [style.color]="c.color">{{ c.letra }}</span>
-          <span class="text-xs text-gray-600">{{ c.label }}</span>
+    <!-- Leyenda (generada del catálogo de hallazgos) -->
+    <div class="space-y-1.5">
+      @for (g of leyenda; track g.titulo) {
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <span class="text-xxs font-semibold text-gray-500 uppercase w-28 shrink-0">{{ g.titulo }}</span>
+          @for (i of g.items; track i.h.id) {
+            <div class="flex items-center gap-1.5">
+              @if (i.h.estadoEnum) {
+                <span [attr.class]="'swatch estado-' + i.h.estadoEnum"></span>
+              }
+              @if (i.glifo) {
+                <span [attr.class]="'text-xs font-bold tk-' + i.h.token">{{ i.glifo }}</span>
+              }
+              <span class="text-xs text-gray-600">{{ i.h.label }}</span>
+            </div>
+          }
         </div>
       }
     </div>
@@ -117,10 +143,10 @@
 <!-- Modal de marcas por diente -->
 <app-modal #modalMarcas [title]="'Pieza ' + (marcaPieza() ?? '') + ' · Marcas'" (closed)="onMarcasClosed()">
   <div class="space-y-3">
-    @for (c of catalogoMarcas; track c.marca) {
+    @for (c of hallazgosMarca; track c.id) {
       <label class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer">
-        <input type="checkbox" [checked]="marcasSel().includes(c.marca)" (change)="toggleMarca(c.marca)" />
-        <span class="w-6 font-bold" [style.color]="c.color">{{ c.letra }}</span>
+        <input type="checkbox" [checked]="marcasSel().includes(c.marcaEnum!)" (change)="toggleMarca(c.marcaEnum!)" />
+        <span [attr.class]="'w-6 font-bold tk-' + c.token">{{ c.glifo }}</span>
         {{ c.label }}
       </label>
     }
@@ -149,6 +175,16 @@
             {{ e.label }}
           </button>
         }
+        <button
+          type="button"
+          (click)="formEstado.set('sano')"
+          [class.ring-2]="formEstado() === 'sano'"
+          [class.ring-sky-500]="formEstado() === 'sano'"
+          class="flex items-center gap-2 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 transition-all"
+        >
+          <span class="swatch estado-sano"></span>
+          Sin hallazgo
+        </button>
       </div>
       @if (formEstado() === 'ausente') {
         <p class="text-xxs text-gray-400 mt-2">Marcar "Ausente" aplica a toda la pieza y desactiva las demás zonas.</p>

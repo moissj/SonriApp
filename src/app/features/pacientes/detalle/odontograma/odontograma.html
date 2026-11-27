@@ -1,22 +1,25 @@
 <div class="space-y-4">
-  <div class="flex items-start justify-between gap-3">
-    <div>
+  <div class="flex flex-wrap items-start justify-between gap-3">
+    <div class="min-w-0 flex-1 basis-60">
       <h3 class="text-base font-semibold text-gray-800">Odontograma</h3>
-      <p class="text-xs text-gray-500 mt-0.5">
+      <p class="text-xs text-gray-600 mt-0.5">
         Elige un hallazgo y toca la zona (superficies) o el recuadro del diente. Goma (E), deshacer (Ctrl+Z), clic derecho para más opciones.
       </p>
     </div>
-    <!-- Controles de zoom -->
+    <!-- Zoom e impresión -->
     <div class="flex items-center gap-1 shrink-0">
       <button type="button" (click)="zoomOut()" class="h-8 w-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="Alejar">−</button>
       <button type="button" (click)="zoomIn()" class="h-8 w-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50" aria-label="Acercar">+</button>
+      @if (!loading() && !ciclo.necesitaCrear()) {
+        <button type="button" (click)="imprimir()" class="odo-tool h-8">Imprimir / PDF</button>
+      }
     </div>
   </div>
 
   <app-odontograma-ciclo [ciclo]="ciclo" [pacienteId]="pacienteId()" (elegirTipo)="cambiarTipo($event)" />
 
   @if (error()) {
-    <div class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
+    <div role="alert" class="bg-red-50 border border-red-200 text-red-800 text-sm rounded-xl px-4 py-3">{{ error() }}</div>
   }
 
   @if (loading()) {
@@ -27,11 +30,11 @@
     <div role="toolbar" aria-label="Herramientas del odontograma" class="bg-white rounded-2xl border border-gray-100 shadow-sm p-2 space-y-1.5">
       @for (g of leyenda; track g.titulo) {
         <div class="flex flex-wrap items-center gap-1" role="group" [attr.aria-label]="g.titulo">
-          <span class="text-xxs font-semibold text-gray-500 uppercase w-28 shrink-0">{{ g.titulo }}</span>
+          <span class="text-xxs font-semibold text-gray-600 uppercase w-full sm:w-28 shrink-0">{{ g.titulo }}</span>
           @for (i of g.items; track i.h.id) {
             <button type="button" class="odo-tool" [class.activa]="ed.herramienta() === i.h.id" [attr.aria-pressed]="ed.herramienta() === i.h.id" (click)="ed.elegir(i.h.id)">
-              @if (i.h.estadoEnum) { <span [attr.class]="'swatch estado-' + i.h.estadoEnum"></span> }
-              @if (i.glifo) { <span [attr.class]="'font-bold tk-' + i.h.token">{{ i.glifo }}</span> }
+              @if (i.h.estadoEnum) { <span aria-hidden="true" [attr.class]="'swatch estado-' + i.h.estadoEnum"></span> }
+              @if (i.glifo) { <span aria-hidden="true" [attr.class]="'font-bold tk-' + i.h.token">{{ i.glifo }}</span> }
               {{ i.h.label }}
             </button>
           }
@@ -54,7 +57,13 @@
     </div>
     }
 
-    <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5">
+    <!-- Zona imprimible (regla global .zona-imprimir en styles.scss): título, SVG activo y leyenda -->
+    <div class="zona-imprimir space-y-3">
+    <div class="hidden print:block">
+      <h2 class="text-lg font-semibold text-gray-900">Odontograma {{ tipoActivo() === 'final' ? 'final' : 'inicial' }}</h2>
+      <p class="text-xs text-gray-700">Fecha de impresión: {{ fechaHoy() }}</p>
+    </div>
+    <div class="odontograma-wrap bg-white rounded-2xl border border-gray-100 shadow-sm p-3 sm:p-5" tabindex="0" role="region" aria-label="Odontograma (desplazable)">
       <svg
         [attr.viewBox]="'0 0 ' + geo.VIEW_WIDTH + ' ' + geo.VIEW_HEIGHT"
         [style.width]="svgWidth()"
@@ -129,6 +138,7 @@
                 class="tooth-box-rect" role="button" tabindex="0"
                 [attr.aria-label]="'Marcas de la pieza ' + t.fdi + ': ' + (vistaPorPieza().get(t.fdi)?.titulo || 'sin marcas')"
                 (keydown.enter)="onBoxClick(t.fdi)"
+                (keydown.space)="$event.preventDefault(); onBoxClick(t.fdi)"
               />
               @for (m of vistaPorPieza().get(t.fdi)?.recuadro ?? []; track m.id) {
                 @if (m.simbolo) {
@@ -164,24 +174,7 @@
       </svg>
     </div>
 
-    <!-- Leyenda (generada del catálogo de hallazgos) -->
-    <div class="space-y-1.5">
-      @for (g of leyenda; track g.titulo) {
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <span class="text-xxs font-semibold text-gray-500 uppercase w-28 shrink-0">{{ g.titulo }}</span>
-          @for (i of g.items; track i.h.id) {
-            <div class="flex items-center gap-1.5">
-              @if (i.h.estadoEnum) {
-                <span [attr.class]="'swatch estado-' + i.h.estadoEnum"></span>
-              }
-              @if (i.glifo) {
-                <span [attr.class]="'text-xs font-bold tk-' + i.h.token">{{ i.glifo }}</span>
-              }
-              <span class="text-xs text-gray-600">{{ i.h.label }}</span>
-            </div>
-          }
-        </div>
-      }
+    <app-leyenda-odontograma [grupos]="leyenda" />
     </div>
   }
 </div>

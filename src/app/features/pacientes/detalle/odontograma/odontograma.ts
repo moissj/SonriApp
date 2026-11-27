@@ -9,12 +9,13 @@ import { EdicionOdontograma } from './funciones/edicion-odontograma';
 import * as geo from './funciones/geometria-odontograma.funcion';
 import { CicloOdontograma } from './funciones/ciclo-odontograma';
 import { CicloOdontogramaComponent } from './ciclo/ciclo-odontograma.component';
+import { LeyendaOdontogramaComponent } from './leyenda-odontograma.component';
 import { etiquetaZona } from './funciones/etiquetas-odontograma.funcion';
 
 @Component({
   selector: 'app-odontograma',
   standalone: true,
-  imports: [ModalComponent, ConfirmModalComponent, CicloOdontogramaComponent],
+  imports: [ModalComponent, ConfirmModalComponent, CicloOdontogramaComponent, LeyendaOdontogramaComponent],
   templateUrl: './odontograma.html',
   styleUrl: './odontograma.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -169,6 +170,14 @@ export class OdontogramaComponent implements OnInit, OnDestroy {
 
   pedirDescartar(): void {
     this.confirmDescartar()?.open();
+  }
+
+  /** Fecha de hoy en America/Bogota, formato colombiano */
+  fechaHoy = (): string => new Intl.DateTimeFormat('es-CO', { timeZone: 'America/Bogota', dateStyle: 'long' }).format(new Date());
+
+  /** Imprime/PDF del odontograma activo (patrón de consentimientos: @media print en styles.scss) */
+  imprimir(): void {
+    window.print();
   }
 
   zoomIn(): void {

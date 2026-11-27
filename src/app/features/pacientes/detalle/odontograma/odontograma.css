@@ -72,37 +72,9 @@
   stroke-dasharray: 3 4;
 }
 
-/* --- Colores por estado (tokens odo-*) --- */
-.estado-sano {
-  fill: #ffffff;
-}
-.estado-caries {
-  fill: var(--odo-caries);
-}
-.estado-resina {
-  fill: var(--odo-resina);
-}
-.estado-amalgama {
-  fill: var(--odo-amalgama);
-}
-.estado-obt_desadaptada {
-  fill: url(#tramaDesadaptada);
-}
-.estado-obturado {
-  fill: var(--odo-resina); /* legado: migrado a resina */
-}
-.estado-ausente {
-  fill: var(--odo-ausente);
-}
-.estado-corona {
-  fill: var(--odo-corona); /* legado: ahora es marca */
-}
-.estado-endodoncia {
-  fill: var(--odo-endo-realizada); /* legado: ahora es marca */
-}
-.estado-implante {
-  fill: var(--odo-implante);
-}
+/* Relleno por estado: --e se define en leyenda-odontograma.css */
+.surface { fill: var(--e); }
+.surface.estado-obt_desadaptada { fill: url(#tramaDesadaptada); }
 
 /* Trama diagonal de obturación desadaptada (<pattern id="tramaDesadaptada">) */
 .trama-base {
@@ -112,22 +84,6 @@
   stroke: #ffffff;
   stroke-width: 1.5;
 }
-
-/* Color por token de hallazgo (letras, figuras y glifos) */
-.tk-odo-caries { color: var(--odo-caries); fill: var(--odo-caries); }
-.tk-odo-desadaptada { color: var(--odo-desadaptada); fill: var(--odo-desadaptada); }
-.tk-odo-resina { color: var(--odo-resina); fill: var(--odo-resina); }
-.tk-odo-amalgama { color: var(--odo-amalgama); fill: var(--odo-amalgama); }
-.tk-odo-sano { color: var(--odo-sano); fill: var(--odo-sano); }
-.tk-odo-corona { color: var(--odo-corona); fill: var(--odo-corona); }
-.tk-odo-negro { color: var(--odo-negro); fill: var(--odo-negro); }
-.tk-odo-rojo { color: var(--odo-rojo); fill: var(--odo-rojo); }
-.tk-odo-azul { color: var(--odo-azul); fill: var(--odo-azul); }
-.tk-odo-teal { color: var(--odo-teal); fill: var(--odo-teal); }
-.tk-odo-endo-realizada { color: var(--odo-endo-realizada); fill: var(--odo-endo-realizada); }
-.tk-odo-endo-indicada { color: var(--odo-endo-indicada); fill: var(--odo-endo-indicada); }
-.tk-odo-implante { color: var(--odo-implante); fill: var(--odo-implante); }
-.tk-odo-ausente { color: var(--odo-ausente); fill: var(--odo-ausente); }
 
 /* Figura de endodoncia (ovalito): relleno translúcido + borde del token */
 .figura-ovalito {
@@ -143,28 +99,6 @@
   stroke-linecap: round;
   fill: none;
 }
-
-/* --- Muestras de color (leyenda y formulario) --- */
-.swatch {
-  display: inline-block;
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 0.3rem;
-  border: 1px solid #cbd5e1;
-  flex-shrink: 0;
-}
-.swatch.estado-sano { background: #ffffff; }
-.swatch.estado-caries { background: var(--odo-caries); }
-.swatch.estado-resina { background: var(--odo-resina); }
-.swatch.estado-amalgama { background: var(--odo-amalgama); }
-.swatch.estado-obt_desadaptada {
-  background: repeating-linear-gradient(45deg, var(--odo-desadaptada) 0 3px, #ffffff 3px 5px);
-}
-.swatch.estado-obturado { background: var(--odo-resina); }
-.swatch.estado-ausente { background: var(--odo-ausente); }
-.swatch.estado-corona { background: var(--odo-corona); }
-.swatch.estado-endodoncia { background: var(--odo-endo-realizada); }
-.swatch.estado-implante { background: var(--odo-implante); }
 
 /* --- Editor: toolbar, menú, x por símbolo --- */
 .odo-tool {
@@ -191,3 +125,12 @@
 .quitar-simbolo rect { fill: #fff; stroke: #64748b; stroke-width: 0.8; }
 .quitar-simbolo text { font-size: 7px; fill: #0f172a; font-weight: 700; }
 .tooth-box:hover .quitar-simbolo, .tooth-box:focus-within .quitar-simbolo, .quitar-simbolo:focus { opacity: 1; }
+
+.odo-tool:focus-visible, .quitar-simbolo:focus-visible { outline: 2px solid #0f172a; outline-offset: 1px; }
+
+@media print {
+  :host, :host * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  .odontograma-wrap { overflow: visible; border: 0; box-shadow: none; padding: 0; }
+  .odontograma-svg { min-width: 0; width: 100% !important; } /* anula el ancho inline del zoom */
+  .quitar-simbolo { display: none; }
+}

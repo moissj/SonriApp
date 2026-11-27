@@ -28,11 +28,13 @@
 ## F5 — Inicial/Final ✓ (local)
 - [x] Segmentado Inicial|Final, crear final (copiar/blanco), cerrar/reabrir con motivo, comparar (dientes con cambios + indice COP/ceo)
 - [x] Solo-lectura al cerrar (cliente) + sub-componentes en `ciclo/`, `crearFinal` en service, funciones puras (indice-cop, comparar, estado-meta) + specs. tsc/build 0, 134 tests.
-- [ ] **F5b (capa-datos):** trigger/RLS para impedir ESCRITURA en odontograma `cerrado` (hoy el bloqueo es solo cliente — historia-clinica-integridad)
+- [x] **F5b (capa-datos):** trigger `odontograma_no_cerrado` BEFORE INS/UPD/DEL en ambas tablas (SECURITY DEFINER, search_path fijo, P0001) — mig `20261126120000`
 - [~] Vinculo presupuesto DIFERIDO (boton "proximamente"); COP/ceo criterio clinico A CONFIRMAR; service 305 lineas (deuda codigo-limpio)
 
-## F6 — Leyenda / PDF / a11y
-- [ ] Leyenda 4 col desde catalogo, toolbar, PDF, pulido movil + accesibilidad
+## F6 — Leyenda / PDF / a11y ✓ (local)
+- [x] Leyenda 4-col desde catalogo (`leyenda-odontograma.component.ts`), impresion/PDF (window.print + @media print, reusa `.zona-imprimir`), pulido movil (wrap toolbar/segmentado, scroll SVG), a11y AA (tokens odo-* oscurecidos para texto/glifo, role=alert/menu, foco visible, Space)
+- [x] Budget CSS: odontograma.css <4KB (dedupe) + `angular.json` anyComponentStyle 4→6KB (examen-ingreso preexistente). Build 0 warnings. odontograma.ts 190 lineas.
+- [~] Diferido: recuadro-insignia+panel en movil; imprimir ambos (inicial+final) a la vez. Nota: fills tailwind vs tokens-texto divergen (AA).
 
 ## Cierre
 - [ ] Gates por fase + verificador final

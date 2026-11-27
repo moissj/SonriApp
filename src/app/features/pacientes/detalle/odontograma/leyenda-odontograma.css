@@ -1,0 +1,36 @@
+/* Colores por estado: --e alimenta el relleno de la superficie (SVG) y el swatch de la leyenda. */
+.estado-sano { --e: #fff; }
+.estado-caries { --e: var(--odo-caries); }
+.estado-resina, .estado-obturado { --e: var(--odo-resina); }
+.estado-amalgama { --e: var(--odo-amalgama); }
+.estado-ausente { --e: var(--odo-ausente); }
+.estado-corona { --e: var(--odo-corona); }
+.estado-endodoncia { --e: var(--odo-endo-realizada); }
+.estado-implante { --e: var(--odo-implante); }
+
+.swatch {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 0.3rem;
+  border: 1px solid #94a3b8;
+  flex-shrink: 0;
+  background: var(--e);
+}
+.swatch.estado-obt_desadaptada {
+  background: repeating-linear-gradient(45deg, var(--odo-desadaptada) 0 3px, #fff 3px 5px);
+}
+
+/* Color de texto/glifo/figura por token. Tonos oscurecidos (contraste AA >= 4.5 sobre blanco). */
+[class*='tk-odo'] { color: var(--c); fill: var(--c); }
+.tk-odo-caries, .tk-odo-rojo, .tk-odo-endo-indicada { --c: #dc2626; }
+.tk-odo-desadaptada { --c: #c2410c; }
+.tk-odo-resina { --c: #0369a1; }
+.tk-odo-amalgama { --c: #1e3a8a; }
+.tk-odo-sano, .tk-odo-endo-realizada { --c: #15803d; }
+.tk-odo-corona { --c: #a16207; }
+.tk-odo-negro { --c: #0f172a; }
+.tk-odo-azul { --c: #1d4ed8; }
+.tk-odo-teal { --c: #0f766e; }
+.tk-odo-implante { --c: #047857; }
+.tk-odo-ausente { --c: #64748b; }

@@ -37,5 +37,8 @@
 - [~] Diferido: recuadro-insignia+panel en movil; imprimir ambos (inicial+final) a la vez. Nota: fills tailwind vs tokens-texto divergen (AA).
 
 ## Cierre
-- [ ] Gates por fase + verificador final
-- [ ] Aplicar migracion a prod + push: SOLO con OK explicito
+- [x] Gates por fase + verificador final
+- [x] Aplicadas a prod 2026-11-26 (MCP apply_migration) en orden: enums -> overhaul -> auditoria -> bloqueo_cerrado. Respaldo previo `odontogramas_bak_20261126` (40) + `odontograma_marcas_bak_20261126` (12). Verificado: resina 23, caries 9, implante 1, sano/corona/endodoncia/ausente/obturado 0; `overhaul_backup` 30; meta+auditoria con RLS; 2 triggers presentes. Fix post-apply: RLS fail-closed en las 2 tablas `_bak_` (advisor ERROR `rls_disabled_in_public`).
+- [ ] Push a origin/main: PENDIENTE OK explicito del usuario
+- [ ] Limpieza post-verif: `drop table odontogramas_bak_20261126, odontograma_marcas_bak_20261126` cuando el usuario confirme
+- [ ] Usuario: rotar token Supabase expuesto en chat
